@@ -1,11 +1,12 @@
-import { Contact } from '@/components/Contact';
 import { Education } from '@/components/Education';
 import { Experience } from '@/components/Experience';
 import { Intro } from '@/components/Intro';
+import { Languages } from '@/components/Languages';
 import { PrintResume } from '@/components/PrintResume';
 import { Projects } from '@/components/Projects';
 import { Rail } from '@/components/Rail';
 import { Skills } from '@/components/Skills';
+import { SiteHeader } from '@/components/SiteHeader';
 
 /**
  * The layout from the original design handoff: a single scrolling page with a
@@ -46,6 +47,8 @@ export default function Page() {
           }}
         />
 
+        <SiteHeader />
+
         <div
           className="cv-shell"
           style={{
@@ -56,7 +59,7 @@ export default function Page() {
             gap: 'var(--cv-shell-gap)',
             maxWidth: 1280,
             margin: '0 auto',
-            padding: '72px 48px 120px',
+            padding: 'var(--cv-content-top) 48px 120px',
           }}
         >
           <Rail />
@@ -66,11 +69,11 @@ export default function Page() {
             style={{ display: 'grid', gap: 'var(--cv-section-gap)', minWidth: 0 }}
           >
             <Intro />
-            <Projects />
             <Experience />
             <Skills />
+            <Projects />
             <Education />
-            <Contact />
+            <Languages />
           </main>
         </div>
       </div>

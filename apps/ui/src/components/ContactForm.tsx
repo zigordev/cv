@@ -1,17 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@ds/components/core/Button.jsx';
 import { Field } from '@ds/components/forms/Field.jsx';
 import { Input } from '@ds/components/forms/Input.jsx';
 import { Textarea } from '@ds/components/forms/Textarea.jsx';
+import { Toast, ToastRegion } from '@ds/components/feedback/Toast.jsx';
 
 import { useI18n } from '@/i18n/client';
 
-type Status = 'idle' | 'sending' | 'sent' | 'error';
+type Status = 'idle' | 'sending';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Long enough to read the confirmation without it lingering over the page. */
+const TOAST_MS = 6000;
 
 export function ContactForm() {
   const { t, locale } = useI18n();
@@ -20,6 +24,21 @@ export function ContactForm() {
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>('idle');
+  const [toast, setToast] = useState<{ kind: 'success' | 'danger'; text: string } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    []
+  );
+
+  function notify(kind: 'success' | 'danger', text: string) {
+    setToast({ kind, text });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
+  }
 
   function validate() {
     const next: Record<string, string> = {};
@@ -48,30 +67,15 @@ export function ContactForm() {
         }),
       });
       if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
-      setStatus('sent');
+      setStatus('idle');
       setName('');
       setEmail('');
       setMessage('');
+      notify('success', t('form.success'));
     } catch {
-      setStatus('error');
+      setStatus('idle');
+      notify('danger', t('form.error'));
     }
-  }
-
-  if (status === 'sent') {
-    return (
-      <p
-        role="status"
-        style={{
-          margin: 0,
-          fontSize: 'var(--ds-text-base)',
-          lineHeight: 1.6,
-          color: 'var(--ds-color-success)',
-          maxWidth: '56ch',
-        }}
-      >
-        {t('form.success')}
-      </p>
-    );
   }
 
   return (
@@ -115,19 +119,22 @@ export function ContactForm() {
         />
       </Field>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-space-4)' }}>
+      <div>
         <Button type="submit" variant="primary" size="sm" loading={status === 'sending'}>
           {status === 'sending' ? t('form.sending') : t('form.submit')}
         </Button>
-        {status === 'error' ? (
-          <span
-            role="alert"
-            style={{ fontSize: 'var(--ds-text-sm)', color: 'var(--ds-color-danger)' }}
-          >
-            {t('form.error')}
-          </span>
-        ) : null}
       </div>
+
+      {/* The design system asks for one ToastRegion at the app root. This form
+          is the only thing that raises a toast and is mounted exactly once, so
+          it owns the region rather than threading state through a provider. */}
+      {toast ? (
+        <ToastRegion>
+          <Toast kind={toast.kind} onDismiss={() => setToast(null)}>
+            {toast.text}
+          </Toast>
+        </ToastRegion>
+      ) : null}
     </form>
   );
 }

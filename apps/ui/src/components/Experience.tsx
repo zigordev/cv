@@ -1,18 +1,17 @@
 'use client';
 
 import { SectionHeader } from '@/components/SectionHeader';
-import { jobs } from '@/content/cv';
+import { useCv } from '@/content/useCv';
 import { Reveal } from '@/components/Reveal';
-import { useI18n } from '@/i18n/client';
 import { display, monoPlain } from '@/lib/type';
 
 export function Experience() {
-  const { t } = useI18n();
+  const { jobs, labels } = useCv();
 
   return (
     <Reveal id="experience">
       <div style={{ display: 'grid', gap: 'var(--ds-space-6)' }}>
-        <SectionHeader num="02" kicker={t('sections.experience.kicker')} />
+        <SectionHeader kicker={labels.sections.experience} />
 
         <div>
           {jobs.map((job) => (
@@ -53,6 +52,7 @@ export function Experience() {
                 >
                   {job.summary}
                 </p>
+                {job.bullets.length > 0 ? (
                 <ul
                   style={{
                     listStyle: 'none',
@@ -80,6 +80,7 @@ export function Experience() {
                     </li>
                   ))}
                 </ul>
+                ) : null}
               </div>
             </div>
           ))}

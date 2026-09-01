@@ -3,19 +3,19 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-import { Badge } from '@ds/components/feedback/Badge.jsx';
 import { Button } from '@ds/components/core/Button.jsx';
 import { Modal } from '@ds/components/overlay/Modal.jsx';
 import { SegmentedControl } from '@ds/components/navigation/SegmentedControl.jsx';
-import { StatTile } from '@ds/components/data-display/StatTile.jsx';
 
+import { PROJECT_DIAGRAMS } from '@/components/diagrams';
+import { ProjectTags } from '@/components/ProjectTags';
 import type { Project } from '@/content/cv';
 import { useI18n } from '@/i18n/client';
 import { display, mono } from '@/lib/type';
 
-type Tab = 'overview' | 'architecture' | 'results';
+type Tab = 'overview' | 'architecture';
 
-const TABS: readonly Tab[] = ['overview', 'architecture', 'results'];
+const TABS: readonly Tab[] = ['overview', 'architecture'];
 
 export function CaseStudyModal({
   project,
@@ -39,26 +39,37 @@ export function CaseStudyModal({
       closeLabel={t('modal.close')}
       style={{ padding: 40 }}
       title={
-        <span style={{ display: 'grid', gap: 'var(--ds-space-3)' }}>
-          <span style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ds-space-5)' }}>
-            <span style={mono(11, '0.14em', 'var(--ds-color-accent)')}>{t('modal.caseStudy')}</span>
-            <span style={mono(11, '0.14em')}>{project.year}</span>
-            <span style={mono(11, '0.14em')}>{project.role}</span>
-          </span>
-          <span style={display('clamp(34px, 5vw, 52px)', 1, '-0.025em')}>{project.name}</span>
-        </span>
+        <span style={display('clamp(34px, 5vw, 52px)', 1, '-0.025em')}>{project.name}</span>
       }
       description={
-        <span
-          style={{
-            display: 'block',
-            fontSize: 17,
-            lineHeight: 1.55,
-            color: 'var(--ds-color-fg-muted)',
-            maxWidth: '56ch',
-          }}
-        >
-          {project.tagline}
+        <span style={{ display: 'grid', gap: 'var(--ds-space-4)', justifyItems: 'start' }}>
+          <ProjectTags project={project} />
+          <span
+            style={{
+              fontSize: 17,
+              lineHeight: 1.55,
+              color: 'var(--ds-color-fg-muted)',
+              maxWidth: '56ch',
+            }}
+          >
+            {project.tagline}
+          </span>
+          {/* Opens in a new tab: this is the one control that sends a reader
+              off the CV, and a repo they cannot get back from is a lost visit.
+              `noopener` because `target="_blank"` otherwise hands the opened
+              page a reference to this one. The glyph is decorative — the URL
+              is already the accessible name. */}
+          {project.url ? (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontFamily: 'var(--cv-font-mono)', fontSize: 12 }}
+            >
+              {project.url.replace(/^https?:\/\//, '')}
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          ) : null}
         </span>
       }
       footer={
@@ -71,10 +82,7 @@ export function CaseStudyModal({
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
-            gap: 'var(--ds-space-4)',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             borderTop: '1px solid var(--ds-color-border)',
             paddingTop: 'var(--ds-space-5)',
           }}
@@ -85,18 +93,10 @@ export function CaseStudyModal({
             onChange={(value: string) => setTab(value as Tab)}
             ariaLabel={t('modal.caseStudy')}
           />
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ds-space-2)' }}>
-            {project.stack.map((item) => (
-              <Badge key={item} variant="neutral">
-                {item}
-              </Badge>
-            ))}
-          </div>
         </div>
 
         {tab === 'overview' ? <OverviewTab project={project} /> : null}
         {tab === 'architecture' ? <ArchitectureTab project={project} /> : null}
-        {tab === 'results' ? <ResultsTab project={project} /> : null}
       </div>
     </Modal>
   );
@@ -111,6 +111,8 @@ function OverviewTab({ project }: Readonly<{ project: Project }>) {
 
   return (
     <div style={{ display: 'grid', gap: 'var(--ds-space-8)' }}>
+      {/* No placeholder when a project has no screenshot: an empty grey frame
+          with the project name in it is 260px that tells the reader nothing. */}
       {project.screenshot ? (
         <Image
           src={project.screenshot}
@@ -119,22 +121,7 @@ function OverviewTab({ project }: Readonly<{ project: Project }>) {
           height={260}
           style={{ width: '100%', height: 260, objectFit: 'cover', borderRadius: 6 }}
         />
-      ) : (
-        <div
-          style={{
-            width: '100%',
-            height: 260,
-            borderRadius: 6,
-            background: 'var(--ds-color-surface-2)',
-            border: '1px solid var(--ds-color-border)',
-            display: 'grid',
-            placeItems: 'center',
-            ...mono(11, '0.14em'),
-          }}
-        >
-          {project.name}
-        </div>
-      )}
+      ) : null}
 
       <div
         style={{
@@ -176,9 +163,12 @@ function OverviewTab({ project }: Readonly<{ project: Project }>) {
 
 function ArchitectureTab({ project }: Readonly<{ project: Project }>) {
   const { t } = useI18n();
+  const Diagram = PROJECT_DIAGRAMS[project.id];
 
   return (
     <div style={{ display: 'grid', gap: 'var(--ds-space-8)' }}>
+      {Diagram ? <Diagram /> : null}
+
       <div>
         {project.pieces.map((piece) => (
           <div
@@ -222,43 +212,7 @@ function ArchitectureTab({ project }: Readonly<{ project: Project }>) {
   );
 }
 
-function ResultsTab({ project }: Readonly<{ project: Project }>) {
-  const { t } = useI18n();
-
-  return (
-    <div style={{ display: 'grid', gap: 'var(--ds-space-8)' }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: 'var(--ds-space-3)',
-        }}
-      >
-        {project.stats.map((stat) => (
-          <StatTile key={stat.label} label={stat.label} value={stat.value} hint={stat.hint} />
-        ))}
-      </div>
-
-      <DashList label={t('modal.lessons')} items={project.lessons} />
-
-      {project.links.length > 0 ? (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ds-space-5)' }}>
-          {project.links.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              style={{ fontFamily: 'var(--cv-font-mono)', fontSize: 12 }}
-            >
-              {link.label} →
-            </a>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/** The recurring em-dash list used for decisions and lessons. */
+/** The em-dash list used for a project's decisions. */
 function DashList({ label, items }: Readonly<{ label: string; items: string[] }>) {
   if (items.length === 0) return null;
 

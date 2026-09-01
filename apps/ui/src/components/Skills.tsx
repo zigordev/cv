@@ -1,18 +1,17 @@
 'use client';
 
 import { SectionHeader } from '@/components/SectionHeader';
-import { skillGroups } from '@/content/cv';
+import { useCv } from '@/content/useCv';
 import { Reveal } from '@/components/Reveal';
-import { useI18n } from '@/i18n/client';
 import { mono } from '@/lib/type';
 
 export function Skills() {
-  const { t } = useI18n();
+  const { skillGroups, labels } = useCv();
 
   return (
     <Reveal id="skills">
       <div style={{ display: 'grid', gap: 'var(--ds-space-6)' }}>
-        <SectionHeader num="03" kicker={t('sections.skills.kicker')} />
+        <SectionHeader kicker={labels.sections.skills} />
 
         <div
           style={{
