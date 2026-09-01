@@ -1,0 +1,155 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality (Format + Lint + Typecheck + Build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: HUSKY=0 npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  secrets-scan:
+    name: Secrets Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+
+  web-smoke:
+    name: Web Smoke (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Build web image
+        run: docker build -f apps/ui/Dockerfile --target prod --build-arg NEXT_PUBLIC_RELEASE=ci -t cv-web:ci .
+
+      # The container normally boots through openbao-run, which needs the ops
+      # stack. CI has no OpenBao, so the smoke test runs the server directly:
+      # it proves the image serves the CV, not that secrets wiring works.
+      - name: Run container
+        run: |
+          docker run -d --name cv-web -p 3001:3001 cv-web:ci node apps/ui/server.js
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3001/api/health > /dev/null; then
+              echo "web is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "web did not become healthy" >&2
+          docker logs cv-web >&2
+          exit 1
+
+      - name: Smoke probes
+        run: |
+          set -euo pipefail
+          curl -sf http://localhost:3001/api/health | grep -q '"status":"ok"'
+          body="$(curl -sf http://localhost:3001/)"
+          # The CV must be readable in the server-rendered HTML, not only after
+          # hydration — this is what keeps it indexable and printable.
+          for needle in "Curriculum vitae" "Experience" "Skills" "Education"; do
+            printf '%s' "$body" | grep -qF "$needle" || { echo "missing: $needle" >&2; exit 1; }
+          done
+
+      - name: Container logs (on failure)
+        if: failure()
+        run: docker logs cv-web || true
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f cv-web || true
+
+  security-supply-chain:
+    name: Security + Supply Chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: HUSKY=0 npm ci
+
+      - name: Audit dependencies (prod only, high+)
+        run: npm run audit:prod:gate
+
+      - name: Build prod image
+        run: docker build --build-arg NEXT_PUBLIC_RELEASE=ci -f apps/ui/Dockerfile --target prod -t cv-web:ci .
+
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Generate SBOM (web image)
+        uses: anchore/sbom-action@17ae1740179002c89186b61233e0f892c3118b11 # v0
+        with:
+          image: cv-web:ci
+          format: spdx-json
+          output-file: artifacts/sbom-web.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Validate SBOM file
+        run: |
+          test -s artifacts/sbom-web.spdx.json
+          jq -e '.spdxVersion and (.packages | type == "array")' artifacts/sbom-web.spdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: sbom
+          path: artifacts/sbom-web.spdx.json
+          if-no-files-found: error
+
+      - name: Trivy scan (web image)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: cv-web:ci
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          vuln-type: os,library
+          severity: HIGH,CRITICAL

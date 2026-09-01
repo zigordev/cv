@@ -1,0 +1,80 @@
+{
+  "contact": {
+    "copyAction": "Copy {label}",
+    "copyDone": "✓ {label}",
+    "intro": "I reply within a day, and I am happy to talk even when I am not looking — platform work, developer tooling, and teams stuck on their build pipeline are always interesting.",
+    "updated": "Updated August 2026 · Built on the shared product design system"
+  },
+  "filters": {
+    "all": "All",
+    "data": "Data",
+    "tooling": "Tooling",
+    "web": "Web apps"
+  },
+  "form": {
+    "email": "Your email",
+    "emailInvalid": "Enter a valid email address",
+    "error": "Something went wrong. Try the email link above instead.",
+    "heading": "Or send a message",
+    "message": "Message",
+    "name": "Your name",
+    "required": "This field is required",
+    "sending": "Sending…",
+    "submit": "Send message",
+    "success": "Thanks — your message is on its way. I reply within a day."
+  },
+  "intro": {
+    "authorised": "EU authorised",
+    "eyebrow": "Staff engineer · Lisbon · Remote-first",
+    "h1a": "I build the boring",
+    "h1b": "infrastructure that makes",
+    "h1c": "product teams fast.",
+    "lede": "Eleven years in production code — developer platforms, build pipelines, and the kind of migrations nobody notices because nothing broke. Currently at Northbound, where deploys went from 51 minutes to 9."
+  },
+  "modal": {
+    "approach": "Approach",
+    "architecture": "Architecture",
+    "caseStudy": "Case study",
+    "close": "Close",
+    "decisions": "Decisions worth defending",
+    "lessons": "What I would change",
+    "overview": "Overview",
+    "problem": "The problem",
+    "results": "Results"
+  },
+  "nav": {
+    "contact": "Contact",
+    "education": "Education",
+    "experience": "Experience",
+    "projects": "Personal projects",
+    "skills": "Skills"
+  },
+  "rail": {
+    "cv": "Curriculum vitae",
+    "language": "Language",
+    "pdf": "Download PDF"
+  },
+  "sections": {
+    "contact": {
+      "kicker": "Contact"
+    },
+    "education": {
+      "kicker": "Education",
+      "title": "Where the clock arguments started."
+    },
+    "experience": {
+      "kicker": "Experience",
+      "title": "Eleven years, four companies."
+    },
+    "projects": {
+      "kicker": "Personal projects",
+      "titleA": "Four things built after hours,",
+      "titleB": "open in full."
+    },
+    "skills": {
+      "kicker": "Skills",
+      "titleA": "Highlighted is what I want",
+      "titleB": "to be hired for."
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@cv/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3021",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0",
+    "lint": "next lint --no-cache",
+    "typecheck": "tsc --noEmit",
+    "i18n:pull": "node ./scripts/i18n-pull.mjs",
+    "i18n:push": "tolgee push --config ./tolgee.config.cjs --force-mode OVERRIDE",
+    "test": "echo \"No web tests configured\"",
+    "clean": "rm -rf .next"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "next": "^15.5.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@tolgee/cli": "2.16.1",
+    "@types/node": "^20.3.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.5.10",
+    "jszip": "^3.10.1",
+    "typescript": "^5.1.3"
+  }
+}
