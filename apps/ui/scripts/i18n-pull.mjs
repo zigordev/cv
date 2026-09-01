@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
@@ -16,6 +16,15 @@ const exportUrl = new URL(`/v2/projects/${projectId}/export`, apiUrl);
 exportUrl.searchParams.set('format', 'JSON');
 exportUrl.searchParams.set('structure', 'KEYS');
 exportUrl.searchParams.set('zip', 'true');
+/*
+ * Tolgee has no array type: pushing `bullets: [...]` stores three keys named
+ * `bullets[0]`, `bullets[1]`, `bullets[2]`, and without this the export hands
+ * them back under those literal names. The app reads `bullets` as an array, so
+ * it would find nothing — and because the pull merges rather than overwrites,
+ * the bracket keys pile up beside the real ones instead of failing loudly.
+ * `supportArrays` makes the export reassemble them.
+ */
+exportUrl.searchParams.set('supportArrays', 'true');
 
 const response = await fetch(exportUrl.toString(), {
   headers: {
@@ -51,6 +60,57 @@ function normalizeLocale(tag) {
   return tag.trim().toLowerCase().split(/[-_]/)[0];
 }
 
+/**
+ * Deep-merges the export over what is already committed, rather than replacing
+ * the file.
+ *
+ * A plain overwrite silently deletes every key Tolgee does not know about yet —
+ * which is exactly what happens to a key added in code before anyone has pushed
+ * it. That has cost this repo its entire CV content once already. Merging makes
+ * a pull additive: Tolgee wins wherever it has an opinion, and local-only keys
+ * survive until they are pushed.
+ *
+ * The trade-off is deliberate: a key deliberately deleted in Tolgee will linger
+ * locally until it is removed here too. Stale keys are cheap; lost copy is not.
+ */
+function mergeMessages(local, remote) {
+  if (Array.isArray(remote) || typeof remote !== 'object' || remote === null) return remote;
+  if (Array.isArray(local) || typeof local !== 'object' || local === null) return remote;
+  const merged = { ...local };
+  for (const [key, value] of Object.entries(remote)) {
+    merged[key] = key in local ? mergeMessages(local[key], value) : value;
+  }
+  return merged;
+}
+
+/**
+ * Writes every object with its keys sorted.
+ *
+ * Tolgee's export orders keys alphabetically while these files are authored in
+ * reading order, so without this every pull rewrites half the file with a diff
+ * that changes nothing. Sorting on write makes the committed form stable and a
+ * real content change visible.
+ *
+ * Safe because nothing reads these by key order: `resolveCv` indexes jobs,
+ * projects and skills explicitly, education already sorts its keys, and
+ * languages is an array, whose order this preserves.
+ */
+function sortKeys(value) {
+  if (Array.isArray(value)) return value.map(sortKeys);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortKeys(value[key])]));
+  }
+  return value;
+}
+
+async function readLocal(dest) {
+  try {
+    return JSON.parse(await readFile(dest, 'utf8'));
+  } catch {
+    return null; // first pull, or an unreadable file: treat the export as authoritative
+  }
+}
+
 const skipped = [];
 const writes = [];
 zip.forEach((relativePath, file) => {
@@ -62,9 +122,11 @@ zip.forEach((relativePath, file) => {
     return;
   }
   const dest = path.join(outDir, `${locale}.json`);
-  const task = file.async('string').then((content) => {
-    const parsed = JSON.parse(content);
-    return writeFile(dest, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
+  const task = file.async('string').then(async (content) => {
+    const remote = JSON.parse(content);
+    const local = await readLocal(dest);
+    const merged = local ? mergeMessages(local, remote) : remote;
+    return writeFile(dest, JSON.stringify(sortKeys(merged), null, 2) + '\n', 'utf8');
   });
   writes.push(task);
 });
