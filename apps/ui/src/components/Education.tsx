@@ -1,18 +1,17 @@
 'use client';
 
 import { SectionHeader } from '@/components/SectionHeader';
-import { education } from '@/content/cv';
+import { useCv } from '@/content/useCv';
 import { Reveal } from '@/components/Reveal';
-import { useI18n } from '@/i18n/client';
 import { display, monoPlain } from '@/lib/type';
 
 export function Education() {
-  const { t } = useI18n();
+  const { education, labels } = useCv();
 
   return (
     <Reveal id="education">
       <div style={{ display: 'grid', gap: 'var(--ds-space-6)' }}>
-        <SectionHeader num="04" kicker={t('sections.education.kicker')} />
+        <SectionHeader kicker={labels.sections.education} />
 
         <div>
           {education.map((entry) => (

@@ -4,13 +4,14 @@ import { useState } from 'react';
 
 import { CaseStudyModal } from '@/components/CaseStudyModal';
 import { SectionHeader } from '@/components/SectionHeader';
-import { projects, type Project } from '@/content/cv';
+import type { Project } from '@/content/cv';
+import { useCv } from '@/content/useCv';
 import { Reveal } from '@/components/Reveal';
-import { useI18n } from '@/i18n/client';
-import { display, mono, monoPlain } from '@/lib/type';
+import { ProjectTags } from '@/components/ProjectTags';
+import { display } from '@/lib/type';
 
 export function Projects() {
-  const { t } = useI18n();
+  const { projects, labels } = useCv();
   const [openId, setOpenId] = useState<string | null>(null);
 
   const active = projects.find((p) => p.id === openId) ?? null;
@@ -18,14 +19,13 @@ export function Projects() {
   return (
     <Reveal id="projects">
       <div style={{ display: 'grid', gap: 'var(--ds-space-6)' }}>
-        <SectionHeader num="01" kicker={t('sections.projects.kicker')} />
+        <SectionHeader kicker={labels.sections.projects} />
 
         <div>
-          {projects.map((project, index) => (
+          {projects.map((project) => (
             <ProjectRow
               key={project.id}
               project={project}
-              num={String(index + 1).padStart(2, '0')}
               onOpen={() => setOpenId(project.id)}
             />
           ))}
@@ -42,36 +42,48 @@ export function Projects() {
  * it is a real <button> so it lands in the tab order and answers Enter/Space,
  * with `text-align: left` undoing the button default.
  */
-function ProjectRow({
-  project,
-  num,
-  onOpen,
-}: Readonly<{ project: Project; num: string; onOpen: () => void }>) {
+/**
+ * The whole row opens the case study, but a live product also needs its own
+ * link — and an `<a>` inside a `<button>` is invalid HTML, so the click target
+ * cannot be the element that wraps the content.
+ *
+ * Instead the row is a plain container with an absolutely positioned button
+ * covering it, and the link lifts itself above that overlay with a z-index.
+ * Both stay independently focusable, and the row keeps its full-width target.
+ */
+function ProjectRow({ project, onOpen }: Readonly<{ project: Project; onOpen: () => void }>) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
+    <div
       className="cv-row"
       style={{
+        position: 'relative',
         display: 'grid',
-        gridTemplateColumns: '52px minmax(0, 1fr) 96px 32px',
+        gridTemplateColumns: 'minmax(0, 1fr) 32px',
         gap: 'var(--ds-space-5)',
         alignItems: 'start',
-        width: '100%',
-        padding: '24px 16px 24px 0',
-        border: 'none',
+        padding: '16px 0',
         borderBottom: '1px solid var(--ds-color-border)',
-        borderRadius: 0,
-        background: 'transparent',
-        textAlign: 'left',
-        font: 'inherit',
-        color: 'inherit',
-        cursor: 'pointer',
       }}
     >
-      <span style={{ ...monoPlain(12, 'var(--ds-color-fg-faint)'), paddingTop: 10 }}>{num}</span>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="cv-row-hit"
+        aria-label={project.name}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          border: 'none',
+          background: 'transparent',
+          padding: 0,
+          font: 'inherit',
+          color: 'inherit',
+          cursor: 'pointer',
+        }}
+      />
 
-      <span style={{ display: 'grid', gap: 'var(--ds-space-2)', minWidth: 0 }}>
+      <span style={{ display: 'grid', gap: 'var(--ds-space-2)', minWidth: 0, justifyItems: 'start' }}>
+        <ProjectTags project={project} />
         <span className="cv-row-name" style={display('clamp(26px, 3vw, 36px)', 1.05, '-0.02em')}>
           {project.name}
         </span>
@@ -85,16 +97,24 @@ function ProjectRow({
         >
           {project.tagline}
         </span>
-        <span style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ds-space-4)' }}>
-          {project.stack.map((item) => (
-            <span key={item} style={mono(11, '0.06em')}>
-              {item}
-            </span>
-          ))}
-        </span>
+        {project.url ? (
+          <a
+            href={project.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            /* Above the overlay, or the button would swallow the click. */
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              fontFamily: 'var(--cv-font-mono)',
+              fontSize: 12,
+            }}
+          >
+            {project.url.replace(/^https?:\/\//, '')}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        ) : null}
       </span>
-
-      <span style={{ ...monoPlain(12), paddingTop: 10 }}>{project.year}</span>
 
       <span
         aria-hidden="true"
@@ -108,6 +128,6 @@ function ProjectRow({
       >
         →
       </span>
-    </button>
+    </div>
   );
 }

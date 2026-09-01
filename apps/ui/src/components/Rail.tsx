@@ -2,31 +2,27 @@
 
 import Image from 'next/image';
 
-import { Button } from '@ds/components/core/Button.jsx';
-import { SegmentedControl } from '@ds/components/navigation/SegmentedControl.jsx';
+import { useCv } from '@/content/useCv';
+import { mono, monoPlain } from '@/lib/type';
 
-import { identity, portrait } from '@/content/cv';
-import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
-import { useI18n } from '@/i18n/client';
-import { display, mono, monoPlain } from '@/lib/type';
-
+/** Order mirrors the page, and the page mirrors the PDF. */
 const SECTION_KEYS = [
-  { num: '01', key: 'nav.projects', href: '#projects' },
-  { num: '02', key: 'nav.experience', href: '#experience' },
-  { num: '03', key: 'nav.skills', href: '#skills' },
-  { num: '04', key: 'nav.education', href: '#education' },
-  { num: '05', key: 'nav.contact', href: '#contact' },
+  { key: 'experience', href: '#experience' },
+  { key: 'skills', href: '#skills' },
+  { key: 'projects', href: '#projects' },
+  { key: 'education', href: '#education' },
+  { key: 'languages', href: '#languages' },
 ] as const;
 
 export function Rail() {
-  const { t, locale, setLocale } = useI18n();
+  const { identity, portrait, labels } = useCv();
 
   return (
     <aside
       className="cv-rail"
       style={{
         position: 'sticky',
-        top: 40,
+        top: 'var(--cv-content-top)',
         alignSelf: 'start',
         display: 'grid',
         gap: 'var(--ds-space-5)',
@@ -34,9 +30,6 @@ export function Rail() {
       }}
     >
       <div style={{ display: 'grid', gap: 'var(--ds-space-2)' }}>
-        <span style={display(26, 1.05, '-0.01em')}>
-          {identity.firstName} {identity.lastName}
-        </span>
         <Image
           src={portrait}
           alt={`${identity.firstName} ${identity.lastName}`}
@@ -54,6 +47,15 @@ export function Rail() {
         />
       </div>
 
+      {/* Role and location sit here rather than above the headline: they are
+          identifying facts, not an opening line, and the rail is where a reader
+          already looks for who this is. Two lines because 208px will not hold
+          "INGENIERO DE SOFTWARE · BILBAO, ESPAÑA" on one. */}
+      <div style={{ display: 'grid', gap: 'var(--ds-space-1)' }}>
+        <span style={mono(11, '0.16em', 'var(--ds-color-accent)')}>{identity.title}</span>
+        <span style={mono(11, '0.16em')}>{identity.location}</span>
+      </div>
+
       <nav style={{ display: 'grid', gap: 2 }}>
         {SECTION_KEYS.map((section) => (
           <a
@@ -63,7 +65,6 @@ export function Rail() {
             style={{
               ...monoPlain(12),
               display: 'grid',
-              gridTemplateColumns: '24px 1fr',
               alignItems: 'baseline',
               gap: 'var(--ds-space-2)',
               padding: '6px 0',
@@ -71,29 +72,10 @@ export function Rail() {
               borderTop: '1px solid var(--ds-color-border)',
             }}
           >
-            <span style={{ color: 'var(--ds-color-fg-faint)' }}>{section.num}</span>
-            <span>{t(section.key)}</span>
+            <span>{labels.sections[section.key]}</span>
           </a>
         ))}
       </nav>
-
-      <div
-        className="cv-no-print"
-        style={{ display: 'grid', gap: 'var(--ds-space-3)', justifyItems: 'start' }}
-      >
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
-          {t('rail.pdf')}
-        </Button>
-        <SegmentedControl
-          options={SUPPORTED_LOCALES.map((code) => ({
-            value: code,
-            label: code.toUpperCase(),
-          }))}
-          value={locale}
-          onChange={(value: string) => setLocale(value as Locale)}
-          ariaLabel={t('rail.language')}
-        />
-      </div>
     </aside>
   );
 }

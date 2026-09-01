@@ -1,4 +1,6 @@
-import { contactRows, education, identity, jobs, projects, skillGroups } from '@/content/cv';
+'use client';
+
+import { useCv } from '@/content/useCv';
 
 /**
  * The document that actually prints.
@@ -79,36 +81,29 @@ function displayValue(value: string): string {
 }
 
 export function PrintResume() {
+  const { education, identity, jobs, languages, projects, skillGroups, labels } = useCv();
+  const label = labels.pdf;
   const fullName = `${identity.firstName} ${identity.lastName}`;
-  const contactLine = [
-    identity.location,
-    ...contactRows.map((row) => displayValue(row.value)),
-  ].join(' | ');
+  const contactLine = identity.location;
 
   return (
     <div className="cv-print" style={sheet.page}>
       <header style={{ breakInside: 'avoid' }}>
         <h1 style={sheet.name}>{fullName}</h1>
         <p style={sheet.title}>{identity.title}</p>
-        {/* Plain text, not icons — and not in a running header, which
-            extraction often discards along with page furniture. */}
+        {/* Location only. There is deliberately no email, phone or profile
+            link here: nothing on this CV should publish a way to reach a
+            person directly, and the site's contact form reaches the same
+            inbox without doing so. The cost is real and accepted — an ATS
+            keys on the email address, so a parsed record from this PDF has
+            no contact field. */}
         <p style={sheet.contact}>{contactLine}</p>
-        <p style={{ ...sheet.contact, margin: '2pt 0 0' }}>
-          Languages: {identity.languages.join(', ')} | Timezone: {identity.timezone}
-        </p>
       </header>
 
-      <h2 style={sheet.heading}>Summary</h2>
+      <h2 style={sheet.heading}>{label.summary}</h2>
       <p style={{ margin: 0 }}>{identity.summary}</p>
 
-      <h2 style={sheet.heading}>Skills</h2>
-      {skillGroups.map((group) => (
-        <p key={group.group} style={{ margin: '0 0 3pt' }}>
-          <strong>{group.group}:</strong> {group.items.join(', ')}
-        </p>
-      ))}
-
-      <h2 style={sheet.heading}>Experience</h2>
+      <h2 style={sheet.heading}>{label.experience}</h2>
       {jobs.map((job) => (
         <div key={`${job.company}-${job.period}`} style={sheet.entry}>
           <h3 style={sheet.entryTitle}>{job.role}</h3>
@@ -128,16 +123,29 @@ export function PrintResume() {
         </div>
       ))}
 
-      <h2 style={sheet.heading}>Projects</h2>
+      <h2 style={sheet.heading}>{label.skills}</h2>
+      {skillGroups.map((group) => (
+        <p key={group.group} style={{ margin: '0 0 3pt' }}>
+          <strong>{group.group}:</strong> {group.items.join(', ')}
+        </p>
+      ))}
+
+      <h2 style={sheet.heading}>{label.projects}</h2>
       {projects.map((project) => (
         <div key={project.id} style={sheet.entry}>
           <h3 style={sheet.entryTitle}>
-            {project.name} | {project.year}
+            {[
+              project.name,
+              labels.projectKinds[project.kind],
+              project.status ? labels.projectStatuses[project.status] : null,
+            ]
+              .filter(Boolean)
+              .join(' | ')}
           </h3>
           <p style={sheet.entryMeta}>{project.role}</p>
           <p style={sheet.body}>{project.tagline}</p>
           <p style={{ margin: '3pt 0 0' }}>
-            <strong>Stack:</strong> {project.stack.join(', ')}
+            <strong>{label.stack}:</strong> {project.stack.join(', ')}
           </p>
           {project.decisions.length > 0 ? (
             <ul style={sheet.list}>
@@ -148,15 +156,13 @@ export function PrintResume() {
               ))}
             </ul>
           ) : null}
-          {project.links.length > 0 ? (
-            <p style={{ ...sheet.entryMeta, margin: '3pt 0 0' }}>
-              {project.links.map((link) => displayValue(link.href)).join(' | ')}
-            </p>
+          {project.url ? (
+            <p style={{ ...sheet.entryMeta, margin: '3pt 0 0' }}>{displayValue(project.url)}</p>
           ) : null}
         </div>
       ))}
 
-      <h2 style={sheet.heading}>Education</h2>
+      <h2 style={sheet.heading}>{label.education}</h2>
       {education.map((entry) => (
         <div key={entry.degree} style={sheet.entry}>
           <h3 style={sheet.entryTitle}>{entry.degree}</h3>
@@ -166,6 +172,13 @@ export function PrintResume() {
           {entry.detail ? <p style={sheet.body}>{entry.detail}</p> : null}
         </div>
       ))}
+      <h2 style={sheet.heading}>{label.languages}</h2>
+      {languages.map((language) => (
+        <p key={language.name} style={{ margin: '0 0 3pt' }}>
+          <strong>{language.name}:</strong> {language.level}
+        </p>
+      ))}
+
     </div>
   );
 }

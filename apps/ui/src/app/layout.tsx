@@ -2,13 +2,17 @@ import type { Metadata } from 'next';
 import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
 
 import { I18nProvider } from '@/i18n/client';
-import { identity } from '@/content/cv';
+import { getLocale, getMessages } from '@/i18n/server';
+import { resolveCv } from '@/content/cv';
 
 import './globals.css';
 
+// Variable, not fixed cuts. The design system's weight tokens are 400 / 550 /
+// 650 / 800; requesting static 400/500/600/800 meant 550 and 650 were never
+// actually loaded and the browser snapped or synthesised them. The variable
+// face covers the whole range and drops the 800 cut nothing on screen used.
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '800'],
   variable: '--font-inter',
   display: 'swap',
 });
@@ -28,38 +32,45 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const fullName = `${identity.firstName} ${identity.lastName}`;
-const pageTitle = `${fullName} — ${identity.title}`;
-// PLACEHOLDER copy — this is the snippet search engines show. Replace it.
-const pageDescription = `${identity.title} in ${identity.location}, working on developer platforms, build pipelines and shared infrastructure.`;
-
-export const metadata: Metadata = {
-  title: pageTitle,
-  description: pageDescription,
-  openGraph: {
-    title: pageTitle,
-    description: pageDescription,
-    type: 'profile',
-  },
-};
-
 /**
- * schema.org Person, so the CV is machine-readable to search engines and to
- * the recruiter tooling that scrapes them.
+ * Locale-aware, which only became possible once the locale was resolved on the
+ * server: the tab title and the search snippet now follow the language the
+ * visitor is actually reading rather than always being English.
  */
-const personJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: fullName,
-  email: `mailto:${identity.email}`,
-  jobTitle: identity.title,
-  knowsLanguage: identity.languages.map((code) => code.toLowerCase()),
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { identity } = resolveCv(await getMessages());
+  const title = `${identity.firstName} ${identity.lastName} — ${identity.title}`;
+  // PLACEHOLDER copy — this is the snippet search engines show. Replace it.
+  const description = `${identity.title}, ${identity.location}.`;
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: 'profile' },
+  };
+}
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Resolved server-side from the cookie, then Accept-Language, then default.
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+  const { identity, languages } = resolveCv(messages);
+
+  /**
+   * schema.org Person, so the CV is machine-readable to search engines and to
+   * the recruiter tooling that scrapes them.
+   */
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: `${identity.firstName} ${identity.lastName}`,
+    jobTitle: identity.title,
+    knowsLanguage: languages.map((language) => language.name),
+  };
+
   return (
     <html
-      lang="en"
+      lang={locale}
       data-theme="light"
       className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
@@ -69,7 +80,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           // Serialised from a literal defined above — no user input reaches this.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
-        <I18nProvider>{children}</I18nProvider>
+        <I18nProvider locale={locale} messages={messages}>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );
