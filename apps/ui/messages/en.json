@@ -1,4 +1,386 @@
 {
+  "cv": {
+    "diagrams": {
+      "designSystem": {
+        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into each of the four products.",
+        "caption": "Themes override colour and nothing else. Shape, type scale and spacing stay on shared tokens, so a full reskin touches no component file.",
+        "notes": {
+          "components": "tokens only, no literals",
+          "products": "each vendors a copy",
+          "themes": "colour overrides only",
+          "tokens": "oklch custom properties"
+        }
+      },
+      "gpool": {
+        "alt": "The gpool request path: a Next.js front end calling a NestJS API backed by Postgres, with the API publishing email intent to Kafka for the shared notifications service to deliver.",
+        "caption": "The API publishes an email intent and moves on. Delivery, idempotency and dead-lettering belong to a service that already does them, so joining a pool never waits on an SMTP call.",
+        "notes": {
+          "api": "auth, pools, live scoring",
+          "db": "migrations on boot",
+          "events": "email as an event",
+          "handoff": "owns delivery",
+          "web": "pages, server-rendered"
+        }
+      },
+      "kini": {
+        "alt": "kini, and the practices extracted from it — the translation workflow, release automation and compose layout — carried into the repositories that followed.",
+        "caption": "Kept as its own repository rather than folded into gpool, so the rewrite could change its mind about the architecture without rewriting history.",
+        "notes": {
+          "carried": "extracted, not rebuilt",
+          "into": "the repositories that followed",
+          "kini": "NestJS and Next.js, one stack"
+        }
+      },
+      "notifications": {
+        "alt": "A delivery pipeline reading a versioned topic through a consumer, idempotency claims and locale-resolved templates to a sent email, with malformed payloads branching off to a dead-letter record.",
+        "caption": "Invalid payloads fail as non-retryable and land in a durable record. Retrying a malformed message forever is a worse outcome than losing it loudly.",
+        "notes": {
+          "consumer": "stable group",
+          "deadLetter": "non-retryable",
+          "email": "delivered once",
+          "idempotency": "atomic claims",
+          "templates": "per locale, escaped",
+          "topic": "versioned name"
+        }
+      },
+      "platformOps": {
+        "alt": "Five applications — cv, gpool, kini, notifications and trading-bot — attached to one shared Docker network, which fronts three families of service: secrets and translations, events, and observability.",
+        "caption": "Seven of the eleven services are observability. That ratio is deliberate: the expensive part of running several small services is not running them, it is being able to see them.",
+        "groups": {
+          "events": "Events",
+          "observability": "Observability",
+          "secrets": "Secrets & translations"
+        },
+        "notes": {
+          "console": "topic browser, local only",
+          "grafana": "the one place anyone looks",
+          "logs": "logs, tailed off the host",
+          "metrics": "metrics, scraped from it",
+          "openbao": "one kv path per app",
+          "redpanda": "kafka API, no JVM",
+          "tolgee": "copy for every app",
+          "traces": "traces, pushed by the app"
+        },
+        "seam": "one shared docker network"
+      },
+      "tradingBot": {
+        "alt": "A Rust hot path of market data, strategy and execution, where the strategy crate also feeds an offline backtest, above a TypeScript control plane serving a Next.js operator console.",
+        "caption": "Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery.",
+        "lanes": {
+          "control": "Control plane",
+          "hot": "Rust hot path"
+        },
+        "notes": {
+          "backtest": "same code, offline",
+          "console": "supervision UI",
+          "controlPlane": "operational API",
+          "execution": "order placement",
+          "marketData": "ingest and normalise",
+          "strategy": "one crate, two callers"
+        }
+      }
+    },
+    "education": {
+      "0": {
+        "degree": "B.Sc. Mathematics",
+        "period": "2026 — Present",
+        "school": "UNED"
+      },
+      "1": {
+        "degree": "B.Sc. Computer Science",
+        "period": "2013 — 2017",
+        "school": "University of the Basque Country"
+      }
+    },
+    "identity": {
+      "headline": "Simplicity leaves room for appreciation",
+      "lede": "Applying \"Less is more\" to software engineering.",
+      "location": "Bilbao, Spain",
+      "summary": "Full-stack software engineer with a backend centre of gravity. Nine years building products for regulated industries — banking, insurance, e-mobility and digital identity — first in Java and Spring, now in Node and NestJS, along with the front ends that sit on them.",
+      "title": "Software Engineer"
+    },
+    "jobs": {
+      "dehn": {
+        "bullets": [
+          "Replaced a legacy Spring and Angular platform with NestJS microservices, now released and running in production.",
+          "Owned the full vertical on the migrated pieces — the NestJS services and the Vue front ends built on them — rather than one side of an interface.",
+          "The rewrite removed a substantial amount of accumulated technical debt and improved the platform’s performance."
+        ],
+        "company": "DEHN digital solutions GmbH",
+        "location": "Remote",
+        "period": "Sep 2022 — Present",
+        "role": "Software Engineer",
+        "summary": "Migrating a legacy platform to a microservices architecture, across both the services and the front ends that consume them."
+      },
+      "dominion": {
+        "bullets": [
+          "Built KYC, regulatory reporting and risk scoring for a compliance platform used by banks and insurers.",
+          "Worked across the whole stack — a Spring Boot monolith and the React front end on top of it."
+        ],
+        "company": "DOMINION GLOBAL",
+        "location": "Bilbao, Spain",
+        "period": "May 2017 — Oct 2019",
+        "role": "Full-stack Developer",
+        "summary": "Full-stack development of Alert, a RegTech product for the banking and insurance industry."
+      },
+      "entelgy": {
+        "bullets": [
+          "Spring services for the platform that controls electric-vehicle charging infrastructure."
+        ],
+        "company": "Entelgy",
+        "location": "Bilbao, Spain",
+        "period": "Nov 2019 — Mar 2021",
+        "role": "Software Engineer",
+        "summary": "Backend development in Spring under a microservices architecture, for the e-mobility industry."
+      },
+      "everis": {
+        "bullets": [],
+        "company": "everis",
+        "location": "Bilbao, Spain",
+        "period": "Apr 2021 — Nov 2021",
+        "role": "Software Engineer",
+        "summary": "Open banking product development and deployment."
+      },
+      "wise-security": {
+        "bullets": [
+          "Java services for a distributed identity provider, integrating with an application on the Solana blockchain."
+        ],
+        "company": "Wise Security Global",
+        "location": "Remote",
+        "period": "Dec 2021 — Aug 2022",
+        "role": "Software Engineer",
+        "summary": "Building a distributed, blockchain-based identity provider."
+      }
+    },
+    "labels": {
+      "pdf": {
+        "education": "Education",
+        "experience": "Experience",
+        "languages": "Languages",
+        "projects": "Projects",
+        "skills": "Skills",
+        "stack": "Stack",
+        "summary": "Summary"
+      },
+      "projectKinds": {
+        "core": "Core",
+        "product": "Product"
+      },
+      "projectStatuses": {
+        "development": "In development",
+        "poc": "Proof of concept",
+        "production": "Production"
+      },
+      "sections": {
+        "contact": "Contact",
+        "education": "Education",
+        "experience": "Experience",
+        "languages": "Languages",
+        "projects": "Projects",
+        "skills": "Skills"
+      }
+    },
+    "languages": [
+      {
+        "level": "Native",
+        "name": "Spanish"
+      },
+      {
+        "level": "Native",
+        "name": "Basque"
+      },
+      {
+        "level": "Fluent",
+        "name": "English"
+      }
+    ],
+    "projects": {
+      "design-system": {
+        "approach": "Components are plain React styled only through CSS custom properties, with no Tailwind, no CSS-in-JS and no build step. Any of the three can import them as-is, and each supplies its own theme file rather than editing component source.",
+        "decisions": [
+          "Themes override colour only. Shape, type scale and spacing stay on shared base tokens, so every product renders identical geometry and differs solely in paint.",
+          "Vendored into each consumer rather than published as a package: the products are private and a copy keeps the dependency graph flat."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Colour, typography, spacing, radius, shadow and motion as oklch-based custom properties, with one neutral default theme.",
+            "title": "Tokens"
+          },
+          {
+            "step": "02",
+            "text": "Primitives grouped by concern — core, forms, feedback, data-display, navigation, overlay, icons — each referencing tokens only, never a literal colour.",
+            "title": "Components"
+          },
+          {
+            "step": "03",
+            "text": "One file per product overriding colour tokens. A full reskin touches zero component files.",
+            "title": "Themes"
+          }
+        ],
+        "problem": "Three products had drifted into three styling technologies — plain CSS classes, Tailwind utilities and CVA variants — and no shared visual language. Picking one framework would have meant rewriting two applications.",
+        "role": "Solo — design & code",
+        "tagline": "A technology-agnostic token and component library three products share without agreeing on a CSS framework."
+      },
+      "gpool": {
+        "approach": "One monorepo with a NestJS API and a Next.js web app, both joining a shared platform rather than owning their own infrastructure. Secrets, translations, the event broker and observability all come from platform-ops; gpool ships only the two containers that are actually its own.",
+        "decisions": [
+          "Secrets are fetched at boot by a wrapper process, never baked into an image or committed to an env file, so a leaked app token exposes one kv path rather than the whole store.",
+          "Email is an event, not a call. The API publishes to a topic and a shared service owns delivery, idempotency and dead-lettering.",
+          "CI regenerates the web API contract from the running API and fails on drift, so client and server cannot disagree silently."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "NestJS monolith covering auth, pools and RUM. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
+            "title": "API"
+          },
+          {
+            "step": "02",
+            "text": "Next.js App Router in standalone output. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
+            "title": "Web"
+          },
+          {
+            "step": "03",
+            "text": "Images build to ECR on release, a bundle lands in S3, and SSM drives a compose deploy on the shared EC2 host. CI gates on lint, typecheck, coverage, a compose integration smoke, gitleaks, SBOM and a Trivy scan.",
+            "title": "Delivery"
+          }
+        ],
+        "problem": "A prediction pool needs more than a spreadsheet: authentication, scoring that settles on a schedule, notifications, and a record of why anyone holds the points they do. Every one of those is a service, and standing them up per project does not scale.",
+        "role": "Solo — platform, API & web",
+        "tagline": "A real-time football pool platform: private pools, live scoring, and an auditable trail of every point."
+      },
+      "kini": {
+        "approach": "A NestJS API and Next.js client in one monorepo, with monitoring wired in locally. Much of what it worked out — the compose layout, the Tolgee translation flow, the release and deploy workflows — became the template the later projects started from.",
+        "decisions": [
+          "Kept as its own repository rather than folded into gpool, so the rewrite could change its mind about the architecture without rewriting history."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "NestJS backend and Next.js client, sharing a compose stack and a single set of CI workflows.",
+            "title": "API and web"
+          },
+          {
+            "step": "02",
+            "text": "The translation workflow, the commit and release automation, and the local-first compose layout were all extracted and reused rather than rebuilt.",
+            "title": "What carried forward"
+          }
+        ],
+        "problem": "The original attempt at a pool platform: teams, invitations, and scoring, built before there was any shared infrastructure to lean on.",
+        "role": "Solo — API & web",
+        "tagline": "The first football pool platform, and the one that taught me what gpool needed to be."
+      },
+      "notifications": {
+        "approach": "One consumer owns delivery for all of them. Producers publish an intent event and stop caring; the service validates the contract, renders a localised template, sends it, and keeps a durable record of every attempt.",
+        "decisions": [
+          "Invalid payloads fail as non-retryable and go to a durable dead-letter record, because retrying a malformed message forever is a worse outcome than losing it loudly.",
+          "A versioned topic name, so a contract change is a new topic rather than a silent break for every producer."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Reads a versioned topic under a stable consumer group and validates every event against an explicit contract, rejecting malformed payloads as non-retryable rather than looping on them.",
+            "title": "Consumer"
+          },
+          {
+            "step": "02",
+            "text": "Atomic idempotency claims stop duplicate sends, and processing leases let a crashed worker’s in-flight messages be picked up rather than stranded.",
+            "title": "Delivery"
+          },
+          {
+            "step": "03",
+            "text": "Handlebars templates keyed by source application and template id, resolved per locale, with data escaped on render so sender-controlled content cannot inject markup.",
+            "title": "Templates"
+          }
+        ],
+        "problem": "Every product eventually needs to send mail, and every product that does it inline reinvents retries, deduplication and the question of what happened to a message that never arrived.",
+        "role": "Solo — backend",
+        "tagline": "A Kafka-backed email service the other products delegate delivery to, with idempotency and crash recovery built in."
+      },
+      "platform-ops": {
+        "approach": "One ops stack, one external Docker network, and a rule that applications own only their own containers. An app declares which secret path it reads and which topics it uses; everything underneath is shared and versioned in one place.",
+        "decisions": [
+          "Per-application OpenBao policies scoped to exactly one kv path, so an app token is useless against any other app.",
+          "The same compose manifests describe local and production, so a local reproduction is a real reproduction."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "One external Docker network, platform_ops_shared. An application joins it, resolves every shared service by container alias, and needs to know nothing else about the topology. There is no service mesh and no discovery layer — joining the network is the whole contract, which is why every repository creates it before anything else starts.",
+            "title": "The integration seam"
+          },
+          {
+            "step": "02",
+            "text": "OpenBao holds every application secret behind a policy scoped to exactly one kv path, and a boot wrapper fetches them and refuses to start a container missing a key it declared. Tolgee holds the copy, which applications pull as a snapshot at build time and merge live at request time.",
+            "title": "Secrets and translations"
+          },
+          {
+            "step": "03",
+            "text": "Redpanda speaks the Kafka API without a JVM or ZooKeeper, carrying versioned topics such as notification.email.requested.v1 — how an application hands off an email instead of sending one itself. A console for browsing topics, consumer groups and messages runs locally only; production has no reason to expose it.",
+            "title": "Events"
+          },
+          {
+            "step": "04",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks.",
+            "title": "Three signals, three paths"
+          },
+          {
+            "step": "05",
+            "text": "Commit hooks that scan for secrets, parse every workflow, render every compose file and check Terraform formatting before anything reaches CI.",
+            "title": "Guardrails"
+          }
+        ],
+        "problem": "Five applications each needed secret storage, translations, an event broker and observability. Duplicating that per repository means five OpenBao instances to unseal and five ways to be inconsistent.",
+        "role": "Solo — infrastructure",
+        "tagline": "The shared operations stack every other project attaches to instead of rebuilding."
+      },
+      "trading-bot": {
+        "approach": "Latency-sensitive work lives in Rust crates; orchestration and supervision live in TypeScript. The two halves meet at a control plane, with a Next.js operator console on top.",
+        "decisions": [
+          "Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Separate crates for market data, the strategy engine, execution, and research backtesting, so the backtest and the live path can share the same strategy code.",
+            "title": "Rust crates"
+          },
+          {
+            "step": "02",
+            "text": "A TypeScript service coordinating the crates and owning the operational API.",
+            "title": "Control plane"
+          },
+          {
+            "step": "03",
+            "text": "A Next.js supervision UI built on Tailwind and Radix, sharing the design system with the other products.",
+            "title": "Operator console"
+          }
+        ],
+        "problem": "A strategy that runs unattended needs two very different things: a fast, predictable execution path, and a supervision surface a human can read at a glance. Building both in one language means compromising one of them.",
+        "role": "Solo — Rust & TypeScript",
+        "tagline": "A trading platform split between a Rust hot path and a TypeScript control plane with an operator console."
+      }
+    },
+    "skills": {
+      "0": {
+        "group": "Languages",
+        "note": "Daily first, then fluent enough to be useful."
+      },
+      "1": {
+        "group": "Product front-end",
+        "note": "Accessible, fast, no framework religion."
+      },
+      "2": {
+        "group": "Backend & data",
+        "note": "Boring architecture, carefully chosen."
+      },
+      "3": {
+        "group": "Platform & practice",
+        "note": "How the work reaches production."
+      }
+    }
+  },
   "form": {
     "email": "Your email",
     "emailInvalid": "Enter a valid email address",
@@ -23,6 +405,6 @@
   "rail": {
     "cv": "Curriculum vitae",
     "language": "Language",
-    "pdf": "Download PDF"
+    "pdf": "Download CV"
   }
 }

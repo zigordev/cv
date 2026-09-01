@@ -1,19 +1,28 @@
+import type { Messages } from '@/i18n/translator';
+
 /**
- * CV content model.
+ * The CV's shape. Every word of it lives in Tolgee, like the rest of the app.
  *
- * PLACEHOLDER CONTENT — the persona below ("Alex Moreno", the four employers,
- * the four projects) comes from the design handoff and is realistic but not
- * real. Replace every value with the real CV before shipping; keep the shapes.
+ * What stays here is only what reads identically in every language and is not
+ * translatable copy: ids, ordering, technology names and URLs. Putting
+ * those in the translation store would invite a translator to "translate"
+ * `Next.js` or a GitHub URL, and would duplicate them once per locale for no
+ * benefit.
  *
- * Body prose here is English-only by design: the UI chrome is translated
- * through Tolgee (see `messages/`), the CV substance is not. See README.
+ * Everything a reader actually reads — headline, roles, case studies, section
+ * names, the PDF's headings — comes from `messages.cv.*`, which the loader
+ * assembles from Tolgee merged over the committed message files.
  */
 
+/* -------------------------------------------------------------------------- */
+/* Resolved shapes the components consume                                     */
+/* -------------------------------------------------------------------------- */
+
 export interface Job {
-  role: string;
   company: string;
-  period: string;
+  role: string;
   location: string;
+  period: string;
   summary: string;
   bullets: string[];
 }
@@ -24,35 +33,46 @@ export interface ProjectPiece {
   text: string;
 }
 
-export interface ProjectStat {
-  label: string;
-  value: string;
-  hint: string;
-}
+/**
+ * What a project is, not what it is built with.
+ *
+ * `product` is something with users; `core` is shared machinery the products
+ * are built on. Worth distinguishing because the two read very differently to
+ * a reviewer: a product shows judgement about people, a core project shows
+ * judgement about systems.
+ */
+export type ProjectKind = 'product' | 'core';
 
-export interface ProjectLink {
-  label: string;
-  href: string;
-}
+/**
+ * How far a product actually got. Only products carry one: the core projects
+ * are all in use by definition — every product here runs on them — so a status
+ * on those would say nothing.
+ *
+ * Worth being explicit about rather than letting a reader assume: shipping
+ * something to production is a different claim from having built a proof of
+ * concept, and a CV that blurs the two invites the question at interview.
+ */
+export type ProjectStatus = 'production' | 'development' | 'poc';
 
 export interface Project {
   id: string;
+  kind: ProjectKind;
+  status?: ProjectStatus;
+  /**
+   * Where a reader can use the running thing, for products that have one.
+   * Separate from `links` because a live product and its source repository are
+   * different invitations, and the live one is worth more to a non-engineer.
+   */
+  url?: string;
   name: string;
-  year: string;
+  stack: string[];
+  screenshot?: string;
   role: string;
   tagline: string;
-  stack: string[];
-  /** Modal Overview tab: screenshot slot, then problem / approach. */
-  screenshot?: string;
   problem: string;
   approach: string;
-  /** Modal Architecture tab. */
   pieces: ProjectPiece[];
   decisions: string[];
-  /** Modal Results tab. */
-  stats: ProjectStat[];
-  lessons: string[];
-  links: ProjectLink[];
 }
 
 export interface SkillGroup {
@@ -65,387 +85,243 @@ export interface Education {
   degree: string;
   school: string;
   period: string;
-  /** Optional supporting line — thesis, distinction, focus. */
   detail?: string;
 }
 
-export interface ContactRow {
-  label: string;
-  value: string;
+export interface LanguageEntry {
+  name: string;
+  level: string;
 }
 
-/** Rail portrait, 132x132 circle. Replace with a real photo in `public/`. */
-export const portrait = '/portrait.png';
+/**
+ * Prose for the project architecture diagrams. Only the words: the service,
+ * crate and technology names they draw are proper nouns and live in the
+ * components alongside the geometry, for the same reason technology names live
+ * in this file rather than in the translation store.
+ *
+ * Notes are rendered inside fixed-width boxes, so they have to stay short —
+ * roughly 26 characters at 160px and 32 at 200px, in every language.
+ */
+interface DiagramCopy {
+  alt: string;
+  caption: string;
+}
 
-export const identity = {
+export interface PlatformOpsDiagramCopy extends DiagramCopy {
+  seam: string;
+  groups: { secrets: string; events: string; observability: string };
+  notes: {
+    openbao: string;
+    tolgee: string;
+    redpanda: string;
+    console: string;
+    traces: string;
+    metrics: string;
+    logs: string;
+    grafana: string;
+  };
+}
+
+export interface GpoolDiagramCopy extends DiagramCopy {
+  notes: { web: string; api: string; db: string; events: string; handoff: string };
+}
+
+export interface DesignSystemDiagramCopy extends DiagramCopy {
+  notes: { tokens: string; components: string; themes: string; products: string };
+}
+
+export interface TradingBotDiagramCopy extends DiagramCopy {
+  lanes: { hot: string; control: string };
+  notes: {
+    marketData: string;
+    strategy: string;
+    execution: string;
+    backtest: string;
+    controlPlane: string;
+    console: string;
+  };
+}
+
+export interface NotificationsDiagramCopy extends DiagramCopy {
+  notes: {
+    topic: string;
+    consumer: string;
+    idempotency: string;
+    templates: string;
+    email: string;
+    deadLetter: string;
+  };
+}
+
+export interface KiniDiagramCopy extends DiagramCopy {
+  notes: { kini: string; carried: string; into: string };
+}
+
+export interface Diagrams {
+  platformOps: PlatformOpsDiagramCopy;
+  gpool: GpoolDiagramCopy;
+  designSystem: DesignSystemDiagramCopy;
+  tradingBot: TradingBotDiagramCopy;
+  notifications: NotificationsDiagramCopy;
+  kini: KiniDiagramCopy;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Locale-invariant                                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Rail portrait, rendered as a 132px circle. Stored square at 2x. */
+export const portrait = '/portrait.jpg';
+
+const person = {
   firstName: 'Zigor',
   lastName: 'López',
-  // PLACEHOLDER — replace with the real address and handles below.
-  email: 'alex@moreno.dev',
-  /** Role and location. Content, not UI chrome, so it lives here rather than
-   *  in Tolgee — a pull would otherwise overwrite it on the next stack start. */
-  title: 'Software Engineer',
-  location: 'Bilbao',
-  timezone: 'UTC+1/UTC+2',
-  /**
-   * The hero statement. Split in two so the second clause keeps the design's
-   * italic accent treatment; collapse into one field if you would rather it
-   * read as a single unbroken line.
-   */
-  headline: 'Emptiness and cleanliness leave room',
-  headlineAccent: 'for appreciation and for understanding.',
-  /**
-   * The opening paragraph on the page. Content, not UI chrome, so it lives
-   * here rather than in Tolgee — a pull would otherwise overwrite it.
-   * Distinct from `summary` below, which is written for the PDF and the
-   * parsers that read it.
-   */
-  lede: 'Applying "Ma", or "less is more", to software engineering. In a world where the tech stack grows bigger and the layers keep multiplying, one of the keys to success is building a simple system.',
-  /**
-   * PLACEHOLDER — write your own. This is the professional summary at the top
-   * of the PDF: the first thing a human reads and the densest keyword block an
-   * applicant tracking system indexes. Two or three sentences, naming the
-   * technologies and the kind of work you want matched against.
-   */
-  summary:
-    'Software engineer working on developer platforms, build pipelines and the shared infrastructure that product teams depend on. Comfortable across TypeScript, Node and Rust, from event-driven backends to the deploy path that ships them.',
-  /** Languages the person speaks — CV content, independent of the UI locales
-   *  in `i18n/config.ts`. Drives the meta row and the JSON-LD `knowsLanguage`. */
-  languages: ['EN', 'ES'],
 };
 
-export const jobs: Job[] = [
-  {
-    role: 'Software Engineer, Developer Platform',
-    company: 'Northbound',
-    period: '2023 — Present',
-    location: 'Remote (Bilbao)',
-    summary:
-      'Own the build, deploy and observability path for 60 engineers across nine product teams.',
-    bullets: [
-      'Rebuilt CI on remote caching and merge queues: median pipeline 51 min → 9 min, flake rate under 1%.',
-      'Introduced a service template that ships with tracing, dashboards and an on-call runbook by default — new services reach production in two days instead of three weeks.',
-      'Led the migration of 40 services off a shared Postgres as 11 reversible steps, with zero customer-visible downtime.',
-    ],
-  },
-  {
-    role: 'Senior Full-Stack Engineer',
-    company: 'Cartogram',
-    period: '2020 — 2023',
-    location: 'Bilbao, ES',
-    summary:
-      'Second engineer on a geospatial analytics product; grew with it from prototype to 4,000 paying seats.',
-    bullets: [
-      'Built the tile pipeline and query layer that let customers render 20M-point datasets interactively.',
-      'Designed the permissions model still in use today — one policy evaluator shared by API, UI and exports.',
-      'Mentored four engineers; two now lead teams.',
-    ],
-  },
-  {
-    role: 'Full-Stack Engineer',
-    company: 'Meridian Labs',
-    period: '2017 — 2020',
-    location: 'Berlin, DE',
-    summary: 'Consultancy work: shipped eight client products, mostly in regulated industries.',
-    bullets: [
-      'Delivered an insurance claims portal handling 12k claims a month, replacing a paper process.',
-      'Standardised the studio front-end stack and token setup reused on every later project.',
-    ],
-  },
-  {
-    role: 'Junior Developer',
-    company: 'Studio Vela',
-    period: '2015 — 2017',
-    location: 'Bilbao, ES',
-    summary: 'First job. Marketing sites, CMS work, and an unreasonable amount of CSS debugging.',
-    bullets: [
-      'Built and maintained 20+ client sites; learned to read a stack trace before guessing.',
-    ],
-  },
-];
+/*
+ * No contact details live here, by decision rather than omission.
+ *
+ * Nothing this app publishes — the page, the PDF at `public/cv-*.pdf`, or the
+ * schema.org Person in the document head — carries an email address, a phone
+ * number or a profile link. The contact form is the only route in: it reaches
+ * the same inbox through `CONTACT_RECIPIENT_EMAIL` in OpenBao, so the address
+ * is never in anything served.
+ *
+ * The cost is understood and accepted: an ATS keys on the email address, so a
+ * record parsed from this PDF has no contact field, and a reader who keeps the
+ * file has to return to the site to reach anyone. Restoring a detail means
+ * putting it back in all three places above, not just this one.
+ */
 
-export const projects: Project[] = [
+/** Order is meaningful: reverse-chronological. Keys index into `cv.jobs`. */
+const JOB_IDS = ['dehn', 'wise-security', 'everis', 'entelgy', 'dominion'] as const;
+
+/** Keys index into `cv.projects`; the rest is technology names and URLs. */
+const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }> = [
   {
     id: 'gpool',
+    kind: 'product',
+    status: 'production',
+    url: 'https://gpool.zigordev.com',
     name: 'gpool',
-    year: '2026',
-    role: 'Solo — platform, API & web',
-    tagline:
-      'A real-time football pool platform: private pools, live scoring, and an auditable trail of every point.',
     stack: ['Next.js', 'NestJS', 'Postgres', 'Kafka'],
-    problem:
-      'A prediction pool needs more than a spreadsheet: authentication, scoring that settles on a schedule, notifications, and a record of why anyone holds the points they do. Every one of those is a service, and standing them up per project does not scale.',
-    approach:
-      'One monorepo with a NestJS API and a Next.js web app, both joining a shared platform rather than owning their own infrastructure. Secrets, translations, the event broker and observability all come from platform-ops; gpool ships only the two containers that are actually its own.',
-    pieces: [
-      {
-        step: '01',
-        title: 'API',
-        text: 'NestJS monolith covering auth, pools and RUM. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.',
-      },
-      {
-        step: '02',
-        title: 'Web',
-        text: 'Next.js App Router in standalone output. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.',
-      },
-      {
-        step: '03',
-        title: 'Delivery',
-        text: 'Images build to ECR on release, a bundle lands in S3, and SSM drives a compose deploy on the shared EC2 host. CI gates on lint, typecheck, coverage, a compose integration smoke, gitleaks, SBOM and a Trivy scan.',
-      },
-    ],
-    decisions: [
-      'Secrets are fetched at boot by a wrapper process, never baked into an image or committed to an env file — a leaked app token exposes one kv path, not the store.',
-      'Email is an event, not a call. The API publishes to a topic and a shared service owns delivery, idempotency and dead-lettering.',
-      'CI regenerates the web API contract from the running API and fails on drift, so the client and server cannot disagree silently.',
-    ],
-    // Add your own figures — deploy times, pool counts, uptime.
-    stats: [],
-    lessons: [],
-    links: [{ label: 'github.com/zigordev/gpool', href: 'https://github.com/zigordev/gpool' }],
-  },
-  {
-    id: 'platform-ops',
-    name: 'platform-ops',
-    year: '2026',
-    role: 'Solo — infrastructure',
-    tagline: 'The shared operations stack every other project attaches to instead of rebuilding.',
-    stack: ['Terraform', 'Docker Compose', 'OpenBao', 'Redpanda'],
-    problem:
-      'Five applications each needed secret storage, translations, an event broker and observability. Duplicating that per repository means five OpenBao instances to unseal and five ways to be inconsistent.',
-    approach:
-      'One ops stack, one external Docker network, and a rule that applications own only their own containers. An app declares which secret path it reads and which topics it uses; everything underneath is shared and versioned in one place.',
-    pieces: [
-      {
-        step: '01',
-        title: 'Ops stack',
-        text: 'OpenBao for secrets, Redpanda for events, Tolgee for translations, and Prometheus, Grafana, Loki, Alloy, Jaeger and an OTel collector for signals — composed locally and in production from the same manifests.',
-      },
-      {
-        step: '02',
-        title: 'Integration seam',
-        text: 'A single external Docker network. An application joins it, resolves services by alias, and needs to know nothing else about the topology.',
-      },
-      {
-        step: '03',
-        title: 'Guardrails',
-        text: 'Commit hooks that scan for secrets, parse every workflow, render every compose file and check Terraform formatting before anything reaches CI.',
-      },
-    ],
-    decisions: [
-      'Per-application OpenBao policies scoped to exactly one kv path, so an app token is useless against any other app.',
-      'The same compose manifests describe local and production, so a local reproduction is a real reproduction.',
-    ],
-    stats: [],
-    lessons: [],
-    links: [
-      {
-        label: 'github.com/zigordev/platform-ops',
-        href: 'https://github.com/zigordev/platform-ops',
-      },
-    ],
-  },
-  {
-    id: 'design-system',
-    name: 'design-system',
-    year: '2026',
-    role: 'Solo — design & code',
-    tagline:
-      'A technology-agnostic token and component library other products share without agreeing on a CSS framework.',
-    stack: ['React', 'CSS custom properties', 'oklch'],
-    problem:
-      'Three products had drifted into three styling technologies — plain CSS classes, Tailwind utilities and CVA variants — and no shared visual language. Picking one framework would have meant rewriting two applications.',
-    approach:
-      'Components are plain React styled only through CSS custom properties, with no Tailwind, no CSS-in-JS and no build step. Any of the three can import them as-is, and each supplies its own theme file rather than editing component source.',
-    pieces: [
-      {
-        step: '01',
-        title: 'Tokens',
-        text: 'Colour, typography, spacing, radius, shadow and motion as oklch-based custom properties, with one neutral default theme.',
-      },
-      {
-        step: '02',
-        title: 'Components',
-        text: 'Primitives grouped by concern — core, forms, feedback, data-display, navigation, overlay, icons — each referencing tokens only, never a literal colour.',
-      },
-      {
-        step: '03',
-        title: 'Themes',
-        text: 'One file per product overriding colour tokens. A full reskin touches zero component files.',
-      },
-    ],
-    decisions: [
-      'Themes override colour only. Shape, type scale and spacing stay on shared base tokens, so every product renders identical geometry and differs solely in paint.',
-      'Vendored into each consumer rather than published as a package — the products are private and a copy keeps the dependency graph flat.',
-    ],
-    stats: [],
-    lessons: [],
-    links: [
-      {
-        label: 'github.com/zigordev/design-system',
-        href: 'https://github.com/zigordev/design-system',
-      },
-    ],
   },
   {
     id: 'trading-bot',
+    kind: 'product',
+    status: 'development',
     name: 'trading-bot',
-    year: '2026',
-    role: 'Solo — Rust & TypeScript',
-    tagline:
-      'A trading platform split between a Rust hot path and a TypeScript control plane with an operator console.',
     stack: ['Rust', 'TypeScript', 'Next.js', 'Postgres'],
-    problem:
-      'A strategy that runs unattended needs two very different things: a fast, predictable execution path, and a supervision surface a human can read at a glance. Building both in one language means compromising one of them.',
-    approach:
-      'Latency-sensitive work lives in Rust crates; orchestration and supervision live in TypeScript. The two halves meet at a control plane, with a Next.js operator console on top.',
-    pieces: [
-      {
-        step: '01',
-        title: 'Rust crates',
-        text: 'Separate crates for market data, the strategy engine, execution, and research backtesting, so the backtest and the live path can share the same strategy code.',
-      },
-      {
-        step: '02',
-        title: 'Control plane',
-        text: 'A TypeScript service coordinating the crates and owning the operational API.',
-      },
-      {
-        step: '03',
-        title: 'Operator console',
-        text: 'A Next.js supervision UI built on Tailwind and Radix, sharing the design system with the other products.',
-      },
-    ],
-    decisions: [
-      'Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery.',
-    ],
-    stats: [],
-    lessons: [],
-    links: [
-      { label: 'github.com/zigordev/trading-bot', href: 'https://github.com/zigordev/trading-bot' },
-    ],
-  },
-  {
-    id: 'notifications',
-    name: 'notifications',
-    year: '2026',
-    role: 'Solo — backend',
-    tagline:
-      'A Kafka-backed email service the other products delegate delivery to, with idempotency and crash recovery built in.',
-    stack: ['NestJS', 'Kafka', 'Postgres', 'Handlebars'],
-    problem:
-      'Every product eventually needs to send mail, and every product that does it inline reinvents retries, deduplication and the question of what happened to a message that never arrived.',
-    approach:
-      'One consumer owns delivery for all of them. Producers publish an intent event and stop caring; the service validates the contract, renders a localised template, sends it, and keeps a durable record of every attempt.',
-    pieces: [
-      {
-        step: '01',
-        title: 'Consumer',
-        text: 'Reads a versioned topic under a stable consumer group and validates every event against an explicit contract, rejecting malformed payloads as non-retryable rather than looping on them.',
-      },
-      {
-        step: '02',
-        title: 'Delivery',
-        text: "Atomic idempotency claims stop duplicate sends, and processing leases let a crashed worker's in-flight messages be picked up rather than stranded.",
-      },
-      {
-        step: '03',
-        title: 'Templates',
-        text: 'Handlebars templates keyed by source application and template id, resolved per locale, with data escaped on render so sender-controlled content cannot inject markup.',
-      },
-    ],
-    decisions: [
-      'Invalid payloads fail as non-retryable and go to a durable dead-letter record, because retrying a malformed message forever is a worse outcome than losing it loudly.',
-      'A versioned topic name, so a contract change is a new topic rather than a silent break for every producer.',
-    ],
-    stats: [],
-    lessons: [],
-    links: [
-      {
-        label: 'github.com/zigordev/notifications',
-        href: 'https://github.com/zigordev/notifications',
-      },
-    ],
   },
   {
     id: 'kini',
+    kind: 'product',
+    status: 'poc',
     name: 'kini',
-    year: '2026',
-    role: 'Solo — API & web',
-    tagline:
-      'The first football pool platform, and the one that taught me what gpool needed to be.',
     stack: ['Next.js', 'NestJS', 'Postgres', 'Tolgee'],
-    problem:
-      'The original attempt at a pool platform: teams, invitations, and scoring, built before there was any shared infrastructure to lean on.',
-    approach:
-      'A NestJS API and Next.js client in one monorepo, with monitoring wired in locally. Much of what it worked out — the compose layout, the Tolgee translation flow, the release and deploy workflows — became the template the later projects started from.',
-    pieces: [
-      {
-        step: '01',
-        title: 'API and web',
-        text: 'NestJS backend and Next.js client, sharing a compose stack and a single set of CI workflows.',
-      },
-      {
-        step: '02',
-        title: 'What carried forward',
-        text: 'The translation workflow, the commit and release automation, and the local-first compose layout were all extracted and reused rather than rebuilt.',
-      },
-    ],
-    decisions: [
-      'Kept as its own repository rather than folded into gpool, so the rewrite could change its mind about the architecture without rewriting history.',
-    ],
-    stats: [],
-    lessons: [],
-    links: [{ label: 'github.com/zigordev/kini', href: 'https://github.com/zigordev/kini' }],
+  },
+  {
+    id: 'platform-ops',
+    kind: 'core',
+    name: 'platform-ops',
+    stack: ['Terraform', 'Docker Compose', 'OpenBao', 'Redpanda'],
+  },
+  {
+    id: 'notifications',
+    kind: 'core',
+    name: 'notifications',
+    stack: ['NestJS', 'Kafka', 'Postgres', 'Handlebars'],
+  },
+  {
+    id: 'design-system',
+    kind: 'core',
+    name: 'design-system',
+    stack: ['React', 'CSS custom properties', 'oklch'],
   },
 ];
 
-export const skillGroups: SkillGroup[] = [
-  {
-    group: 'Languages',
-    note: 'Daily first, then fluent enough to be useful.',
-    items: ['TypeScript', 'Go', 'Python', 'SQL', 'Bash', 'Rust'],
-  },
-  {
-    group: 'Product front-end',
-    note: 'Accessible, fast, no framework religion.',
-    items: ['React', 'SvelteKit', 'Design systems', 'Web performance', 'Testing Library'],
-  },
-  {
-    group: 'Backend & data',
-    note: 'Boring architecture, carefully chosen.',
-    items: ['Postgres', 'Event-driven services', 'gRPC', 'Timescale', 'Redis'],
-  },
-  {
-    group: 'Platform & practice',
-    note: 'How the work reaches production.',
-    items: [
-      'Kubernetes',
-      'Terraform',
-      'CI/CD',
-      'OpenTelemetry',
-      'Incident review',
-      'Technical writing',
-    ],
-  },
+/**
+ * Technology names, so they stay out of the translation store.
+ *
+ * Every entry is backed by something on this CV — a role in the experience
+ * section or a project in the case studies. Nothing is listed for coverage:
+ * a reader who cross-references a skill against the work should find it.
+ */
+const SKILL_ITEMS: string[][] = [
+  ['TypeScript', 'Java', 'JavaScript', 'SQL', 'Rust'],
+  ['React', 'Vue', 'Angular', 'Design systems'],
+  ['Spring Boot', 'NestJS', 'Node.js', 'Microservices', 'Postgres', 'Kafka'],
+  ['Docker', 'Terraform', 'CI/CD', 'Observability'],
 ];
 
-export const education: Education[] = [
-  {
-    degree: 'B.Sc. Mathematics',
-    school: 'UNED',
-    period: '2026 — Present',
-  },
-  {
-    degree: 'B.Sc. Computer Science',
-    school: 'University of the Basque Country',
-    period: '2013 — 2017',
-  },
-];
+/* -------------------------------------------------------------------------- */
+/* Resolution                                                                 */
+/* -------------------------------------------------------------------------- */
 
-export const contactRows: ContactRow[] = [
-  { label: 'Email', value: 'alex@moreno.dev' },
-  { label: 'GitHub', value: 'https://github.com/alexmoreno' },
-  { label: 'LinkedIn', value: 'https://linkedin.com/in/alexmoreno' },
-  { label: 'Phone', value: '+351900000000' },
-];
+type ProjectProse = Pick<
+  Project,
+  'role' | 'tagline' | 'problem' | 'approach' | 'pieces' | 'decisions'
+>;
+
+/** The `cv.*` subtree of the message bundle, as this module expects it. */
+interface CvMessages {
+  identity: {
+    title: string;
+    location: string;
+    headline: string;
+    lede: string;
+    summary: string;
+  };
+  labels: {
+    sections: Record<string, string>;
+    pdf: Record<string, string>;
+    projectKinds: Record<ProjectKind, string>;
+    projectStatuses: Record<ProjectStatus, string>;
+  };
+  languages: LanguageEntry[];
+  diagrams: Diagrams;
+  jobs: Record<string, Omit<Job, never>>;
+  projects: Record<string, ProjectProse>;
+  skills: Record<string, { group: string; note: string }>;
+  education: Record<string, { degree: string; school: string; period: string; detail?: string }>;
+}
+
+/**
+ * Merges the translated copy with the locale-invariant skeleton.
+ *
+ * Throws rather than rendering `undefined` everywhere if `cv.*` is absent:
+ * that only happens when the message files have been overwritten by a Tolgee
+ * pull that does not yet know these keys, and a loud failure names the cause
+ * where a blank CV would not.
+ */
+export function resolveCv(messages: Messages) {
+  const cv = messages.cv as unknown as CvMessages | undefined;
+  if (!cv?.identity) {
+    throw new Error(
+      'Missing `cv.*` translations. Push the CV keys to Tolgee, or restore ' +
+        'apps/ui/messages/*.json — a pull has overwritten them.'
+    );
+  }
+
+  return {
+    identity: { ...person, ...cv.identity },
+    labels: cv.labels,
+    languages: cv.languages,
+    diagrams: cv.diagrams,
+    jobs: JOB_IDS.map((id): Job => cv.jobs[id]),
+    projects: PROJECT_SKELETON.map((skeleton): Project => ({
+      ...skeleton,
+      ...cv.projects[skeleton.id],
+    })),
+    skillGroups: SKILL_ITEMS.map((items, index): SkillGroup => ({
+      items,
+      ...cv.skills[String(index)],
+    })),
+    education: Object.keys(cv.education)
+      .sort()
+      .map((key): Education => cv.education[key]),
+    portrait,
+  };
+}
+
+export type Cv = ReturnType<typeof resolveCv>;
