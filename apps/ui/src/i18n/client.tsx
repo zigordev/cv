@@ -1,59 +1,69 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-import { DEFAULT_LOCALE, LANGUAGE_STORAGE_KEY, isLocale, type Locale } from './config';
+import { LANGUAGE_COOKIE, type Locale } from './config';
 import { createTranslator, type Messages } from './translator';
-
-/**
- * Unlike the other platform apps, the CV bundles every locale client-side and
- * switches in state rather than round-tripping a cookie through the server.
- * The translated surface is UI chrome only — a few dozen short strings — so
- * all three locales together are smaller than one extra request, and the
- * language switch stays instant the way the design calls for.
- */
-const CATALOGUES: Record<Locale, Messages> = {
-  en: en as Messages,
-  es: es as Messages,
-};
 
 type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: ReturnType<typeof createTranslator>;
+  /** The raw bundle — the CV reads structured prose from `cv.*`, not just
+   *  flat lookups, so it needs the tree rather than only the translator. */
+  messages: Messages;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+const COOKIE_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
 
-  // Read after mount, not during render: the server has no access to
-  // localStorage, and seeding state from it directly would desync hydration.
-  useEffect(() => {
-    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (isLocale(stored)) setLocaleState(stored);
-  }, []);
+/**
+ * Locale and messages are resolved on the server and handed down, matching the
+ * other apps. The catalogues are no longer bundled into the client, so what
+ * renders is what the server resolved: Tolgee merged over the committed
+ * message files, with the files alone if Tolgee is unreachable.
+ *
+ * Switching writes a cookie and reloads rather than swapping state in place.
+ * That round trip is the deliberate cost of the server-resolved model — the
+ * client no longer carries a second copy of the translations to switch to.
+ */
+export function I18nProvider({
+  locale,
+  messages,
+  children,
+}: Readonly<{ locale: Locale; messages: Messages; children: React.ReactNode }>) {
+  const setLocale = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
+      document.cookie = `${LANGUAGE_COOKIE}=${next}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
 
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    try {
-      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
-    } catch {
-      // Private mode or a storage-blocked browser: the switch still works for
-      // this session, it just will not be remembered.
-    }
-  }, []);
+      /*
+       * Drop any anchor before reloading.
+       *
+       * `reload()` keeps the URL intact, hash included — so once a reader has
+       * used the rail the address is `…#skills`, and every later language
+       * switch re-jumps there no matter how far they have scrolled since.
+       * Switching language is not navigation and should not move anyone.
+       *
+       * `replaceState` rewrites the current entry without navigating, so the
+       * reload that follows has no anchor to honour and the browser's own
+       * scroll restoration puts the reader back where they were. A reader who
+       * really is at that section stays there — they are scrolled to it — so
+       * this only removes the jump, never the position.
+       */
+      if (globalThis.location.hash) {
+        const { pathname, search } = globalThis.location;
+        globalThis.history.replaceState(null, '', `${pathname}${search}`);
+      }
+      globalThis.location.reload();
+    },
+    [locale]
+  );
 
   const value = useMemo<I18nContextValue>(
-    () => ({ locale, setLocale, t: createTranslator(CATALOGUES[locale]) }),
-    [locale, setLocale]
+    () => ({ locale, setLocale, messages, t: createTranslator(messages) }),
+    [locale, messages, setLocale]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
