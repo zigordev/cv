@@ -1,16 +1,4 @@
 {
-  "contact": {
-    "copyAction": "Copiar {label}",
-    "copyDone": "✓ {label}",
-    "intro": "Respondo en un día y me gusta hablar incluso cuando no estoy buscando — el trabajo de plataforma, las herramientas para desarrolladores y los equipos atascados en su pipeline siempre son interesantes.",
-    "updated": "Actualizado en agosto de 2026 · Hecho con el design system compartido"
-  },
-  "filters": {
-    "all": "Todos",
-    "data": "Datos",
-    "tooling": "Herramientas",
-    "web": "Web"
-  },
   "form": {
     "email": "Tu email",
     "emailInvalid": "Introduce un email válido",
@@ -23,58 +11,18 @@
     "submit": "Enviar mensaje",
     "success": "Gracias — tu mensaje va en camino. Respondo en un día."
   },
-  "intro": {
-    "authorised": "Autorizado en la UE",
-    "eyebrow": "Staff engineer · Lisboa · En remoto",
-    "h1a": "Construyo la infraestructura",
-    "h1b": "discreta que hace rápidos",
-    "h1c": "a los equipos.",
-    "lede": "Once años de código en producción — plataformas de desarrollo, pipelines de build y las migraciones que nadie nota porque nada se rompió. Ahora en Northbound, donde los despliegues pasaron de 51 minutos a 9."
-  },
   "modal": {
     "approach": "Enfoque",
     "architecture": "Arquitectura",
     "caseStudy": "Caso de estudio",
     "close": "Cerrar",
     "decisions": "Decisiones que defiendo",
-    "lessons": "Qué cambiaría",
     "overview": "Resumen",
-    "problem": "El problema",
-    "results": "Resultados"
-  },
-  "nav": {
-    "contact": "Contacto",
-    "education": "Formación",
-    "experience": "Experiencia",
-    "projects": "Proyectos personales",
-    "skills": "Habilidades"
+    "problem": "El problema"
   },
   "rail": {
     "cv": "Curriculum vitae",
     "language": "Idioma",
     "pdf": "Descargar PDF"
-  },
-  "sections": {
-    "contact": {
-      "kicker": "Contacto"
-    },
-    "education": {
-      "kicker": "Formación",
-      "title": "Donde empezaron las discusiones sobre relojes."
-    },
-    "experience": {
-      "kicker": "Experiencia",
-      "title": "Once años, cuatro empresas."
-    },
-    "projects": {
-      "kicker": "Proyectos personales",
-      "titleA": "Cuatro cosas hechas fuera de horario,",
-      "titleB": "ábrelas al completo."
-    },
-    "skills": {
-      "kicker": "Habilidades",
-      "titleA": "Lo destacado es aquello para lo que",
-      "titleB": "quiero que me contraten."
-    }
   }
 }

@@ -8,6 +8,12 @@ export interface ButtonProps
   type?: string;
   /** Passed through when `as` is a link component. */
   href?: string;
+  /** Anchor attributes, valid when `as` renders a link. The runtime already
+   *  spreads unknown props onto the element; these make that usable from
+   *  TypeScript instead of only by accident. */
+  download?: string | boolean;
+  target?: string;
+  rel?: string;
   /** Visual treatment. `danger` for destructive actions. */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   /** `icon` is a square button — pair with a single glyph child. */

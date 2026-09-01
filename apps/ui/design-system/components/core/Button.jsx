@@ -2,7 +2,7 @@ import React from 'react';
 import { injectOnce } from '../_shared/injectStyle.js';
 
 injectOnce('ds-button', `
-.ds-btn{display:inline-flex;text-decoration:none;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--ds-radius-md);font-family:var(--ds-font-sans);font-weight:var(--ds-weight-semibold);white-space:nowrap;cursor:pointer;transition:background var(--ds-duration-fast) var(--ds-ease-out),border-color var(--ds-duration-fast) var(--ds-ease-out),color var(--ds-duration-fast) var(--ds-ease-out),transform var(--ds-duration-fast) var(--ds-ease-out),box-shadow var(--ds-duration-fast) var(--ds-ease-out);}
+.ds-btn{box-sizing:border-box;display:inline-flex;text-decoration:none;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--ds-radius-md);font-family:var(--ds-font-sans);font-weight:var(--ds-weight-semibold);white-space:nowrap;cursor:pointer;transition:background var(--ds-duration-fast) var(--ds-ease-out),border-color var(--ds-duration-fast) var(--ds-ease-out),color var(--ds-duration-fast) var(--ds-ease-out),transform var(--ds-duration-fast) var(--ds-ease-out),box-shadow var(--ds-duration-fast) var(--ds-ease-out);}
 .ds-btn:active:not(:disabled){transform:translateY(1px);}
 .ds-btn:disabled{opacity:.55;cursor:not-allowed;}
 .ds-btn:focus-visible{outline:2px solid var(--ds-color-accent);outline-offset:2px;}
