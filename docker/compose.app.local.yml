@@ -1,0 +1,52 @@
+name: cv-app-local
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+    labels: 'com.docker.compose.project,com.docker.compose.service'
+
+services:
+  cv_web:
+    build:
+      context: ..
+      dockerfile: apps/ui/Dockerfile
+      target: local
+      args:
+        NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:?NEXT_PUBLIC_RELEASE is required}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:?NEXT_PUBLIC_RELEASE is required}
+      OTEL_SERVICE_NAME: cv-web
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OPENBAO_ADDR: http://openbao:8200
+      OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
+      OPENBAO_KV_MOUNT: kv
+      OPENBAO_SECRET_PATH: cv
+      OPENBAO_REQUIRED_KEYS: TOLGEE_API_KEY,CONTACT_RECIPIENT_EMAIL
+      TOLGEE_API_URL: http://tolgee:8080
+      TOLGEE_PROJECT_ID: ${TOLGEE_PROJECT_ID:?TOLGEE_PROJECT_ID is required}
+      NOTIFICATIONS_KAFKA_BROKERS: ${NOTIFICATIONS_KAFKA_BROKERS:-platform-redpanda:9092}
+      NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
+    ports:
+      - '3021:3001'
+    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/ui/server.js']
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/api/health >/dev/null 2>&1 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    logging: *default-logging
+    networks:
+      cv_shared:
+        aliases:
+          - cv-web
+
+networks:
+  cv_shared:
+    name: platform_ops_shared
+    external: true

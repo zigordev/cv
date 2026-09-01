@@ -1,0 +1,171 @@
+name: Deploy AWS App (EC2 Compose)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to deploy (example: v0.1.0)'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-aws-prod-cv
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build + Push + Bundle
+    runs-on: ubuntu-latest
+    environment: production
+
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      web_image: ${{ steps.images.outputs.web_image }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'release' && github.ref || inputs.release_tag }}
+
+      - name: Resolve release tag
+        id: meta
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            raw_tag="${{ github.event.release.tag_name }}"
+          else
+            raw_tag="${{ inputs.release_tag }}"
+          fi
+
+          if [ -z "$raw_tag" ]; then
+            echo "Release tag is empty" >&2
+            exit 1
+          fi
+
+          safe_tag="$(printf '%s' "$raw_tag" | tr '/:@ ' '-' | tr -cd '[:alnum:]._-')"
+          if [ -z "$safe_tag" ]; then
+            echo "Release tag '$raw_tag' became empty after sanitization" >&2
+            exit 1
+          fi
+
+          echo "release_tag=$raw_tag" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$safe_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Validate required deploy variables
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ECR_WEB_REPOSITORY_URI: ${{ vars.AWS_ECR_WEB_REPOSITORY_URI }}
+          AWS_DEPLOY_BUCKET: ${{ vars.AWS_DEPLOY_BUCKET }}
+          AWS_DEPLOY_INSTANCE_ID: ${{ vars.AWS_DEPLOY_INSTANCE_ID }}
+          AWS_SSM_APP_PREFIX: ${{ vars.AWS_SSM_APP_PREFIX }}
+        run: |
+          set -euo pipefail
+          required=(
+            AWS_REGION
+            AWS_ECR_WEB_REPOSITORY_URI
+            AWS_DEPLOY_BUCKET
+            AWS_DEPLOY_INSTANCE_ID
+            AWS_SSM_APP_PREFIX
+          )
+          for name in "${required[@]}"; do
+            if [ -z "$(printenv "$name" || true)" ]; then
+              echo "Missing GitHub environment variable: $name" >&2
+              exit 1
+            fi
+          done
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build + push web image
+        id: images
+        env:
+          WEB_REPO: ${{ vars.AWS_ECR_WEB_REPOSITORY_URI }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          web_image="${WEB_REPO}:${IMAGE_TAG}"
+          docker build \
+            -f apps/ui/Dockerfile \
+            --target prod \
+            --build-arg NEXT_PUBLIC_RELEASE="${RELEASE_TAG}" \
+            -t "$web_image" .
+          docker push "$web_image"
+          echo "web_image=$web_image" >> "$GITHUB_OUTPUT"
+
+      - name: Bundle deploy artifacts to S3
+        env:
+          BUCKET: ${{ vars.AWS_DEPLOY_BUCKET }}
+          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          bundle_dir="$(mktemp -d)"
+          cp docker/compose.app.prod.yml "$bundle_dir/"
+          cp docker/.env.app.prod "$bundle_dir/"
+          tar -czf bundle.tar.gz -C "$bundle_dir" .
+          aws s3 cp bundle.tar.gz "s3://${BUCKET}/cv/${IMAGE_TAG}/bundle.tar.gz"
+
+  deploy:
+    name: Deploy to EC2
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Trigger remote deploy via SSM
+        env:
+          INSTANCE_ID: ${{ vars.AWS_DEPLOY_INSTANCE_ID }}
+          BUCKET: ${{ vars.AWS_DEPLOY_BUCKET }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          WEB_IMAGE: ${{ needs.build-and-push.outputs.web_image }}
+          SSM_APP_PREFIX: ${{ vars.AWS_SSM_APP_PREFIX }}
+        run: |
+          set -euo pipefail
+          command_id="$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy cv ${IMAGE_TAG}" \
+            --parameters commands="[\"bash /opt/platform/deploy-cv.sh '${BUCKET}' '${IMAGE_TAG}' '${WEB_IMAGE}' '${SSM_APP_PREFIX}'\"]" \
+            --query 'Command.CommandId' --output text)"
+
+          echo "SSM command: $command_id"
+          aws ssm wait command-executed \
+            --command-id "$command_id" \
+            --instance-id "$INSTANCE_ID" || true
+
+          status="$(aws ssm get-command-invocation \
+            --command-id "$command_id" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'Status' --output text)"
+
+          aws ssm get-command-invocation \
+            --command-id "$command_id" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardOutputContent' --output text
+
+          if [ "$status" != "Success" ]; then
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardErrorContent' --output text >&2
+            echo "Deploy failed with status: $status" >&2
+            exit 1
+          fi

@@ -1,0 +1,148 @@
+@import '../../design-system/styles.css';
+
+/*
+ * The design adds two typefaces the design system does not ship: a display
+ * serif and a mono. They are loaded through next/font in layout.tsx, which
+ * self-hosts them and exposes the two variables below. Body text stays on the
+ * system's own --ds-font-sans.
+ */
+:root {
+  --cv-font-display: var(--font-instrument-serif), Georgia, serif;
+  --cv-font-mono: var(--font-jetbrains-mono), var(--ds-font-mono);
+
+  /* One-offs that sit on top of the shared spacing scale. */
+  --cv-shell-gap: 72px;
+  --cv-section-gap: 128px;
+  --cv-rail-width: 208px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--ds-color-bg);
+}
+
+body {
+  font-family: var(--ds-font-sans);
+  color: var(--ds-color-fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--ds-color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ds-color-accent-hover);
+}
+
+::selection {
+  background: var(--ds-color-accent-soft);
+}
+
+/* --- Project rows ------------------------------------------------------ */
+
+.cv-row {
+  transition:
+    background var(--ds-duration-base) var(--ds-ease-out),
+    color var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-row:hover,
+.cv-row:focus-visible {
+  background: linear-gradient(90deg, var(--ds-color-accent-soft), transparent 78%);
+}
+
+.cv-row:hover .cv-row-name,
+.cv-row:focus-visible .cv-row-name {
+  color: var(--ds-color-accent);
+}
+
+.cv-row:hover .cv-row-arrow,
+.cv-row:focus-visible .cv-row-arrow {
+  transform: translateX(6px);
+  opacity: 1;
+}
+
+.cv-row-arrow {
+  transition:
+    transform var(--ds-duration-base) var(--ds-ease-out),
+    opacity var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-nav-link:hover {
+  color: var(--ds-color-fg);
+}
+
+.cv-mail:hover {
+  color: var(--ds-color-accent);
+}
+
+/* --- Responsive -------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .cv-shell {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 56px !important;
+    padding: 48px 24px 80px !important;
+  }
+
+  .cv-rail {
+    position: static !important;
+  }
+
+  .cv-main {
+    gap: 88px !important;
+  }
+}
+
+/* --- Print ------------------------------------------------------------- */
+
+/*
+ * Printing swaps documents rather than restyling the screen: `.cv-print` is a
+ * purpose-built, single-column resume (see PrintResume.tsx) and everything
+ * else is removed. Trying to coerce the on-screen layouts into a parseable PDF
+ * meant fighting the sticky rail, the two-column rows and a case-study modal
+ * that never printed at all.
+ */
+.cv-print {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  .cv-screen {
+    display: none !important;
+  }
+
+  .cv-print {
+    display: block !important;
+  }
+
+  /* Links print as plain text — the URL is already written out, and coloured
+     underlined text is noise on paper and in extraction. */
+  .cv-print a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  /* Keep a heading with the entry that follows it. */
+  .cv-print h2,
+  .cv-print h3 {
+    break-after: avoid;
+  }
+}
