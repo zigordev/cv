@@ -1,4 +1,386 @@
 {
+  "cv": {
+    "diagrams": {
+      "designSystem": {
+        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada uno de los cuatro productos.",
+        "caption": "Los temas sobrescriben color y nada más. La forma, la escala tipográfica y el espaciado siguen en tokens compartidos, así que un rediseño completo no toca ningún componente.",
+        "notes": {
+          "components": "solo tokens, sin literales",
+          "products": "cada uno copia el sistema",
+          "themes": "solo sobrescriben color",
+          "tokens": "propiedades oklch"
+        }
+      },
+      "gpool": {
+        "alt": "El camino de una petición en gpool: un front-end en Next.js que llama a una API en NestJS respaldada por Postgres, y la API publica la intención de enviar correo en Kafka para que lo entregue el servicio compartido de notificaciones.",
+        "caption": "La API publica la intención de enviar un correo y sigue adelante. La entrega, la idempotencia y los mensajes muertos son de un servicio que ya se encarga de eso, así que unirse a un grupo nunca espera a una llamada SMTP.",
+        "notes": {
+          "api": "auth, grupos, marcador",
+          "db": "migraciones al arrancar",
+          "events": "el correo es un evento",
+          "handoff": "se encarga del envío",
+          "web": "páginas, en servidor"
+        }
+      },
+      "kini": {
+        "alt": "kini y las prácticas extraídas de él — el flujo de traducciones, la automatización de releases y la disposición de compose — llevadas a los repositorios posteriores.",
+        "caption": "Se mantuvo como repositorio propio en vez de absorberse en gpool, para que la reescritura pudiera cambiar de opinión sobre la arquitectura sin reescribir la historia.",
+        "notes": {
+          "carried": "extraído, no reconstruido",
+          "into": "los repositorios posteriores",
+          "kini": "NestJS y Next.js, un stack"
+        }
+      },
+      "notifications": {
+        "alt": "Un pipeline de entrega que lee un topic versionado a través de un consumidor, reservas de idempotencia y plantillas resueltas por idioma hasta el correo enviado, con los payloads malformados desviados a un registro de mensajes muertos.",
+        "caption": "Los payloads inválidos fallan como no reintentables y acaban en un registro duradero. Reintentar eternamente un mensaje malformado es peor que perderlo haciendo ruido.",
+        "notes": {
+          "consumer": "grupo estable",
+          "deadLetter": "no reintentable",
+          "email": "entregado una vez",
+          "idempotency": "reservas atómicas",
+          "templates": "por idioma, escapadas",
+          "topic": "nombre versionado"
+        }
+      },
+      "platformOps": {
+        "alt": "Cinco aplicaciones — cv, gpool, kini, notifications y trading-bot — conectadas a una única red Docker compartida, que da acceso a tres familias de servicios: secretos y traducciones, eventos y observabilidad.",
+        "caption": "Siete de los once servicios son observabilidad. Esa proporción es deliberada: la parte cara de ejecutar varios servicios pequeños no es ejecutarlos, es poder verlos.",
+        "groups": {
+          "events": "Eventos",
+          "observability": "Observabilidad",
+          "secrets": "Secretos y traducciones"
+        },
+        "notes": {
+          "console": "explorador de topics, local",
+          "grafana": "el único sitio que se mira",
+          "logs": "logs, recogidos del host",
+          "metrics": "métricas, se las recogen",
+          "openbao": "una ruta kv por aplicación",
+          "redpanda": "API de Kafka, sin JVM",
+          "tolgee": "textos de todas las apps",
+          "traces": "trazas, las envía la app"
+        },
+        "seam": "una red docker compartida"
+      },
+      "tradingBot": {
+        "alt": "Un camino rápido en Rust con datos de mercado, estrategia y ejecución, donde la crate de estrategia alimenta además un backtest offline, sobre un plano de control en TypeScript que sirve una consola de operador en Next.js.",
+        "caption": "El backtesting y la ejecución en vivo consumen la misma crate de estrategia, así que un resultado que no se puede reproducir offline es un bug y no un misterio.",
+        "lanes": {
+          "control": "Plano de control",
+          "hot": "Camino rápido en Rust"
+        },
+        "notes": {
+          "backtest": "el mismo código, offline",
+          "console": "interfaz de supervisión",
+          "controlPlane": "API operativa",
+          "execution": "envío de órdenes",
+          "marketData": "ingesta y normalización",
+          "strategy": "una crate, dos usos"
+        }
+      }
+    },
+    "education": {
+      "0": {
+        "degree": "Grado en Matemáticas",
+        "period": "2026 — Actualidad",
+        "school": "UNED"
+      },
+      "1": {
+        "degree": "Grado en Ingeniería Informática",
+        "period": "2013 — 2017",
+        "school": "Universidad del País Vasco"
+      }
+    },
+    "identity": {
+      "headline": "La simplicidad deja espacio para la apreciación",
+      "lede": "Aplicando \"Menos es más\" a la ingeniería de software.",
+      "location": "Bilbao, España",
+      "summary": "Ingeniero de software full stack con el peso en el backend. Nueve años construyendo productos para sectores regulados — banca, seguros, e-movilidad e identidad digital — primero en Java y Spring, ahora en Node y NestJS, junto con las interfaces que se apoyan en ellos.",
+      "title": "Ingeniero de Software"
+    },
+    "jobs": {
+      "dehn": {
+        "bullets": [
+          "Sustitución de una plataforma heredada en Spring y Angular por microservicios en NestJS, ya publicada y funcionando en producción.",
+          "Responsable de la vertical completa en las piezas migradas — los servicios en NestJS y las interfaces en Vue construidas sobre ellos — y no de un solo lado de la interfaz.",
+          "La reescritura eliminó una cantidad importante de deuda técnica acumulada y mejoró el rendimiento de la plataforma."
+        ],
+        "company": "DEHN digital solutions GmbH",
+        "location": "En remoto",
+        "period": "Sep 2022 — Actualidad",
+        "role": "Ingeniero de Software",
+        "summary": "Migración de una plataforma heredada a una arquitectura de microservicios, tanto en los servicios como en las interfaces que los consumen."
+      },
+      "dominion": {
+        "bullets": [
+          "Desarrollo de KYC, reporting regulatorio y scoring de riesgo para una plataforma de cumplimiento usada por bancos y aseguradoras.",
+          "Trabajo sobre todo el stack — un monolito en Spring Boot y la interfaz en React montada sobre él."
+        ],
+        "company": "DOMINION GLOBAL",
+        "location": "Bilbao, España",
+        "period": "May 2017 — Oct 2019",
+        "role": "Desarrollador full stack",
+        "summary": "Desarrollo full stack de Alert, un producto RegTech para el sector de banca y seguros."
+      },
+      "entelgy": {
+        "bullets": [
+          "Servicios en Spring para la plataforma que controla la infraestructura de recarga de vehículos eléctricos."
+        ],
+        "company": "Entelgy",
+        "location": "Bilbao, España",
+        "period": "Nov 2019 — Mar 2021",
+        "role": "Ingeniero de Software",
+        "summary": "Desarrollo backend en Spring bajo una arquitectura de microservicios, para el sector de la e-movilidad."
+      },
+      "everis": {
+        "bullets": [],
+        "company": "everis",
+        "location": "Bilbao, España",
+        "period": "Abr 2021 — Nov 2021",
+        "role": "Ingeniero de Software",
+        "summary": "Desarrollo y despliegue de producto de open banking."
+      },
+      "wise-security": {
+        "bullets": [
+          "Servicios en Java para un proveedor de identidad distribuido, integrados con una aplicación en la blockchain de Solana."
+        ],
+        "company": "Wise Security Global",
+        "location": "En remoto",
+        "period": "Dic 2021 — Ago 2022",
+        "role": "Ingeniero de Software",
+        "summary": "Desarrollo de un proveedor de identidad distribuido basado en blockchain."
+      }
+    },
+    "labels": {
+      "pdf": {
+        "education": "Formación",
+        "experience": "Experiencia",
+        "languages": "Idiomas",
+        "projects": "Proyectos",
+        "skills": "Habilidades",
+        "stack": "Stack",
+        "summary": "Resumen"
+      },
+      "projectKinds": {
+        "core": "Base",
+        "product": "Producto"
+      },
+      "projectStatuses": {
+        "development": "En desarrollo",
+        "poc": "Prueba de concepto",
+        "production": "En producción"
+      },
+      "sections": {
+        "contact": "Contacto",
+        "education": "Formación",
+        "experience": "Experiencia",
+        "languages": "Idiomas",
+        "projects": "Proyectos",
+        "skills": "Habilidades"
+      }
+    },
+    "languages": [
+      {
+        "level": "Nativo",
+        "name": "Español"
+      },
+      {
+        "level": "Nativo",
+        "name": "Euskera"
+      },
+      {
+        "level": "Fluido",
+        "name": "Inglés"
+      }
+    ],
+    "projects": {
+      "design-system": {
+        "approach": "Los componentes son React puro, estilados únicamente con propiedades personalizadas de CSS, sin Tailwind, sin CSS-in-JS y sin paso de compilación. Cualquiera de los tres puede importarlos tal cual, y cada uno aporta su propio fichero de tema en lugar de tocar el código de los componentes.",
+        "decisions": [
+          "Los temas solo sobrescriben color. La forma, la escala tipográfica y el espaciado siguen en tokens base compartidos, de modo que todos los productos renderizan la misma geometría y solo cambian de pintura.",
+          "Se copia dentro de cada consumidor en vez de publicarse como paquete: los productos son privados y una copia mantiene plano el grafo de dependencias."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Color, tipografía, espaciado, radios, sombras y movimiento como propiedades personalizadas basadas en oklch, con un tema neutro por defecto.",
+            "title": "Tokens"
+          },
+          {
+            "step": "02",
+            "text": "Primitivas agrupadas por función — core, formularios, feedback, datos, navegación, overlays, iconos — que solo referencian tokens y nunca un color literal.",
+            "title": "Componentes"
+          },
+          {
+            "step": "03",
+            "text": "Un fichero por producto que sobrescribe los tokens de color. Un rediseño completo no toca ni un solo componente.",
+            "title": "Temas"
+          }
+        ],
+        "problem": "Tres productos habían derivado hacia tres tecnologías de estilos distintas — clases de CSS planas, utilidades de Tailwind y variantes de CVA — sin ningún lenguaje visual común. Elegir un solo framework habría implicado reescribir dos aplicaciones.",
+        "role": "En solitario — diseño y código",
+        "tagline": "Una librería de tokens y componentes agnóstica que tres productos comparten sin ponerse de acuerdo en un framework de CSS."
+      },
+      "gpool": {
+        "approach": "Un monorepo con una API en NestJS y una web en Next.js, ambas conectadas a una plataforma compartida en lugar de mantener su propia infraestructura. Los secretos, las traducciones, el broker de eventos y la observabilidad vienen de platform-ops; gpool solo despliega los dos contenedores que realmente le pertenecen.",
+        "decisions": [
+          "Los secretos se obtienen al arrancar mediante un proceso envoltorio, nunca se hornean en la imagen ni se suben en un fichero de entorno: un token filtrado expone una sola ruta del kv, no todo el almacén.",
+          "El correo es un evento, no una llamada. La API publica en un topic y un servicio compartido se encarga de la entrega, la idempotencia y los mensajes muertos.",
+          "La CI regenera el contrato de la API desde la API en ejecución y falla ante cualquier desviación, para que cliente y servidor no puedan discrepar en silencio."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
+            "title": "API"
+          },
+          {
+            "step": "02",
+            "text": "Next.js App Router con salida standalone. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
+            "title": "Web"
+          },
+          {
+            "step": "03",
+            "text": "Las imágenes se publican en ECR con cada release, el bundle llega a S3 y SSM lanza un despliegue con compose en el host EC2 compartido. La CI exige lint, typecheck, cobertura, un smoke de integración con compose, gitleaks, SBOM y un escaneo con Trivy.",
+            "title": "Entrega"
+          }
+        ],
+        "problem": "Una quiniela necesita más que una hoja de cálculo: autenticación, una puntuación que se resuelve de forma programada, notificaciones y un registro de por qué cada persona tiene los puntos que tiene. Cada una de esas piezas es un servicio, y levantarlas en cada proyecto no escala.",
+        "role": "En solitario — plataforma, API y web",
+        "tagline": "Una plataforma de quinielas de fútbol en tiempo real: grupos privados, puntuación en directo y un registro auditable de cada punto."
+      },
+      "kini": {
+        "approach": "Una API en NestJS y un cliente en Next.js dentro de un monorepo, con monitorización montada en local. Buena parte de lo que resolvió — la disposición de compose, el flujo de traducciones con Tolgee, los workflows de release y despliegue — se convirtió en la plantilla desde la que arrancaron los proyectos posteriores.",
+        "decisions": [
+          "Se mantuvo como repositorio propio en vez de absorberse en gpool, para que la reescritura pudiera cambiar de opinión sobre la arquitectura sin reescribir la historia."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Backend en NestJS y cliente en Next.js, compartiendo un stack de compose y un único conjunto de workflows de CI.",
+            "title": "API y web"
+          },
+          {
+            "step": "02",
+            "text": "El flujo de traducciones, la automatización de commits y releases y la disposición de compose local-first se extrajeron y reutilizaron en lugar de reconstruirse.",
+            "title": "Lo que se llevó adelante"
+          }
+        ],
+        "problem": "El primer intento de plataforma de quinielas: equipos, invitaciones y puntuación, construido antes de que existiera infraestructura compartida en la que apoyarse.",
+        "role": "En solitario — API y web",
+        "tagline": "La primera plataforma de quinielas, y la que me enseñó en qué tenía que convertirse gpool."
+      },
+      "notifications": {
+        "approach": "Un único consumidor se encarga de la entrega para todos. Los productores publican un evento de intención y se desentienden; el servicio valida el contrato, renderiza una plantilla localizada, la envía y guarda un registro duradero de cada intento.",
+        "decisions": [
+          "Los payloads inválidos fallan como no reintentables y acaban en un registro duradero de mensajes muertos, porque reintentar eternamente un mensaje malformado es peor que perderlo haciendo ruido.",
+          "El nombre del topic va versionado, de modo que un cambio de contrato es un topic nuevo y no una rotura silenciosa para cada productor."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Lee un topic versionado bajo un grupo de consumo estable y valida cada evento contra un contrato explícito, rechazando los payloads malformados como no reintentables en lugar de dar vueltas sobre ellos.",
+            "title": "Consumidor"
+          },
+          {
+            "step": "02",
+            "text": "Las reservas atómicas de idempotencia impiden envíos duplicados, y los leases de procesamiento permiten recoger los mensajes en vuelo de un worker caído en vez de dejarlos abandonados.",
+            "title": "Entrega"
+          },
+          {
+            "step": "03",
+            "text": "Plantillas de Handlebars indexadas por aplicación de origen e identificador, resueltas por idioma, con los datos escapados al renderizar para que el contenido que controla el remitente no pueda inyectar marcado.",
+            "title": "Plantillas"
+          }
+        ],
+        "problem": "Todo producto acaba necesitando enviar correo, y todo producto que lo hace en línea reinventa los reintentos, la deduplicación y la pregunta de qué pasó con un mensaje que nunca llegó.",
+        "role": "En solitario — backend",
+        "tagline": "Un servicio de correo sobre Kafka al que el resto de productos delegan la entrega, con idempotencia y recuperación ante caídas de serie."
+      },
+      "platform-ops": {
+        "approach": "Un único stack de operaciones, una red Docker externa y una regla: cada aplicación posee solo sus propios contenedores. La aplicación declara qué ruta de secretos lee y qué topics usa; todo lo que hay debajo es compartido y está versionado en un solo sitio.",
+        "decisions": [
+          "Políticas de OpenBao por aplicación limitadas a una única ruta del kv, de forma que el token de una app no sirve contra ninguna otra.",
+          "Los mismos manifiestos de compose describen local y producción, así que una reproducción local es una reproducción de verdad."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Una sola red Docker externa, platform_ops_shared. La aplicación se une a ella, resuelve por alias cada servicio compartido y no necesita saber nada más de la topología. No hay service mesh ni capa de descubrimiento: unirse a la red es todo el contrato, y por eso cada repositorio la crea antes de arrancar nada.",
+            "title": "El punto de integración"
+          },
+          {
+            "step": "02",
+            "text": "OpenBao guarda todos los secretos detrás de una política limitada a una única ruta del kv, y un wrapper de arranque los recupera y se niega a levantar un contenedor al que le falte una clave que ha declarado. Tolgee guarda los textos, que las aplicaciones descargan como snapshot al construir y mezclan en vivo en cada petición.",
+            "title": "Secretos y traducciones"
+          },
+          {
+            "step": "03",
+            "text": "Redpanda habla la API de Kafka sin JVM ni ZooKeeper, y transporta topics versionados como notification.email.requested.v1: así una aplicación delega un correo en lugar de enviarlo ella misma. Una consola para explorar topics, grupos de consumidores y mensajes corre solo en local; producción no tiene motivo para exponerla.",
+            "title": "Eventos"
+          },
+          {
+            "step": "04",
+            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad.",
+            "title": "Tres señales, tres caminos"
+          },
+          {
+            "step": "05",
+            "text": "Hooks de commit que buscan secretos, parsean cada workflow, renderizan cada fichero de compose y comprueban el formato de Terraform antes de que nada llegue a la CI.",
+            "title": "Barreras de seguridad"
+          }
+        ],
+        "problem": "Cinco aplicaciones necesitaban almacenamiento de secretos, traducciones, un broker de eventos y observabilidad. Duplicar eso en cada repositorio significa cinco instancias de OpenBao que desellar y cinco formas distintas de ser inconsistente.",
+        "role": "En solitario — infraestructura",
+        "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
+      },
+      "trading-bot": {
+        "approach": "El trabajo sensible a la latencia vive en crates de Rust; la orquestación y la supervisión, en TypeScript. Las dos mitades se encuentran en un plano de control, con una consola de operador en Next.js por encima.",
+        "decisions": [
+          "El backtesting y la ejecución en vivo consumen la misma crate de estrategia, así que un resultado que no se puede reproducir offline es un bug y no un misterio."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Crates separadas para datos de mercado, motor de estrategia, ejecución y backtesting de investigación, de forma que el backtest y el camino en vivo comparten el mismo código de estrategia.",
+            "title": "Crates de Rust"
+          },
+          {
+            "step": "02",
+            "text": "Un servicio en TypeScript que coordina las crates y es dueño de la API operativa.",
+            "title": "Plano de control"
+          },
+          {
+            "step": "03",
+            "text": "Una interfaz de supervisión en Next.js sobre Tailwind y Radix, que comparte el design system con el resto de productos.",
+            "title": "Consola de operador"
+          }
+        ],
+        "problem": "Una estrategia que corre sin supervisión necesita dos cosas muy distintas: un camino de ejecución rápido y predecible, y una superficie de supervisión que una persona pueda leer de un vistazo. Construir ambas en el mismo lenguaje obliga a sacrificar una.",
+        "role": "En solitario — Rust y TypeScript",
+        "tagline": "Una plataforma de trading repartida entre un camino crítico en Rust y un plano de control en TypeScript con consola de operador."
+      }
+    },
+    "skills": {
+      "0": {
+        "group": "Lenguajes",
+        "note": "Primero los del día a día, después los que manejo lo suficiente."
+      },
+      "1": {
+        "group": "Front-end de producto",
+        "note": "Accesible, rápido y sin fanatismo de frameworks."
+      },
+      "2": {
+        "group": "Backend y datos",
+        "note": "Arquitectura aburrida, elegida con cuidado."
+      },
+      "3": {
+        "group": "Plataforma y práctica",
+        "note": "Cómo el trabajo llega a producción."
+      }
+    }
+  },
   "form": {
     "email": "Tu email",
     "emailInvalid": "Introduce un email válido",
@@ -23,6 +405,6 @@
   "rail": {
     "cv": "Curriculum vitae",
     "language": "Idioma",
-    "pdf": "Descargar PDF"
+    "pdf": "Descargar CV"
   }
 }
