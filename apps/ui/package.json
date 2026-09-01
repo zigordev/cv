@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3021",
-    "build": "next build",
+    "build": "next build && npm run pdf",
     "start": "next start -H 0.0.0.0",
     "lint": "next lint --no-cache",
     "typecheck": "tsc --noEmit",
     "i18n:pull": "node ./scripts/i18n-pull.mjs",
     "i18n:push": "tolgee push --config ./tolgee.config.cjs --force-mode OVERRIDE",
     "test": "echo \"No web tests configured\"",
-    "clean": "rm -rf .next"
+    "clean": "rm -rf .next",
+    "pdf": "node ./scripts/generate-pdf.mjs"
   },
   "dependencies": {
     "kafkajs": "^2.2.4",
@@ -27,6 +28,7 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.5.10",
     "jszip": "^3.10.1",
+    "playwright-core": "^1.49.1",
     "typescript": "^5.1.3"
   }
 }

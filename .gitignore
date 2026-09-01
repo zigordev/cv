@@ -9,3 +9,6 @@ dist/
 docker/.env.app.local
 coverage/
 artifacts/
+
+# Generated at build time by apps/ui/scripts/generate-pdf.mjs
+apps/ui/public/cv-*.pdf
