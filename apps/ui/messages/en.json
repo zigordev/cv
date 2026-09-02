@@ -1,4 +1,10 @@
 {
+  "contact": {
+    "copyAction": "Copy {label}",
+    "copyDone": "✓ {label}",
+    "intro": "I reply within a day, and I am happy to talk even when I am not looking — platform work, developer tooling, and teams stuck on their build pipeline are always interesting.",
+    "updated": "Updated August 2026 · Built on the shared product design system"
+  },
   "cv": {
     "diagrams": {
       "cv": {
@@ -6,10 +12,10 @@
         "caption": "The same content renders twice: an editorial page for a person, and a single-column document for a parser. Building the PDF at compile time is what keeps its text real rather than a picture of text.",
         "notes": {
           "content": "every word, both locales",
-          "page": "locale resolved server-side",
-          "pdf": "built by Chromium",
           "events": "contact as an event",
-          "handoff": "owns delivery"
+          "handoff": "owns delivery",
+          "page": "locale resolved server-side",
+          "pdf": "built by Chromium"
         }
       },
       "designSystem": {
@@ -111,6 +117,18 @@
       "title": "Software Engineer"
     },
     "jobs": {
+      "cartogram": {
+        "bullets": [
+          "Built the tile pipeline and query layer that let customers render 20M-point datasets interactively.",
+          "Designed the permissions model still in use today: one policy evaluator shared by API, UI and exports.",
+          "Mentored four engineers; two now lead teams."
+        ],
+        "company": "Cartogram",
+        "location": "Bilbao, ES",
+        "period": "2020 — 2023",
+        "role": "Senior Full-Stack Engineer",
+        "summary": "Second engineer on a geospatial analytics product; grew with it from prototype to 4,000 paying seats."
+      },
       "dehn": {
         "bullets": [
           "Replaced a legacy Spring and Angular platform with NestJS microservices, now released and running in production.",
@@ -151,6 +169,39 @@
         "period": "Apr 2021 — Nov 2021",
         "role": "Software Engineer",
         "summary": "Open banking product development and deployment."
+      },
+      "meridian-labs": {
+        "bullets": [
+          "Delivered an insurance claims portal handling 12k claims a month, replacing a paper process.",
+          "Standardised the studio front-end stack and token setup reused on every later project."
+        ],
+        "company": "Meridian Labs",
+        "location": "Berlin, DE",
+        "period": "2017 — 2020",
+        "role": "Full-Stack Engineer",
+        "summary": "Consultancy work: shipped eight client products, mostly in regulated industries."
+      },
+      "northbound": {
+        "bullets": [
+          "Rebuilt CI on remote caching and merge queues: median pipeline 51 min to 9 min, flake rate under 1%.",
+          "Introduced a service template shipping with tracing, dashboards and an on-call runbook by default, so new services reach production in two days instead of three weeks.",
+          "Led the migration of 40 services off a shared Postgres as 11 reversible steps, with zero customer-visible downtime."
+        ],
+        "company": "Northbound",
+        "location": "Remote (Bilbao)",
+        "period": "2023 — Present",
+        "role": "Software Engineer, Developer Platform",
+        "summary": "Own the build, deploy and observability path for 60 engineers across nine product teams."
+      },
+      "studio-vela": {
+        "bullets": [
+          "Built and maintained 20+ client sites; learned to read a stack trace before guessing."
+        ],
+        "company": "Studio Vela",
+        "location": "Bilbao, ES",
+        "period": "2015 — 2017",
+        "role": "Junior Developer",
+        "summary": "First job. Marketing sites, CMS work, and an unreasonable amount of CSS debugging."
       },
       "wise-security": {
         "bullets": [
@@ -207,31 +258,31 @@
     ],
     "projects": {
       "cv": {
-        "role": "Solo — product",
-        "tagline": "This site: a CV that renders itself twice, once for a person and once for a parser.",
-        "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other.",
         "approach": "One source of content, rendered twice. The page is an editorial layout with a case study behind each project; the same data renders a separate single-column document that headless Chromium turns into a PDF during the build, so the parsed version keeps real selectable text rather than a picture of it.",
-        "pieces": [
-          {
-            "step": "01",
-            "title": "Content",
-            "text": "Every word lives in Tolgee under a cv.* namespace — the case studies, the section names and the PDF headings included. What stays in code is only what reads identically in every language: ids, ordering and technology names."
-          },
-          {
-            "step": "02",
-            "title": "The page",
-            "text": "Next.js in standalone output, with the locale resolved on the server from a cookie, then Accept-Language, then the default, so the tab title and the search snippet follow the selected language rather than lagging a request behind it."
-          },
-          {
-            "step": "03",
-            "title": "The PDF",
-            "text": "A separate print document built for extraction — one column, conventional headings, no icons, contact details in plain text — rendered by Chromium during the Docker build, which fails if the file cannot be produced."
-          }
-        ],
         "decisions": [
           "The PDF is generated at build time rather than in the browser. Client-side html-to-PDF libraries rasterise the page, destroying the selectable text the entire ATS layout exists to produce.",
           "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data."
-        ]
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Every word lives in Tolgee under a cv.* namespace — the case studies, the section names and the PDF headings included. What stays in code is only what reads identically in every language: ids, ordering and technology names.",
+            "title": "Content"
+          },
+          {
+            "step": "02",
+            "text": "Next.js in standalone output, with the locale resolved on the server from a cookie, then Accept-Language, then the default, so the tab title and the search snippet follow the selected language rather than lagging a request behind it.",
+            "title": "The page"
+          },
+          {
+            "step": "03",
+            "text": "A separate print document built for extraction — one column, conventional headings, no icons, contact details in plain text — rendered by Chromium during the Docker build, which fails if the file cannot be produced.",
+            "title": "The PDF"
+          }
+        ],
+        "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other.",
+        "role": "Solo — product",
+        "tagline": "This site: a CV that renders itself twice, once for a person and once for a parser."
       },
       "design-system": {
         "approach": "Components are plain React styled only through CSS custom properties, with no Tailwind, no CSS-in-JS and no build step. Any of the three can import them as-is, and each supplies its own theme file rather than editing component source.",
@@ -419,6 +470,12 @@
       }
     }
   },
+  "filters": {
+    "all": "All",
+    "data": "Data",
+    "tooling": "Tooling",
+    "web": "Web apps"
+  },
   "form": {
     "email": "Your email",
     "emailInvalid": "Enter a valid email address",
@@ -431,18 +488,58 @@
     "submit": "Send message",
     "success": "Thanks — your message is on its way. I reply within a day."
   },
+  "intro": {
+    "authorised": "EU authorised",
+    "eyebrow": "Staff engineer · Lisbon · Remote-first",
+    "h1a": "I build the boring",
+    "h1b": "infrastructure that makes",
+    "h1c": "product teams fast.",
+    "lede": "Eleven years in production code — developer platforms, build pipelines, and the kind of migrations nobody notices because nothing broke. Currently at Northbound, where deploys went from 51 minutes to 9."
+  },
   "modal": {
     "approach": "Approach",
     "architecture": "Architecture",
     "caseStudy": "Case study",
     "close": "Close",
     "decisions": "Decisions worth defending",
+    "lessons": "What I would change",
     "overview": "Overview",
-    "problem": "The problem"
+    "problem": "The problem",
+    "results": "Results"
+  },
+  "nav": {
+    "contact": "Contact",
+    "education": "Education",
+    "experience": "Experience",
+    "projects": "Personal projects",
+    "skills": "Skills"
   },
   "rail": {
     "cv": "Curriculum vitae",
     "language": "Language",
     "pdf": "Download CV"
+  },
+  "sections": {
+    "contact": {
+      "kicker": "Contact"
+    },
+    "education": {
+      "kicker": "Education",
+      "title": "Where the clock arguments started."
+    },
+    "experience": {
+      "kicker": "Experience",
+      "title": "Eleven years, four companies."
+    },
+    "projects": {
+      "kicker": "Personal projects",
+      "titleA": "Four things built after hours,",
+      "titleB": "open in full."
+    },
+    "skills": {
+      "kicker": "Skills",
+      "titleA": "Highlighted is what I want",
+      "titleB": "to be hired for."
+    }
   }
 }
