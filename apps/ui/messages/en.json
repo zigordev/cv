@@ -1,8 +1,19 @@
 {
   "cv": {
     "diagrams": {
+      "cv": {
+        "alt": "Tolgee supplying content to a Next.js page, which also renders a PDF built by Chromium, and publishes contact messages to Kafka for the shared notifications service to deliver.",
+        "caption": "The same content renders twice: an editorial page for a person, and a single-column document for a parser. Building the PDF at compile time is what keeps its text real rather than a picture of text.",
+        "notes": {
+          "content": "every word, both locales",
+          "page": "locale resolved server-side",
+          "pdf": "built by Chromium",
+          "events": "contact as an event",
+          "handoff": "owns delivery"
+        }
+      },
       "designSystem": {
-        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into each of the four products.",
+        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into every product.",
         "caption": "Themes override colour and nothing else. Shape, type scale and spacing stay on shared tokens, so a full reskin touches no component file.",
         "notes": {
           "components": "tokens only, no literals",
@@ -44,7 +55,7 @@
         }
       },
       "platformOps": {
-        "alt": "Five applications — cv, gpool, kini, notifications and trading-bot — attached to one shared Docker network, which fronts three families of service: secrets and translations, events, and observability.",
+        "alt": "The products attached to one shared Docker network, which fronts three families of service: secrets and translations, events, and observability.",
         "caption": "Seven of the eleven services are observability. That ratio is deliberate: the expensive part of running several small services is not running them, it is being able to see them.",
         "groups": {
           "events": "Events",
@@ -195,6 +206,33 @@
       }
     ],
     "projects": {
+      "cv": {
+        "role": "Solo — product",
+        "tagline": "This site: a CV that renders itself twice, once for a person and once for a parser.",
+        "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other.",
+        "approach": "One source of content, rendered twice. The page is an editorial layout with a case study behind each project; the same data renders a separate single-column document that headless Chromium turns into a PDF during the build, so the parsed version keeps real selectable text rather than a picture of it.",
+        "pieces": [
+          {
+            "step": "01",
+            "title": "Content",
+            "text": "Every word lives in Tolgee under a cv.* namespace — the case studies, the section names and the PDF headings included. What stays in code is only what reads identically in every language: ids, ordering and technology names."
+          },
+          {
+            "step": "02",
+            "title": "The page",
+            "text": "Next.js in standalone output, with the locale resolved on the server from a cookie, then Accept-Language, then the default, so the tab title and the search snippet follow the selected language rather than lagging a request behind it."
+          },
+          {
+            "step": "03",
+            "title": "The PDF",
+            "text": "A separate print document built for extraction — one column, conventional headings, no icons, contact details in plain text — rendered by Chromium during the Docker build, which fails if the file cannot be produced."
+          }
+        ],
+        "decisions": [
+          "The PDF is generated at build time rather than in the browser. Client-side html-to-PDF libraries rasterise the page, destroying the selectable text the entire ATS layout exists to produce.",
+          "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data."
+        ]
+      },
       "design-system": {
         "approach": "Components are plain React styled only through CSS custom properties, with no Tailwind, no CSS-in-JS and no build step. Any of the three can import them as-is, and each supplies its own theme file rather than editing component source.",
         "decisions": [

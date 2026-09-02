@@ -1,5 +1,6 @@
 'use client';
 
+import { PRODUCT_NAMES } from '@/content/cv';
 import { useCv } from '@/content/useCv';
 import { DiagramFigure, Link, Node } from './primitives';
 
@@ -26,7 +27,7 @@ export function DesignSystemDiagram() {
         y={150}
         w={800}
         h={52}
-        label="cv · gpool · kini · trading-bot"
+        label={PRODUCT_NAMES.join(' · ')}
         note={copy.notes.products}
       />
     </DiagramFigure>

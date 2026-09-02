@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import { CvDiagram } from './CvDiagram';
 import { DesignSystemDiagram } from './DesignSystemDiagram';
 import { GpoolDiagram } from './GpoolDiagram';
 import { KiniDiagram } from './KiniDiagram';
@@ -15,6 +16,7 @@ import { TradingBotDiagram } from './TradingBotDiagram';
  * module imports the component tree it is supposed to be independent of.
  */
 export const PROJECT_DIAGRAMS: Record<string, ComponentType> = {
+  cv: CvDiagram,
   gpool: GpoolDiagram,
   'platform-ops': PlatformOpsDiagram,
   'design-system': DesignSystemDiagram,

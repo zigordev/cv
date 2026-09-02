@@ -1,5 +1,6 @@
 'use client';
 
+import { PRODUCT_NAMES } from '@/content/cv';
 import { useCv } from '@/content/useCv';
 import { DiagramFigure, Entry, Link, svgLane, svgName } from './primitives';
 
@@ -17,10 +18,16 @@ import { DiagramFigure, Entry, Link, svgLane, svgName } from './primitives';
  * neighbours have room to spare says so faster than a sentence would.
  */
 
-const APPS = ['cv', 'gpool', 'kini', 'notifications', 'trading-bot'] as const;
-
-const APP_W = 162;
-const APP_PITCH = 174.5;
+/*
+ * The row is the products, taken from the project list rather than typed out
+ * here, so adding a product cannot leave the diagram disagreeing with the page
+ * above it. Widths are derived for the same reason: the row fills 860 whatever
+ * the count turns out to be.
+ */
+const APPS = PRODUCT_NAMES;
+const APP_GAP = 12.5;
+const APP_W = (860 - (APPS.length - 1) * APP_GAP) / APPS.length;
+const APP_PITCH = APP_W + APP_GAP;
 const SEAM_TOP = 96;
 const SEAM_H = 38;
 const PANEL_TOP = 190;
