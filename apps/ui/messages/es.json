@@ -1,4 +1,10 @@
 {
+  "contact": {
+    "copyAction": "Copiar {label}",
+    "copyDone": "✓ {label}",
+    "intro": "Respondo en un día y me gusta hablar incluso cuando no estoy buscando — el trabajo de plataforma, las herramientas para desarrolladores y los equipos atascados en su pipeline siempre son interesantes.",
+    "updated": "Actualizado en agosto de 2026 · Hecho con el design system compartido"
+  },
   "cv": {
     "diagrams": {
       "cv": {
@@ -6,10 +12,10 @@
         "caption": "El mismo contenido se renderiza dos veces: una página editorial para una persona y un documento a una columna para un parser. Generar el PDF en el build es lo que mantiene su texto real y no una imagen de texto.",
         "notes": {
           "content": "cada palabra, dos idiomas",
-          "page": "idioma resuelto en servidor",
-          "pdf": "generado por Chromium",
           "events": "el contacto es un evento",
-          "handoff": "se encarga del envío"
+          "handoff": "se encarga del envío",
+          "page": "idioma resuelto en servidor",
+          "pdf": "generado por Chromium"
         }
       },
       "designSystem": {
@@ -111,6 +117,18 @@
       "title": "Ingeniero de Software"
     },
     "jobs": {
+      "cartogram": {
+        "bullets": [
+          "Construí el pipeline de teselas y la capa de consultas que permitieron a los clientes explorar conjuntos de 20 millones de puntos de forma interactiva.",
+          "Diseñé el modelo de permisos que sigue en uso: un único evaluador de políticas compartido por API, interfaz y exportaciones.",
+          "Mentoricé a cuatro ingenieros; dos lideran equipos hoy."
+        ],
+        "company": "Cartogram",
+        "location": "Bilbao, ES",
+        "period": "2020 — 2023",
+        "role": "Ingeniero Full-Stack Senior",
+        "summary": "Segundo ingeniero de un producto de análisis geoespacial; crecí con él desde el prototipo hasta las 4.000 licencias de pago."
+      },
       "dehn": {
         "bullets": [
           "Sustitución de una plataforma heredada en Spring y Angular por microservicios en NestJS, ya publicada y funcionando en producción.",
@@ -151,6 +169,39 @@
         "period": "Abr 2021 — Nov 2021",
         "role": "Ingeniero de Software",
         "summary": "Desarrollo y despliegue de producto de open banking."
+      },
+      "meridian-labs": {
+        "bullets": [
+          "Entregué un portal de siniestros que gestiona 12.000 partes al mes y sustituyó un proceso en papel.",
+          "Estandaricé el stack de front-end del estudio y la configuración de tokens que se reutilizó en todos los proyectos posteriores."
+        ],
+        "company": "Meridian Labs",
+        "location": "Berlín, DE",
+        "period": "2017 — 2020",
+        "role": "Ingeniero Full-Stack",
+        "summary": "Trabajo de consultoría: entregué ocho productos de cliente, en su mayoría en sectores regulados."
+      },
+      "northbound": {
+        "bullets": [
+          "Reconstruí la CI sobre caché remota y colas de merge: pipeline mediano de 51 a 9 minutos, con menos de un 1% de tests inestables.",
+          "Introduje una plantilla de servicio que incluye trazas, dashboards y un runbook de guardia por defecto, de modo que un servicio nuevo llega a producción en dos días en lugar de tres semanas.",
+          "Dirigí la migración de 40 servicios fuera de un Postgres compartido en 11 pasos reversibles, sin caídas visibles para el cliente."
+        ],
+        "company": "Northbound",
+        "location": "En remoto (Bilbao)",
+        "period": "2023 — Actualidad",
+        "role": "Ingeniero de Software, Plataforma de Desarrollo",
+        "summary": "Responsable del camino de build, despliegue y observabilidad para 60 personas repartidas en nueve equipos de producto."
+      },
+      "studio-vela": {
+        "bullets": [
+          "Construí y mantuve más de 20 sitios de cliente; aprendí a leer una traza de error antes de ponerme a adivinar."
+        ],
+        "company": "Studio Vela",
+        "location": "Bilbao, ES",
+        "period": "2015 — 2017",
+        "role": "Desarrollador Junior",
+        "summary": "Primer trabajo. Webs de marketing, gestores de contenido y una cantidad poco razonable de depuración de CSS."
       },
       "wise-security": {
         "bullets": [
@@ -207,31 +258,31 @@
     ],
     "projects": {
       "cv": {
-        "role": "En solitario — producto",
-        "tagline": "Este sitio: un CV que se renderiza dos veces, una para una persona y otra para un parser.",
-        "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro.",
         "approach": "Una única fuente de contenido, renderizada dos veces. La página es una maquetación editorial con un caso de estudio detrás de cada proyecto; los mismos datos generan un documento aparte a una sola columna que Chromium convierte en PDF durante el build, de modo que la versión que se parsea conserva texto real y no una imagen de texto.",
-        "pieces": [
-          {
-            "step": "01",
-            "title": "Contenido",
-            "text": "Cada palabra vive en Tolgee bajo el espacio cv.*: los casos de estudio, los nombres de sección y los encabezados del PDF incluidos. En el código solo queda lo que se lee igual en todos los idiomas: identificadores, orden y nombres de tecnologías."
-          },
-          {
-            "step": "02",
-            "title": "La página",
-            "text": "Next.js con salida standalone y el idioma resuelto en el servidor a partir de una cookie, después Accept-Language y después el valor por defecto, para que el título de la pestaña y el resumen en buscadores sigan al idioma elegido en vez de ir una petición por detrás."
-          },
-          {
-            "step": "03",
-            "title": "El PDF",
-            "text": "Un documento de impresión aparte pensado para la extracción — una columna, encabezados convencionales, sin iconos, contacto en texto plano — generado por Chromium durante el build de Docker, que falla si el fichero no se puede producir."
-          }
-        ],
         "decisions": [
           "El PDF se genera en el build y no en el navegador. Las librerías de html-a-PDF del lado del cliente rasterizan la página y destruyen el texto seleccionable que justifica toda la maquetación pensada para ATS.",
           "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados."
-        ]
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Cada palabra vive en Tolgee bajo el espacio cv.*: los casos de estudio, los nombres de sección y los encabezados del PDF incluidos. En el código solo queda lo que se lee igual en todos los idiomas: identificadores, orden y nombres de tecnologías.",
+            "title": "Contenido"
+          },
+          {
+            "step": "02",
+            "text": "Next.js con salida standalone y el idioma resuelto en el servidor a partir de una cookie, después Accept-Language y después el valor por defecto, para que el título de la pestaña y el resumen en buscadores sigan al idioma elegido en vez de ir una petición por detrás.",
+            "title": "La página"
+          },
+          {
+            "step": "03",
+            "text": "Un documento de impresión aparte pensado para la extracción — una columna, encabezados convencionales, sin iconos, contacto en texto plano — generado por Chromium durante el build de Docker, que falla si el fichero no se puede producir.",
+            "title": "El PDF"
+          }
+        ],
+        "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro.",
+        "role": "En solitario — producto",
+        "tagline": "Este sitio: un CV que se renderiza dos veces, una para una persona y otra para un parser."
       },
       "design-system": {
         "approach": "Los componentes son React puro, estilados únicamente con propiedades personalizadas de CSS, sin Tailwind, sin CSS-in-JS y sin paso de compilación. Cualquiera de los tres puede importarlos tal cual, y cada uno aporta su propio fichero de tema en lugar de tocar el código de los componentes.",
@@ -419,6 +470,12 @@
       }
     }
   },
+  "filters": {
+    "all": "Todos",
+    "data": "Datos",
+    "tooling": "Herramientas",
+    "web": "Web"
+  },
   "form": {
     "email": "Tu email",
     "emailInvalid": "Introduce un email válido",
@@ -431,18 +488,58 @@
     "submit": "Enviar mensaje",
     "success": "Gracias — tu mensaje va en camino. Respondo en un día."
   },
+  "intro": {
+    "authorised": "Autorizado en la UE",
+    "eyebrow": "Staff engineer · Lisboa · En remoto",
+    "h1a": "Construyo la infraestructura",
+    "h1b": "discreta que hace rápidos",
+    "h1c": "a los equipos.",
+    "lede": "Once años de código en producción — plataformas de desarrollo, pipelines de build y las migraciones que nadie nota porque nada se rompió. Ahora en Northbound, donde los despliegues pasaron de 51 minutos a 9."
+  },
   "modal": {
     "approach": "Enfoque",
     "architecture": "Arquitectura",
     "caseStudy": "Caso de estudio",
     "close": "Cerrar",
     "decisions": "Decisiones que defiendo",
+    "lessons": "Qué cambiaría",
     "overview": "Resumen",
-    "problem": "El problema"
+    "problem": "El problema",
+    "results": "Resultados"
+  },
+  "nav": {
+    "contact": "Contacto",
+    "education": "Formación",
+    "experience": "Experiencia",
+    "projects": "Proyectos personales",
+    "skills": "Habilidades"
   },
   "rail": {
     "cv": "Curriculum vitae",
     "language": "Idioma",
     "pdf": "Descargar CV"
+  },
+  "sections": {
+    "contact": {
+      "kicker": "Contacto"
+    },
+    "education": {
+      "kicker": "Formación",
+      "title": "Donde empezaron las discusiones sobre relojes."
+    },
+    "experience": {
+      "kicker": "Experiencia",
+      "title": "Once años, cuatro empresas."
+    },
+    "projects": {
+      "kicker": "Proyectos personales",
+      "titleA": "Cuatro cosas hechas fuera de horario,",
+      "titleB": "ábrelas al completo."
+    },
+    "skills": {
+      "kicker": "Habilidades",
+      "titleA": "Lo destacado es aquello para lo que",
+      "titleB": "quiero que me contraten."
+    }
   }
 }
