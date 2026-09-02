@@ -122,6 +122,10 @@ export interface PlatformOpsDiagramCopy extends DiagramCopy {
   };
 }
 
+export interface CvDiagramCopy extends DiagramCopy {
+  notes: { content: string; page: string; pdf: string; events: string; handoff: string };
+}
+
 export interface GpoolDiagramCopy extends DiagramCopy {
   notes: { web: string; api: string; db: string; events: string; handoff: string };
 }
@@ -158,6 +162,7 @@ export interface KiniDiagramCopy extends DiagramCopy {
 }
 
 export interface Diagrams {
+  cv: CvDiagramCopy;
   platformOps: PlatformOpsDiagramCopy;
   gpool: GpoolDiagramCopy;
   designSystem: DesignSystemDiagramCopy;
@@ -199,6 +204,13 @@ const JOB_IDS = ['dehn', 'wise-security', 'everis', 'entelgy', 'dominion'] as co
 /** Keys index into `cv.projects`; the rest is technology names and URLs. */
 const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }> = [
   {
+    id: 'cv',
+    kind: 'product',
+    status: 'production',
+    name: 'cv',
+    stack: ['Next.js', 'Tolgee', 'OpenBao', 'Kafka'],
+  },
+  {
     id: 'gpool',
     kind: 'product',
     status: 'production',
@@ -239,6 +251,18 @@ const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }
     stack: ['React', 'CSS custom properties', 'oklch'],
   },
 ];
+
+/**
+ * The products, by name, derived rather than listed.
+ *
+ * The architecture diagrams draw this set — the applications sitting on the
+ * shared platform, and the products that vendor the design system — so adding a
+ * product here puts it into the diagrams without editing any of them. Hardcoded
+ * name lists are how a diagram comes to disagree with the page above it.
+ */
+export const PRODUCT_NAMES: string[] = PROJECT_SKELETON.filter(
+  (project) => project.kind === 'product'
+).map((project) => project.name);
 
 /**
  * Technology names, so they stay out of the translation store.

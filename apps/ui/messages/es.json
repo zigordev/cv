@@ -1,8 +1,19 @@
 {
   "cv": {
     "diagrams": {
+      "cv": {
+        "alt": "Tolgee alimentando de contenido a una página en Next.js, que además genera un PDF construido por Chromium y publica los mensajes de contacto en Kafka para que los entregue el servicio compartido de notificaciones.",
+        "caption": "El mismo contenido se renderiza dos veces: una página editorial para una persona y un documento a una columna para un parser. Generar el PDF en el build es lo que mantiene su texto real y no una imagen de texto.",
+        "notes": {
+          "content": "cada palabra, dos idiomas",
+          "page": "idioma resuelto en servidor",
+          "pdf": "generado por Chromium",
+          "events": "el contacto es un evento",
+          "handoff": "se encarga del envío"
+        }
+      },
       "designSystem": {
-        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada uno de los cuatro productos.",
+        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada producto.",
         "caption": "Los temas sobrescriben color y nada más. La forma, la escala tipográfica y el espaciado siguen en tokens compartidos, así que un rediseño completo no toca ningún componente.",
         "notes": {
           "components": "solo tokens, sin literales",
@@ -44,7 +55,7 @@
         }
       },
       "platformOps": {
-        "alt": "Cinco aplicaciones — cv, gpool, kini, notifications y trading-bot — conectadas a una única red Docker compartida, que da acceso a tres familias de servicios: secretos y traducciones, eventos y observabilidad.",
+        "alt": "Los productos conectados a una única red Docker compartida, que da acceso a tres familias de servicios: secretos y traducciones, eventos y observabilidad.",
         "caption": "Siete de los once servicios son observabilidad. Esa proporción es deliberada: la parte cara de ejecutar varios servicios pequeños no es ejecutarlos, es poder verlos.",
         "groups": {
           "events": "Eventos",
@@ -195,6 +206,33 @@
       }
     ],
     "projects": {
+      "cv": {
+        "role": "En solitario — producto",
+        "tagline": "Este sitio: un CV que se renderiza dos veces, una para una persona y otra para un parser.",
+        "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro.",
+        "approach": "Una única fuente de contenido, renderizada dos veces. La página es una maquetación editorial con un caso de estudio detrás de cada proyecto; los mismos datos generan un documento aparte a una sola columna que Chromium convierte en PDF durante el build, de modo que la versión que se parsea conserva texto real y no una imagen de texto.",
+        "pieces": [
+          {
+            "step": "01",
+            "title": "Contenido",
+            "text": "Cada palabra vive en Tolgee bajo el espacio cv.*: los casos de estudio, los nombres de sección y los encabezados del PDF incluidos. En el código solo queda lo que se lee igual en todos los idiomas: identificadores, orden y nombres de tecnologías."
+          },
+          {
+            "step": "02",
+            "title": "La página",
+            "text": "Next.js con salida standalone y el idioma resuelto en el servidor a partir de una cookie, después Accept-Language y después el valor por defecto, para que el título de la pestaña y el resumen en buscadores sigan al idioma elegido en vez de ir una petición por detrás."
+          },
+          {
+            "step": "03",
+            "title": "El PDF",
+            "text": "Un documento de impresión aparte pensado para la extracción — una columna, encabezados convencionales, sin iconos, contacto en texto plano — generado por Chromium durante el build de Docker, que falla si el fichero no se puede producir."
+          }
+        ],
+        "decisions": [
+          "El PDF se genera en el build y no en el navegador. Las librerías de html-a-PDF del lado del cliente rasterizan la página y destruyen el texto seleccionable que justifica toda la maquetación pensada para ATS.",
+          "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados."
+        ]
+      },
       "design-system": {
         "approach": "Los componentes son React puro, estilados únicamente con propiedades personalizadas de CSS, sin Tailwind, sin CSS-in-JS y sin paso de compilación. Cualquiera de los tres puede importarlos tal cual, y cada uno aporta su propio fichero de tema en lugar de tocar el código de los componentes.",
         "decisions": [
