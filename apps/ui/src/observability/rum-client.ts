@@ -106,8 +106,7 @@ class RumClient {
 
     this.observe('largest-contentful-paint', (entries) => {
       const last = entries.at(-1) as
-        | (PerformanceEntry & { renderTime?: number; loadTime?: number })
-        | undefined;
+        (PerformanceEntry & { renderTime?: number; loadTime?: number }) | undefined;
       if (!last) return;
       this.record({
         type: 'performance',
@@ -199,8 +198,7 @@ class RumClient {
 
     window.addEventListener('load', () => {
       const nav = performance.getEntriesByType('navigation')[0] as
-        | PerformanceNavigationTiming
-        | undefined;
+        PerformanceNavigationTiming | undefined;
       const loadTime = nav ? nav.loadEventEnd - nav.startTime : 0;
       if (loadTime > SLOW_LOAD_MS) {
         this.record({ type: 'frustration', name: 'Slow Page Load', value: loadTime });
