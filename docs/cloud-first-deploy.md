@@ -145,7 +145,7 @@ It receives four arguments — deploy bucket, image tag, the fully qualified web
 2. `docker login` to ECR and pull the web image
 3. read `OPENBAO_TOKEN` from `<ssm-prefix>/OPENBAO_TOKEN` with `--with-decryption`
 4. run `docker compose -f compose.app.prod.yml --env-file .env.app.prod up -d` with `CV_WEB_IMAGE` and `OPENBAO_TOKEN` set
-5. wait for `/api/health` on the container and roll back on failure
+5. wait for `/health` on the container and roll back on failure
 
 ## 9. Deploy
 
@@ -158,7 +158,7 @@ The workflow builds and pushes the web image, uploads a bundle of the prod compo
 ## 10. Verify
 
 ```bash
-curl -sf https://<cv-hostname>/api/health
+curl -sf https://<cv-hostname>/health
 ```
 
 Expect `{"status":"ok","release":"v0.1.0"}` with the released tag, which confirms the deployed image is the one you expect.
