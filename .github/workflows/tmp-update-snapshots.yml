@@ -1,0 +1,23 @@
+name: TEMP Update Visual Snapshots
+on:
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v5.1.0
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+        working-directory: apps/ui
+      - run: npm run build
+        working-directory: apps/ui
+      - run: npx playwright test --update-snapshots --project=chromium
+        working-directory: apps/ui
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: updated-snapshots
+          path: apps/ui/e2e/**/*.png
