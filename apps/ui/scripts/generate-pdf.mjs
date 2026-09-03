@@ -58,7 +58,7 @@ async function waitForServer(timeoutMs = 60_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
-      const response = await fetch(`${ORIGIN}/api/health`);
+      const response = await fetch(`${ORIGIN}/health`);
       if (response.ok) return true;
     } catch {
       // not up yet

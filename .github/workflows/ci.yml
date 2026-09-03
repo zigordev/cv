@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -48,7 +48,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
@@ -69,7 +69,7 @@ jobs:
         run: |
           docker run -d --name cv-web -p 3001:3001 cv-web:ci node apps/ui/server.js
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:3001/api/health > /dev/null; then
+            if curl -sf http://localhost:3001/health > /dev/null; then
               echo "web is up"; exit 0
             fi
             sleep 2
@@ -81,7 +81,7 @@ jobs:
       - name: Smoke probes
         run: |
           set -euo pipefail
-          curl -sf http://localhost:3001/api/health | grep -q '"status":"ok"'
+          curl -sf http://localhost:3001/health | grep -q '"status":"ok"'
           body="$(curl -sf http://localhost:3001/)"
           # The CV must be readable in the server-rendered HTML, not only after
           # hydration — this is what keeps it indexable and printable.
@@ -96,6 +96,46 @@ jobs:
       - name: Stop container
         if: always()
         run: docker rm -f cv-web || true
+
+  e2e-a11y:
+    name: E2E, accessibility and performance budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The estate's pilot for Playwright, axe and performance budgets. cv is the
+    # smallest public surface and the one product whose whole job is being read
+    # by someone else, so it is where the rules get proven before they move to
+    # gpool, kini and the operator console.
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: HUSKY=0 npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/ui
+
+      - name: Build
+        run: npm run build
+
+      # Playwright starts the server itself, so there is no compose step and no
+      # port to keep in sync between the workflow and the config.
+      - name: Run accessibility and performance suite
+        run: npm run e2e
+        working-directory: apps/ui
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: playwright-report
+          path: apps/ui/playwright-report
+          if-no-files-found: ignore
 
   security-supply-chain:
     name: Security + Supply Chain
@@ -112,6 +152,12 @@ jobs:
 
       - name: Install
         run: HUSKY=0 npm ci
+
+      # A copyleft licence arriving through a transitive dependency can oblige
+      # you to publish source you never intended to. Checked on every build
+      # because the dangerous moment is when a licence *changes*.
+      - name: Licence check (prod dependencies)
+        run: node ./scripts/check-licences.mjs .
 
       - name: Audit dependencies (prod only, high+)
         run: npm run audit:prod:gate
@@ -153,3 +199,51 @@ jobs:
           trivyignores: .trivyignore
           vuln-type: os,library
           severity: HIGH,CRITICAL
+
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    # Semgrep rather than CodeQL: CodeQL code scanning on a *private* repository
+    # requires GitHub Code Security, a paid add-on. The CodeQL workflow beside
+    # this one is gated on `!repository.private` for that reason and never runs.
+    # Semgrep needs no add-on, so this is the job that actually scans.
+    #
+    # Findings fail the build and appear in the job log. Uploading SARIF to the
+    # Security tab needs the same paid add-on, so the log is the report.
+    #
+    # Excluded rules, each reviewed rather than waved through:
+    #   missing-user: container hardening — backlog
+    #   missing-user-entrypoint: container hardening — backlog
+    #   writable-filesystem-service: container hardening — backlog
+    #   no-new-privileges: container hardening — backlog
+    #   ifs-tampering: IFS is saved and restored around the loop
+    #   detected-generic-secret: entropy heuristic; gitleaks already covers secrets
+    #   prototype-pollution-loop: read-only tree walks, guarded with hasOwnProperty; no assignment
+    #   incomplete-sanitization: stripping '%' from a formatted percentage, not sanitisation
+    #   detect-non-literal-regexp: locale comes from a fixed list, in a build script
+    #   aws-subnet-has-public-ip-address: single public host by design; there is no NAT gateway
+    container:
+      image: semgrep/semgrep:1.99.0
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Scan
+        # `semgrep scan`, not `semgrep ci`: the latter expects a Semgrep AppSec
+        # Platform token and behaves differently without one. `--error` is what
+        # turns a finding into a failed job rather than a printed note.
+        run: |
+          semgrep scan \
+            --config p/default \
+            --config p/secrets \
+            --exclude-rule dockerfile.security.missing-user.missing-user \
+            --exclude-rule dockerfile.security.missing-user-entrypoint.missing-user-entrypoint \
+            --exclude-rule yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service \
+            --exclude-rule yaml.docker-compose.security.no-new-privileges.no-new-privileges \
+            --exclude-rule bash.lang.security.ifs-tampering.ifs-tampering \
+            --exclude-rule generic.secrets.security.detected-generic-secret.detected-generic-secret \
+            --exclude-rule javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop \
+            --exclude-rule javascript.lang.security.audit.incomplete-sanitization.incomplete-sanitization \
+            --exclude-rule javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp \
+            --exclude-rule terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address \
+            --error \
+            --metrics=off

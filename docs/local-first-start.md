@@ -146,12 +146,12 @@ npm run local:up
 4. pull Tolgee snapshots into `apps/ui/messages/`
 5. build and start the `cv_web` container
 
-The app is then on `http://localhost:3021`, with `http://localhost:3021/api/health` as the liveness probe.
+The app is then on `http://localhost:3021`, with `http://localhost:3021/health` as the liveness probe.
 
 ## 9. Verify
 
 ```bash
-curl -sf http://localhost:3021/api/health
+curl -sf http://localhost:3021/health
 ```
 
 Expect `{"status":"ok","release":"dev"}`.

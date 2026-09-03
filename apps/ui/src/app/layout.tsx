@@ -6,6 +6,7 @@ import { getLocale, getMessages } from '@/i18n/server';
 import { resolveCv } from '@/content/cv';
 
 import './globals.css';
+import { RumProvider } from '@/observability/RumProvider';
 
 // Variable, not fixed cuts. The design system's weight tokens are 400 / 550 /
 // 650 / 800; requesting static 400/500/600/800 meant 550 and 650 were never
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        <RumProvider />
         <script
           type="application/ld+json"
           // Serialised from a literal defined above — no user input reaches this.

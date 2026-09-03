@@ -9,6 +9,8 @@ x-logging: &default-logging
 
 services:
   cv_web:
+    security_opt:
+      - no-new-privileges:true
     image: ${CV_WEB_IMAGE:?CV_WEB_IMAGE is required}
     restart: unless-stopped
     environment:
@@ -30,7 +32,7 @@ services:
       - '3021:3001'
     command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/ui/server.js']
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/api/health >/dev/null 2>&1 || exit 1']
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1 || exit 1']
       interval: 10s
       timeout: 5s
       retries: 12
