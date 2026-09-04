@@ -15,6 +15,13 @@ updates:
       default-days: 7
     open-pull-requests-limit: 5
     groups:
+      # react and react-dom must move together — a version skew between them
+      # breaks JSX typing (this exact failure is why this group exists: PR #9
+      # bumped react alone, to 19, while react-dom sat separately at 18 in
+      # PR #7). Ungrouped because it's a major bump, which neither
+      # dev-dependencies nor production-patch below covers.
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       dev-dependencies:
         dependency-type: development
         update-types: [minor, patch]
