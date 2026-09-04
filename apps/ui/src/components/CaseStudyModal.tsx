@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 import { Button } from '@ds/components/core/Button.jsx';
@@ -25,9 +25,13 @@ export function CaseStudyModal({
   const [tab, setTab] = useState<Tab>('overview');
 
   // Every open starts on Overview, including reopening the same project.
-  useEffect(() => {
+  // Adjusted during render rather than in an effect, per
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevProject, setPrevProject] = useState(project);
+  if (project !== prevProject) {
+    setPrevProject(project);
     if (project) setTab('overview');
-  }, [project]);
+  }
 
   if (!project) return null;
 
