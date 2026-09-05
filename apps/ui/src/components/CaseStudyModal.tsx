@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
-import { Button } from '@ds/components/core/Button.jsx';
-import { Modal } from '@ds/components/overlay/Modal.jsx';
-import { SegmentedControl } from '@ds/components/navigation/SegmentedControl.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { Modal } from 'design-system/components/overlay/Modal.jsx';
+import { SegmentedControl } from 'design-system/components/navigation/SegmentedControl.jsx';
 
 import { PROJECT_DIAGRAMS } from '@/components/diagrams';
 import { ProjectTags } from '@/components/ProjectTags';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge } from '@ds/components/feedback/Badge.jsx';
+import { Badge } from 'design-system/components/feedback/Badge.jsx';
 
 import type { Project, ProjectKind, ProjectStatus } from '@/content/cv';
 import { useCv } from '@/content/useCv';
