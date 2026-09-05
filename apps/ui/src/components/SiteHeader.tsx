@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 
-import { Button } from '@ds/components/core/Button.jsx';
-import { Flag } from '@ds/components/icons/Flag.jsx';
-import { Icon } from '@ds/components/icons/Icon.jsx';
-import { Menu, MenuItem } from '@ds/components/overlay/Menu.jsx';
-import { Modal } from '@ds/components/overlay/Modal.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { Flag } from 'design-system/components/icons/Flag.jsx';
+import { Icon } from 'design-system/components/icons/Icon.jsx';
+import { Menu, MenuItem } from 'design-system/components/overlay/Menu.jsx';
+import { Modal } from 'design-system/components/overlay/Modal.jsx';
 
 import { ContactForm } from '@/components/ContactForm';
 import { useCv } from '@/content/useCv';

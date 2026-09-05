@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { Button } from '@ds/components/core/Button.jsx';
-import { Field } from '@ds/components/forms/Field.jsx';
-import { Input } from '@ds/components/forms/Input.jsx';
-import { Textarea } from '@ds/components/forms/Textarea.jsx';
-import { Toast, ToastRegion } from '@ds/components/feedback/Toast.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { Field } from 'design-system/components/forms/Field.jsx';
+import { Input } from 'design-system/components/forms/Input.jsx';
+import { Textarea } from 'design-system/components/forms/Textarea.jsx';
+import { Toast, ToastRegion } from 'design-system/components/feedback/Toast.jsx';
 
 import { useI18n } from '@/i18n/client';
 
