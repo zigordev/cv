@@ -15,5 +15,14 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v4
         with:
+          # GITHUB_TOKEN cannot open the release PR here: this repository has
+          # "Allow GitHub Actions to create and approve pull requests" off, and
+          # the run on 2026-09-04 failed on exactly that — "GitHub Actions is
+          # not permitted to create or approve pull requests", after it had
+          # already built the branch and commit. Leaving that setting off is
+          # the safer posture, since the same toggle also lets any workflow
+          # approve a PR. So release-please gets the PAT instead, which is what
+          # gpool, notifications, platform-ops and design-system already do.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
