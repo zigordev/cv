@@ -177,7 +177,21 @@ You should see an event with `"sourceApp":"cv"` and `"templateId":"cv.contact-re
 
 If the `notifications` stack is running, the mail arrives through its configured SMTP.
 
-## 11. Working Without The Stack
+## 11. Watch Mode
+
+`local:up` builds and runs the production image, which is the point of it — the container you develop against is the one that ships. The cost is that a one-character edit needs a full rebuild, headless-Chromium PDF render included.
+
+```bash
+npm run local:dev
+```
+
+Runs the same preflight and the same URL, but builds the `dev` stage of `apps/ui/Dockerfile` and starts `next dev` under `docker compose watch`. Edits under `apps/ui/src`, `apps/ui/messages` and `apps/ui/public` are copied into the running container and hot-reload in about a second; `package.json` and `package-lock.json` trigger a rebuild instead, because a dependency change cannot be copied in.
+
+It keeps everything the plain dev server gives up: OpenBao secrets, the shared network, and a working contact form.
+
+Both modes are the same service on the same port, so run one at a time. `local:down` stops either.
+
+## 12. Working Without The Stack
 
 The CV itself has no runtime dependency on OpenBao, Tolgee or Kafka — only the contact form does. For pure UI work:
 
@@ -187,7 +201,7 @@ npm run dev -w @cv/web
 
 That serves on `http://localhost:3021` using the committed `messages/` snapshots. `POST /api/contact` returns `502` because no broker is configured, which is expected.
 
-## 12. Stop And Reset
+## 13. Stop And Reset
 
 ```bash
 npm run local:down
@@ -196,7 +210,7 @@ npm run local:reset
 
 `local:reset` forces a no-cache rebuild and brings the stack back up. There are no volumes to drop — the app is stateless.
 
-## 13. Troubleshooting
+## 14. Troubleshooting
 
 `local:up` fails at "Waiting for OpenBao":
 
@@ -239,6 +253,6 @@ Sections appear blank when scrolling:
 - only possible with JavaScript disabled mid-session; the server-rendered HTML
   contains every section, and the entrance animation has a timer fallback
 
-## 14. Next Step
+## 15. Next Step
 
 Deploying to AWS for the first time is covered in `docs/cloud-first-deploy.md`.
