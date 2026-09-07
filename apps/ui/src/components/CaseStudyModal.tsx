@@ -9,13 +9,13 @@ import { SegmentedControl } from 'design-system/components/navigation/SegmentedC
 
 import { PROJECT_DIAGRAMS } from '@/components/diagrams';
 import { ProjectTags } from '@/components/ProjectTags';
-import type { Project } from '@/content/cv';
+import type { Project, ProjectPiece } from '@/content/cv';
 import { useI18n } from '@/i18n/client';
 import { display, mono } from '@/lib/type';
 
-type Tab = 'overview' | 'architecture';
+type Tab = 'overview' | 'architecture' | 'pipelines';
 
-const TABS: readonly Tab[] = ['overview', 'architecture'];
+const TABS: readonly Tab[] = ['overview', 'architecture', 'pipelines'];
 
 export function CaseStudyModal({
   project,
@@ -101,6 +101,7 @@ export function CaseStudyModal({
 
         {tab === 'overview' ? <OverviewTab project={project} /> : null}
         {tab === 'architecture' ? <ArchitectureTab project={project} /> : null}
+        {tab === 'pipelines' ? <PipelinesTab project={project} /> : null}
       </div>
     </Modal>
   );
@@ -173,50 +174,68 @@ function ArchitectureTab({ project }: Readonly<{ project: Project }>) {
     <div style={{ display: 'grid', gap: 'var(--ds-space-8)' }}>
       {Diagram ? <Diagram /> : null}
 
-      <div>
-        {project.pieces.map((piece) => (
-          <div
-            key={piece.step}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '40px minmax(0, 1fr)',
-              gap: 'var(--ds-space-4)',
-              padding: '20px 0',
-              borderTop: '1px solid var(--ds-color-border)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--cv-font-mono)',
-                fontSize: 12,
-                color: 'var(--ds-color-accent)',
-              }}
-            >
-              {piece.step}
-            </span>
-            <div style={{ display: 'grid', gap: 'var(--ds-space-2)' }}>
-              <span style={display(22, 1.15, '-0.015em')}>{piece.title}</span>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 'var(--ds-text-sm)',
-                  lineHeight: 1.65,
-                  color: 'var(--ds-color-fg-muted)',
-                }}
-              >
-                {piece.text}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <StepList steps={project.pieces} />
 
       <DashList label={t('modal.decisions')} items={project.decisions} />
     </div>
   );
 }
 
-/** The em-dash list used for a project's decisions. */
+function PipelinesTab({ project }: Readonly<{ project: Project }>) {
+  const { t } = useI18n();
+
+  return (
+    <div style={{ display: 'grid', gap: 'var(--ds-space-8)' }}>
+      <StepList steps={project.pipeline.stages} />
+
+      <DashList label={t('modal.automation')} items={project.pipeline.automation} />
+    </div>
+  );
+}
+
+function StepList({ steps }: Readonly<{ steps: ProjectPiece[] }>) {
+  return (
+    <div>
+      {steps.map((step) => (
+        <div
+          key={step.step}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '40px minmax(0, 1fr)',
+            gap: 'var(--ds-space-4)',
+            padding: '20px 0',
+            borderTop: '1px solid var(--ds-color-border)',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'var(--cv-font-mono)',
+              fontSize: 12,
+              color: 'var(--ds-color-accent)',
+            }}
+          >
+            {step.step}
+          </span>
+          <div style={{ display: 'grid', gap: 'var(--ds-space-2)' }}>
+            <span style={display(22, 1.15, '-0.015em')}>{step.title}</span>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 'var(--ds-text-sm)',
+                lineHeight: 1.65,
+                color: 'var(--ds-color-fg-muted)',
+              }}
+            >
+              {step.text}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** The em-dash list used for a project's decisions and standing automation. */
 function DashList({ label, items }: Readonly<{ label: string; items: string[] }>) {
   if (items.length === 0) return null;
 

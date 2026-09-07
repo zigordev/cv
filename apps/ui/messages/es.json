@@ -280,6 +280,37 @@
             "title": "El PDF"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Dependabot abre pull requests agrupados una vez por semana y espera siete días antes de proponer una versión recién publicada. Una release comprometida suele detectarse y retirarse en cuestión de días, y aquí nada es tan urgente como para merecer instalarla el primero.",
+            "El auto-merge se activa en cada pull request no borrador en cuanto se abre, lo que deja la protección de rama como lo único que lo sujeta: lo verde se fusiona, lo rojo se queda. Los majors de Dependabot son la única exclusión, porque un major es un cambio que se lee, no un número que se sube.",
+            "CodeQL, la revisión de dependencias y Semgrep se ejecutan en cada pull request, y el SBOM se conserva como artefacto de cada uno y no solo de una release.",
+            "El PDF lo genera Chromium sin interfaz dentro del build de Docker, que falla si el fichero no se puede producir. Un despliegue no puede publicar una página y un PDF desactualizado que se contradigan.",
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta la imagen de producción, así que lo que se comprueba es lo que se despliega; `local:dev` construye en su lugar una etapa de desarrollo y ejecuta `next dev` bajo `docker compose watch`, que copia los archivos modificados al contenedor en marcha en vez de reconstruirlo. La reconstrucción que se ahorra incluye el render del PDF con Chromium, el paso más lento de la imagen."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Husky pasa gitleaks sobre el diff en stage y después lint, typecheck y build, para que un workspace que no compila nunca llegue a ser una rama. commitlint obliga a que el mensaje sea un Conventional Commit — release-please los lee más tarde para decidir la versión — y un hook de pre-push rechaza directamente cualquier push a main.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "Seis jobs en paralelo: calidad, un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please mantiene abierto un pull request de release contra main y deriva la siguiente versión y el changelog de los conventional commits desde la última etiqueta. Fusionarlo etiqueta y publica la release, así que cortar una es un merge y no un comando que alguien ejecuta en su portátil.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "Una release publicada construye la imagen, la sube a ECR y cosign la firma sin claves por digest, con la procedencia SLSA adjunta — por digest, porque una etiqueta se puede reapuntar después de firmar. El bundle de compose va a S3 y SSM ejecuta el script de despliegue en el host EC2, de modo que ningún runner guarda jamás una clave SSH.",
+              "title": "El despliegue"
+            }
+          ]
+        },
         "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro.",
         "role": "En solitario — producto",
         "tagline": "Este sitio: un CV que se renderiza dos veces, una para una persona y otra para un parser."
@@ -307,6 +338,31 @@
             "title": "Temas"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "El manifiesto se genera, y la CI falla cuando el que está commiteado difiere de una ejecución limpia. Un manifiesto editado a mano es la manera en que un componente desaparece en silencio de la lista que leen todos los consumidores.",
+            "Cada componente del manifiesto se monta durante los tests, así que un componente que ya no renderiza falla aquí y no en el primer producto que actualice.",
+            "Dependabot sobre npm y las Actions; los componentes en sí no tienen dependencias de ejecución que actualizar.",
+            "Un escaneo de secretos y Semgrep en cada pull request, las mismas dos barreras que en todas partes — un repositorio sin build no es un repositorio sin riesgo."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "No hay build, ni bundle, ni nada que un consumidor tenga que instalar — esto son componentes, tokens y guías que otros repositorios incorporan. Así que la CI comprueba las dos cosas que sí pueden salir mal: un secreto filtrado y un manifiesto que ya no se corresponde con lo que hay en disco. El manifiesto tiene que regenerarse y no editarse a mano, cada componente que aparece en él se monta, y los ficheros JSON se parsean.",
+              "title": "El pull request"
+            },
+            {
+              "step": "02",
+              "text": "release-please corta una versión a partir de los conventional commits. Esa etiqueta es toda la distribución: los productos dependen del repositorio fijado a una etiqueta, así que no hay publicación en un registro que pueda fallar ni una versión sin publicar que perseguir.",
+              "title": "La release"
+            },
+            {
+              "step": "03",
+              "text": "Una release del sistema de diseño no despliega nada por sí sola. Cada producto la recoge cuando su propio Dependabot sube la etiqueta fijada, y a partir de ahí viaja por el pipeline de ese producto — por eso un cambio en un componente llega a cada producto según el calendario de ese producto y no a todos a la vez.",
+              "title": "La adopción"
+            }
+          ]
+        },
         "problem": "Tres productos habían derivado hacia tres tecnologías de estilos distintas — clases de CSS planas, utilidades de Tailwind y variantes de CVA — sin ningún lenguaje visual común. Elegir un solo framework habría implicado reescribir dos aplicaciones.",
         "role": "En solitario — diseño y código",
         "tagline": "Una librería de tokens y componentes agnóstica que tres productos comparten sin ponerse de acuerdo en un framework de CSS."
@@ -335,6 +391,37 @@
             "title": "Entrega"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Las traducciones se promocionan solas. Un push a main que toque los ficheros de mensajes, la configuración de Tolgee o el entorno de producción promociona el texto al proyecto de Tolgee de producción, así que el copy se publica sin una release.",
+            "Dependabot vigila cuatro ecosistemas — npm, ambos Dockerfiles y las propias Actions — agrupados semanalmente, con patch y minor fusionándose en verde y los majors reservados a una persona.",
+            "platform-ops sondea los endpoints públicos cada cinco minutos desde fuera del estado y abre una incidencia cuando alguno deja de responder.",
+            "CodeQL, revisión de dependencias y Semgrep en cada pull request; Trivy y el SBOM otra vez en el despliegue, contra la imagen que realmente se publica y no contra la que la CI construyó en su momento.",
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Los mismos tres hooks que lleva cada repositorio de aquí: gitleaks sobre el diff en stage seguido de lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main. La CI pone HUSKY=0 para que los hooks no se ejecuten por segunda vez en un runner que ya los está ejecutando como jobs.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build y tests unitarios de la API con la cobertura subida —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose, seguridad y cadena de suministro, y Semgrep.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please deriva la versión y el changelog de los conventional commits en main, y publica la etiqueta cuando su pull request se fusiona.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "Se construyen ambas imágenes, Trivy las escanea antes de que salgan del runner y después cosign las firma y les añade procedencia SLSA y una atestación de SBOM, todo ligado al digest. S3 lleva el bundle, SSM lo aplica en el host y un smoke posterior golpea el endpoint público de salud — la única comprobación que puede fallar cuando producción ya ha cambiado.",
+              "title": "El despliegue"
+            }
+          ]
+        },
         "problem": "Una quiniela necesita más que una hoja de cálculo: autenticación, una puntuación que se resuelve de forma programada, notificaciones y un registro de por qué cada persona tiene los puntos que tiene. Cada una de esas piezas es un servicio, y levantarlas en cada proyecto no escala.",
         "role": "En solitario — plataforma, API y web",
         "tagline": "Una plataforma de quinielas de fútbol en tiempo real: grupos privados, puntuación en directo y un registro auditable de cada punto."
@@ -356,6 +443,36 @@
             "title": "Lo que se llevó adelante"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Una prueba de concepto usa el mismo pipeline que producción. La ventaja de tener la plantilla propia es que una idea nueva empieza con imágenes firmadas, un smoke y un changelog en lugar de ganárselos más tarde, cuando adaptarlo todo es justo lo que nadie tiene tiempo de hacer.",
+            "Dependabot sobre npm, ambos Dockerfiles y las Actions, agrupado semanalmente, con patch y minor fusionándose en verde.",
+            "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks sobre el diff en stage y después lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose, seguridad y cadena de suministro, y Semgrep.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please deriva la versión y el changelog de los conventional commits en main, y publica la etiqueta cuando su pull request se fusiona.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "Imágenes de API y web construidas y subidas, firmadas con cosign por digest y con procedencia SLSA adjunta, empaquetadas a S3, aplicadas en el host mediante SSM y después comprobadas con un smoke contra el endpoint público de salud.",
+              "title": "El despliegue"
+            }
+          ]
+        },
         "problem": "El primer intento de plataforma de quinielas: equipos, invitaciones y puntuación, construido antes de que existiera infraestructura compartida en la que apoyarse.",
         "role": "En solitario — API y web",
         "tagline": "La primera plataforma de quinielas, y la que me enseñó en qué tenía que convertirse gpool."
@@ -383,6 +500,37 @@
             "title": "Plantillas"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Los manifiestos de compose se renderizan en la CI, así que un fichero que ya no parsea falla en el pull request y no en el host, a mitad de un despliegue.",
+            "El job de integración vuelca los logs de los contenedores cuando falla. Una ejecución roja sin ellos solo te dice que lo reproduzcas en local, que es la forma más lenta posible de averiguar qué hizo el broker.",
+            "Dependabot sobre npm, el Dockerfile y las Actions, semanal y agrupado; patch y minor se fusionan en verde.",
+            "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
+            "El desarrollo local tiene dos modos sobre un mismo contenedor. `local:up` ejecuta la imagen de producción; `local:dev` construye una etapa de desarrollo y ejecuta `nest start --watch` bajo `docker compose watch`, de modo que una edición del worker le llega como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks sobre el diff en stage y después lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "Seis jobs, y uno de ellos es el que importa: el servicio se ejecuta contra un Kafka real, un PostgreSQL real y un sumidero SMTP. La idempotencia y el envío a mensajes muertos son afirmaciones sobre lo que hace un broker ante una reentrega, y un broker simulado dará la razón a lo que el código ya cree.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please, con la versión replicada en el paquete de la API para que el artefacto y la etiqueta no se separen.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "La imagen de la API se construye y se sube, se firma con cosign por digest con la procedencia SLSA adjunta, se empaqueta a S3 y se aplica en el host mediante SSM.",
+              "title": "El despliegue"
+            }
+          ]
+        },
         "problem": "Todo producto acaba necesitando enviar correo, y todo producto que lo hace en línea reinventa los reintentos, la deduplicación y la pregunta de qué pasó con un mensaje que nunca llegó.",
         "role": "En solitario — backend",
         "tagline": "Un servicio de correo sobre Kafka al que el resto de productos delegan la entrega, con idempotencia y recuperación ante caídas de serie."
@@ -420,6 +568,36 @@
             "title": "Barreras de seguridad"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Una sonda de disponibilidad se ejecuta cada cinco minutos en la infraestructura de GitHub y comprueba los endpoints públicos de salud desde fuera. Prometheus corre en el mismo host que aquello que vigila, así que no puede avisar de su propia muerte — y el silencio se parece exactamente a que todo va bien.",
+            "La sonda abre una incidencia en GitHub en lugar de enviar un correo. Una incidencia se deduplica, tiene estado y no depende del relé SMTP, que es en sí mismo una de las cosas que podrían estar rotas.",
+            "Las ejecuciones programadas son de mejor esfuerzo por diseño: GitHub las retrasa cuando hay carga y las omite del todo en una cuenta ocupada, así que esto es aproximadamente cada cinco minutos y nunca un latido.",
+            "Dependabot sobre npm y las Actions, semanal y agrupado, con patch y minor fusionándose en verde."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Dos hooks en vez de tres: un pre-commit que escanea y comprueba, y un pre-push que rechaza main. Los mensajes de commit los valida un workflow y no un hook local, porque buena parte de lo que aterriza aquí llega como una subida de dependencia y no como alguien escribiendo un mensaje.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, shellcheck, linting de workflows y de compose, terraform validate contra ambos stacks, y el kit de observabilidad con typecheck y tests. Al lado, un escaneo de secretos y Semgrep.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please en modo simple. Aquí no hay paquete que versionar — solo una etiqueta y un changelog que registran en qué consiste ahora la plataforma compartida, que es contra lo que se fijan los productos.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo.",
+              "title": "El despliegue"
+            }
+          ]
+        },
         "problem": "Cinco aplicaciones necesitaban almacenamiento de secretos, traducciones, un broker de eventos y observabilidad. Duplicar eso en cada repositorio significa cinco instancias de OpenBao que desellar y cinco formas distintas de ser inconsistente.",
         "role": "En solitario — infraestructura",
         "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
@@ -446,6 +624,36 @@
             "title": "Consola de operador"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Dependabot cubre npm, Cargo y ambos Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio.",
+            "Auto-merge en verde para patch y minor; los majors esperan a una persona, en los dos ecosistemas.",
+            "CodeQL, revisión de dependencias y Semgrep en cada pull request — la misma barrera que usan los repositorios en producción, porque el código la va a necesitar antes de desplegarse y no después.",
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores, en los dos lenguajes. `local:dev` ejecuta el plano de control con `tsx watch`, la consola con `next dev` y los tres servicios Rust con `cargo watch`, todos alimentados por `docker compose watch`. Los servicios Rust comparten un único volumen para el directorio target de cargo, así que los artefactos de las dependencias que tienen en común se compilan una vez y no tres: la primera construcción es larga y una incremental son unos segundos."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks sobre el diff en stage y después las comprobaciones del workspace, commitlint en el mensaje y un hook de pre-push que rechaza main. Los mismos tres hooks que en el resto del estado, para que cambiar de repositorio no signifique aprender otro juego de reglas locales.",
+              "title": "Antes del commit"
+            },
+            {
+              "step": "02",
+              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, typecheck, build y tests del plano de control y de la consola de operación. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "Una sola versión para dos lenguajes. release-please sube ambos package.json y el workspace de Cargo a partir de los mismos conventional commits, de modo que un crate y la consola que lo gobierna nunca pueden declarar versiones distintas de la misma release.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "No hay workflow de despliegue. El bot se ejecuta con Compose en una máquina que alguien está mirando, y automatizar el camino a producción antes de que una estrategia se haya ganado la confianza solo serviría para publicar más rápido algo que no debería estar corriendo.",
+              "title": "Sin despliegue, a propósito"
+            }
+          ]
+        },
         "problem": "Una estrategia que corre sin supervisión necesita dos cosas muy distintas: un camino de ejecución rápido y predecible, y una superficie de supervisión que una persona pueda leer de un vistazo. Construir ambas en el mismo lenguaje obliga a sacrificar una.",
         "role": "En solitario — Rust y TypeScript",
         "tagline": "Una plataforma de trading repartida entre un camino crítico en Rust y un plano de control en TypeScript con consola de operador."
@@ -499,11 +707,13 @@
   "modal": {
     "approach": "Enfoque",
     "architecture": "Arquitectura",
+    "automation": "Automatización permanente",
     "caseStudy": "Caso de estudio",
     "close": "Cerrar",
     "decisions": "Decisiones que defiendo",
     "lessons": "Qué cambiaría",
     "overview": "Resumen",
+    "pipelines": "Pipelines",
     "problem": "El problema",
     "results": "Resultados"
   },
