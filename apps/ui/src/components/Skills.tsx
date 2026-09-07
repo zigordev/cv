@@ -17,11 +17,20 @@ export function Skills() {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-            gap: '40px 32px',
+            columnGap: 32,
+            rowGap: 'var(--ds-space-3)',
           }}
         >
           {skillGroups.map((group) => (
-            <div key={group.group} style={{ display: 'grid', gap: 'var(--ds-space-3)' }}>
+            <div
+              key={group.group}
+              style={{
+                display: 'grid',
+                gridTemplateRows: 'subgrid',
+                gridRow: 'span 3',
+                paddingBottom: 28,
+              }}
+            >
               <span style={mono(11, '0.14em')}>{group.group}</span>
               <span
                 style={{

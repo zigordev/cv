@@ -280,6 +280,37 @@
             "title": "The PDF"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Dependabot opens grouped pull requests once a week and waits seven days before proposing a newly published version. A compromised release is usually caught and yanked within days, and nothing here is urgent enough to be worth installing first.",
+            "Auto-merge is enabled on every non-draft pull request the moment it opens, which leaves branch protection as the only thing holding it: green checks merge, red ones sit. Dependabot majors are the one exclusion, because a major is a change to read rather than a number to bump.",
+            "CodeQL, dependency review and Semgrep run on every pull request, and the SBOM is kept as an artefact of each one rather than only of a release.",
+            "The PDF is rendered by headless Chromium inside the Docker build, which fails if the file cannot be produced. A deploy cannot ship a page and a stale PDF that disagree with each other.",
+            "Local development has two modes over one set of containers. `local:up` runs the production image, so what is being checked is what ships; `local:dev` builds a dev stage instead and runs `next dev` under `docker compose watch`, which copies changed files into the running container rather than rebuilding it. The rebuild it skips includes the Chromium PDF render, the slowest step in the image."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Husky runs gitleaks over the staged diff, then lint, typecheck and build, so a workspace that does not compile never becomes a branch. commitlint holds the message to Conventional Commits — release-please reads those later to decide the version — and a pre-push hook refuses to push to main at all.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Six jobs in parallel: quality, a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please keeps a release pull request open against main, deriving the next version and the changelog from the conventional commits since the last tag. Merging it tags and publishes the release, so cutting one is a merge rather than a command somebody runs on a laptop.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "A published release builds the image, pushes it to ECR and has cosign sign it keylessly by digest with SLSA provenance attached — by digest, because a tag can be repointed after signing. The compose bundle goes to S3 and SSM runs the deploy script on the EC2 host, so no runner ever holds an SSH key.",
+              "title": "The deploy"
+            }
+          ]
+        },
         "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other.",
         "role": "Solo — product",
         "tagline": "This site: a CV that renders itself twice, once for a person and once for a parser."
@@ -307,6 +338,31 @@
             "title": "Themes"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "The manifest is generated, and CI fails when the committed one differs from a fresh run. A hand-edited manifest is how a component quietly disappears from the list every consumer reads.",
+            "Every component in the manifest is mounted in the test run, so a component that no longer renders fails here rather than in whichever product upgrades first.",
+            "Dependabot on npm and the Actions; the components themselves have no runtime dependencies to update.",
+            "A secret scan and Semgrep on every pull request, the same two gates as everywhere else — a repository with no build is not a repository with no risk."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "No build, no bundle and nothing for a consumer to install — this is components, tokens and guidelines that other repositories vendor. So CI checks the two things that can actually go wrong: a leaked secret, and a manifest that no longer matches what is on disk. The manifest has to be regenerated rather than hand-edited, every component listed in it is mounted, and the JSON files are parsed.",
+              "title": "The pull request"
+            },
+            {
+              "step": "02",
+              "text": "release-please cuts a version from the conventional commits. That tag is the entire distribution: products depend on the repository at a pinned tag, so there is no registry publish to fail and no unpublished version to chase.",
+              "title": "The release"
+            },
+            {
+              "step": "03",
+              "text": "A design system release deploys nothing by itself. Each product picks it up when its own Dependabot bumps the pinned tag, and it then ships through that product's pipeline — which is why a component change reaches each product on that product's schedule rather than all at once.",
+              "title": "The upgrade"
+            }
+          ]
+        },
         "problem": "Three products had drifted into three styling technologies — plain CSS classes, Tailwind utilities and CVA variants — and no shared visual language. Picking one framework would have meant rewriting two applications.",
         "role": "Solo — design & code",
         "tagline": "A technology-agnostic token and component library three products share without agreeing on a CSS framework."
@@ -335,6 +391,37 @@
             "title": "Delivery"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Translations promote themselves. A push to main touching the message files, the Tolgee config or the production env promotes the copy to the production Tolgee project, so wording ships without a release.",
+            "Dependabot watches four ecosystems — npm, both Dockerfiles and the Actions themselves — grouped weekly, with patch and minor merging on green and majors left for a person.",
+            "The public endpoints are probed every five minutes from outside the estate by platform-ops, which opens an issue when one stops answering.",
+            "CodeQL, dependency review and Semgrep on every pull request; Trivy and the SBOM again at deploy, against the image that is actually shipping rather than the one CI happened to build.",
+            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "The same three hooks every repository here carries: gitleaks over the staged diff followed by lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main. CI sets HUSKY=0 so the hooks never run a second time on a runner that is already running them as jobs.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build and API unit tests with coverage uploaded — a secret scan, an integration smoke that stands the whole stack up under Compose, security and supply chain, and Semgrep.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please derives the version and the changelog from the conventional commits on main, and publishes the tag when its pull request is merged.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "Both images are built, Trivy-scanned before they leave the runner, then signed with cosign and given SLSA provenance and an SBOM attestation, all bound to the digest. S3 carries the bundle, SSM applies it on the host, and a post-deploy smoke hits the public health endpoint — the only check that can fail after production has already changed.",
+              "title": "The deploy"
+            }
+          ]
+        },
         "problem": "A prediction pool needs more than a spreadsheet: authentication, scoring that settles on a schedule, notifications, and a record of why anyone holds the points they do. Every one of those is a service, and standing them up per project does not scale.",
         "role": "Solo — platform, API & web",
         "tagline": "A real-time football pool platform: private pools, live scoring, and an auditable trail of every point."
@@ -356,6 +443,36 @@
             "title": "What carried forward"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "A proof of concept runs the same pipeline as production. The point of owning the template is that a new idea starts with signed images, a smoke test and a changelog rather than earning them later, when retrofitting is exactly what nobody has time for.",
+            "Dependabot across npm, both Dockerfiles and the Actions, grouped weekly, with patch and minor merging on green.",
+            "CodeQL, dependency review and Semgrep on every pull request.",
+            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks over the staged diff, then lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose, security and supply chain, and Semgrep.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please derives the version and changelog from the conventional commits on main, and publishes the tag when its pull request is merged.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "API and web images built and pushed, signed with cosign by digest with SLSA provenance attached, bundled to S3, applied on the host through SSM, then smoke-tested against the public health endpoint.",
+              "title": "The deploy"
+            }
+          ]
+        },
         "problem": "The original attempt at a pool platform: teams, invitations, and scoring, built before there was any shared infrastructure to lean on.",
         "role": "Solo — API & web",
         "tagline": "The first football pool platform, and the one that taught me what gpool needed to be."
@@ -383,6 +500,37 @@
             "title": "Templates"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Compose manifests are rendered in CI, so a file that no longer parses fails on the pull request rather than on the host, halfway through a deploy.",
+            "The integration job dumps the container logs when it fails. A red run without them only tells you to reproduce it locally, which is the slowest possible way to learn what the broker did.",
+            "Dependabot on npm, the Dockerfile and the Actions, weekly and grouped; patch and minor merge on green.",
+            "CodeQL, dependency review and Semgrep on every pull request.",
+            "Local development has two modes over one container. `local:up` runs the production image; `local:dev` builds a dev stage and runs `nest start --watch` under `docker compose watch`, so an edit to the worker reaches it as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks over the staged diff, then lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Six jobs, one of which is the one that matters: the service runs against a real Kafka, a real PostgreSQL and an SMTP sink. Idempotency and dead-lettering are claims about what a broker does under redelivery, and a mocked broker will agree with whatever the code already believes.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please, with the version mirrored into the API package so the artefact and the tag cannot drift apart.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "The API image is built and pushed, signed with cosign by digest with SLSA provenance attached, bundled to S3 and applied on the host through SSM.",
+              "title": "The deploy"
+            }
+          ]
+        },
         "problem": "Every product eventually needs to send mail, and every product that does it inline reinvents retries, deduplication and the question of what happened to a message that never arrived.",
         "role": "Solo — backend",
         "tagline": "A Kafka-backed email service the other products delegate delivery to, with idempotency and crash recovery built in."
@@ -420,6 +568,36 @@
             "title": "Guardrails"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "An uptime probe runs every five minutes on GitHub's infrastructure and checks the public health endpoints from outside. Prometheus runs on the same host as the things it watches, so it cannot report its own death — and the silence looks exactly like everything being fine.",
+            "The probe opens a GitHub issue rather than sending mail. An issue deduplicates, carries a state, and does not depend on the SMTP relay, which is itself one of the things that could be broken.",
+            "Scheduled runs are best effort by design: GitHub delays them under load and skips them outright on a busy account, so this is roughly every five minutes and never a heartbeat.",
+            "Dependabot on npm and the Actions, weekly and grouped, with patch and minor merging on green."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Two hooks rather than three: a pre-commit that scans and checks, and a pre-push that refuses main. Commit messages are held to Conventional Commits by a workflow instead of a local hook, since much of what lands here arrives as a dependency bump rather than as somebody typing a message.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, shellcheck, workflow and compose linting, terraform validate against both stacks, and the observability kit typechecked and tested. A secret scan and Semgrep alongside them.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please in simple mode. There is no package to version here — only a tag and a changelog that record what the shared platform now is, which is what the products pin themselves against.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "A published release, or a manual dispatch, packages the tracked files into a bundle, uploads it to S3 and has SSM apply it on the host. The shared stack deploys down exactly the same path as the products sitting on it, which is how that path stays trustworthy: everything exercises it.",
+              "title": "The deploy"
+            }
+          ]
+        },
         "problem": "Five applications each needed secret storage, translations, an event broker and observability. Duplicating that per repository means five OpenBao instances to unseal and five ways to be inconsistent.",
         "role": "Solo — infrastructure",
         "tagline": "The shared operations stack every other project attaches to instead of rebuilding."
@@ -446,6 +624,36 @@
             "title": "Operator console"
           }
         ],
+        "pipeline": {
+          "automation": [
+            "Dependabot covers npm, Cargo and both Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly.",
+            "Auto-merge on green for patch and minor; majors wait for a person, in both ecosystems.",
+            "CodeQL, dependency review and Semgrep on every pull request — the same gate the production repositories use, because the code will need it before it deploys, not after.",
+            "Local development has two modes over one set of containers, across both languages. `local:dev` runs the control plane under `tsx watch`, the console under `next dev` and the three Rust services under `cargo watch`, all fed by `docker compose watch`. The Rust services share one named volume for the cargo target directory, so the dependency artefacts they have in common are compiled once rather than three times: the first build is long, an incremental one is a few seconds."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "gitleaks over the staged diff and then the workspace checks, commitlint on the message, and a pre-push hook that refuses main. The same three hooks as the rest of the estate, so moving between repositories does not mean learning a different set of local rules.",
+              "title": "Before the commit"
+            },
+            {
+              "step": "02",
+              "text": "Two language lanes running side by side. Rust: cargo fmt --check, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "One version across two languages. release-please bumps both package.json files and the Cargo workspace from the same conventional commits, so a crate and the console that drives it can never claim different versions of the same release.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "There is no deploy workflow. The bot runs from Compose on a machine somebody is watching, and automating the path to production before a strategy has earned trust would only make it faster to ship something that should not be running.",
+              "title": "No deploy, deliberately"
+            }
+          ]
+        },
         "problem": "A strategy that runs unattended needs two very different things: a fast, predictable execution path, and a supervision surface a human can read at a glance. Building both in one language means compromising one of them.",
         "role": "Solo — Rust & TypeScript",
         "tagline": "A trading platform split between a Rust hot path and a TypeScript control plane with an operator console."
@@ -499,11 +707,13 @@
   "modal": {
     "approach": "Approach",
     "architecture": "Architecture",
+    "automation": "Standing automation",
     "caseStudy": "Case study",
     "close": "Close",
     "decisions": "Decisions worth defending",
     "lessons": "What I would change",
     "overview": "Overview",
+    "pipelines": "Pipelines",
     "problem": "The problem",
     "results": "Results"
   },

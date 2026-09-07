@@ -48,6 +48,24 @@ That verifies OpenBao is unsealed and holds the required keys, pulls the Tolgee
 snapshots into `messages/`, and brings the container up on
 <http://localhost:3021>.
 
+`local:up` builds the production image, so a source edit only reaches the
+browser after a rebuild — including the headless-Chromium PDF render, which the
+Docker build makes mandatory. For an edit-and-refresh loop:
+
+```bash
+npm run local:dev
+```
+
+Same preflight, same URL, same OpenBao secrets and shared network — but the
+container runs `next dev` and `docker compose watch` copies changed files into
+it, so an edit under `src/`, `messages/` or `public/` reaches the browser in
+about a second. `package-lock.json` and `apps/ui/package.json` trigger a
+rebuild rather than a sync, since a dependency change cannot be copied in.
+
+The two modes are the same container on the same port, so they do not run at
+the same time: `local:up` is the does-it-work-like-production check and
+`local:dev` is the loop you develop in.
+
 `OPENBAO_TOKEN` is not the OpenBao root token — it is a scoped token minted
 against a `cv-local-read` policy that grants nothing beyond `kv/cv`.
 [docs/local-first-start.md](docs/local-first-start.md) walks through creating
