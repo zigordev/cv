@@ -105,6 +105,13 @@ if [ -n "$tolgee_project_id" ]; then
     node scripts/openbao-run.mjs -- npm run i18n:pull -w @cv/web
 fi
 
+if [ "${LOCAL_STACK_MODE:-}" = "dev" ]; then
+  echo "Starting CV web in watch mode on http://localhost:3021"
+  exec docker compose --env-file "$APP_ENV_FILE" \
+    -f docker/compose.app.local.yml -f docker/compose.app.dev.yml \
+    up --build --remove-orphans --watch
+fi
+
 docker compose --env-file "$APP_ENV_FILE" -f docker/compose.app.local.yml \
   up -d --build --force-recreate --remove-orphans
 

@@ -1,0 +1,41 @@
+services:
+  cv_web:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    command:
+      [
+        'node',
+        '/workspace/scripts/openbao-run.mjs',
+        '--',
+        'npm',
+        'exec',
+        '--',
+        'next',
+        'dev',
+        '-H',
+        '0.0.0.0',
+        '-p',
+        '3001',
+      ]
+    healthcheck:
+      start_period: 90s
+    develop:
+      watch:
+        - action: sync
+          path: ../apps/ui/src
+          target: /workspace/apps/ui/src
+        - action: sync
+          path: ../apps/ui/messages
+          target: /workspace/apps/ui/messages
+        - action: sync
+          path: ../apps/ui/public
+          target: /workspace/apps/ui/public
+        - action: sync+restart
+          path: ../apps/ui/next.config.js
+          target: /workspace/apps/ui/next.config.js
+        - action: rebuild
+          path: ../package-lock.json
+        - action: rebuild
+          path: ../apps/ui/package.json
