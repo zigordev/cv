@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/zigordev/cv/compare/v0.3.0...v0.4.0) (2026-09-07)
+
+
+### Features
+
+* **ui:** describe the new test gates in the pipelines tab ([#40](https://github.com/zigordev/cv/issues/40)) ([e50b4d9](https://github.com/zigordev/cv/commit/e50b4d93efedcd4aedf5dd6dcf32e038ae609307))
+
 ## [0.3.0](https://github.com/zigordev/cv/compare/v0.2.0...v0.3.0) (2026-09-07)
 
 
