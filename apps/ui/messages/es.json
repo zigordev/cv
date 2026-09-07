@@ -291,12 +291,12 @@
           "stages": [
             {
               "step": "01",
-              "text": "Husky pasa gitleaks sobre el diff en stage y después lint, typecheck y build, para que un workspace que no compila nunca llegue a ser una rama. commitlint obliga a que el mensaje sea un Conventional Commit — release-please los lee más tarde para decidir la versión — y un hook de pre-push rechaza directamente cualquier push a main.",
+              "text": "Husky pasa gitleaks sobre el diff en stage y después lint, typecheck, la batería de tests unitarios y build, para que un workspace que no compila o no pasa sus tests nunca llegue a ser una rama. commitlint obliga a que el mensaje sea un Conventional Commit — release-please los lee más tarde para decidir la versión — y un hook de pre-push rechaza directamente cualquier push a main.",
               "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "Seis jobs en paralelo: calidad, un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
+              "text": "Seis jobs en paralelo: calidad (formato, lint, typecheck, tests unitarios y build), un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
               "title": "El pull request"
             },
             {
@@ -341,14 +341,14 @@
         "pipeline": {
           "automation": [
             "El manifiesto se genera, y la CI falla cuando el que está commiteado difiere de una ejecución limpia. Un manifiesto editado a mano es la manera en que un componente desaparece en silencio de la lista que leen todos los consumidores.",
-            "Cada componente del manifiesto se monta durante los tests, así que un componente que ya no renderiza falla aquí y no en el primer producto que actualice.",
+            "Cada componente del manifiesto se monta y pasa por axe durante los tests, y las páginas de muestra se comprueban en un navegador real, así que un componente que ya no renderiza — o una combinación de tokens que no pasa el contraste — falla aquí y no en el primer producto que actualice.",
             "Dependabot sobre npm y las Actions; los componentes en sí no tienen dependencias de ejecución que actualizar.",
             "Un escaneo de secretos y Semgrep en cada pull request, las mismas dos barreras que en todas partes — un repositorio sin build no es un repositorio sin riesgo."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "No hay build, ni bundle, ni nada que un consumidor tenga que instalar — esto son componentes, tokens y guías que otros repositorios incorporan. Así que la CI comprueba las dos cosas que sí pueden salir mal: un secreto filtrado y un manifiesto que ya no se corresponde con lo que hay en disco. El manifiesto tiene que regenerarse y no editarse a mano, cada componente que aparece en él se monta, y los ficheros JSON se parsean.",
+              "text": "No hay build, ni bundle, ni nada que un consumidor tenga que instalar — esto son componentes, tokens y guías que otros repositorios incorporan. Así que la CI comprueba las cosas que sí pueden salir mal: un secreto filtrado, un manifiesto que ya no se corresponde con lo que hay en disco, y un componente o una combinación de tokens que no pasa accesibilidad. El manifiesto tiene que regenerarse y no editarse a mano, cada componente que aparece en él se monta y pasa por axe, los ficheros JSON se parsean, y Playwright abre cada página de muestra en Chromium para comprobar WCAG A y AA — contraste de color incluido, que solo existe donde hay maquetación y pintado.",
               "title": "El pull request"
             },
             {
@@ -402,12 +402,12 @@
           "stages": [
             {
               "step": "01",
-              "text": "Los mismos tres hooks que lleva cada repositorio de aquí: gitleaks sobre el diff en stage seguido de lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main. La CI pone HUSKY=0 para que los hooks no se ejecuten por segunda vez en un runner que ya los está ejecutando como jobs.",
+              "text": "Los mismos tres hooks que lleva cada repositorio de aquí: gitleaks sobre el diff en stage seguido de lint, typecheck, build y las dos baterías de tests unitarios; commitlint en el mensaje; y un hook de pre-push que rechaza main. La CI pone HUSKY=0 para que los hooks no se ejecuten por segunda vez en un runner que ya los está ejecutando como jobs.",
               "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build y tests unitarios de la API con la cobertura subida —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -458,7 +458,7 @@
             },
             {
               "step": "02",
-              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose a partir de las imágenes de producción y después conduce la web en un navegador real — la tarjeta de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals —, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -583,7 +583,7 @@
             },
             {
               "step": "02",
-              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, shellcheck, linting de workflows y de compose, terraform validate contra ambos stacks, y el kit de observabilidad con typecheck y tests. Al lado, un escaneo de secretos y Semgrep.",
+              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, shellcheck, linting de workflows y de compose, terraform validate contra ambos stacks, el kit de observabilidad con typecheck y tests, y los helpers de fichero de entorno del script de despliegue bajo bats. Al lado, un escaneo de secretos y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -639,7 +639,7 @@
             },
             {
               "step": "02",
-              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, typecheck, build y tests del plano de control y de la consola de operación. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
+              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, typecheck, build y tests del plano de control y de la consola de operación. Un tercer carril levanta un PostgreSQL real con Compose y ejecuta contra él la proyección de operaciones del plano de control. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
               "title": "El pull request"
             },
             {
