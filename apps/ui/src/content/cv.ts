@@ -33,6 +33,11 @@ export interface ProjectPiece {
   text: string;
 }
 
+export interface ProjectPipeline {
+  stages: ProjectPiece[];
+  automation: string[];
+}
+
 /**
  * What a project is, not what it is built with.
  *
@@ -73,6 +78,7 @@ export interface Project {
   approach: string;
   pieces: ProjectPiece[];
   decisions: string[];
+  pipeline: ProjectPipeline;
 }
 
 export interface SkillGroup {
@@ -272,10 +278,10 @@ export const PRODUCT_NAMES: string[] = PROJECT_SKELETON.filter(
  * a reader who cross-references a skill against the work should find it.
  */
 const SKILL_ITEMS: string[][] = [
-  ['TypeScript', 'Java', 'JavaScript', 'SQL', 'Rust'],
-  ['React', 'Vue', 'Angular', 'Design systems'],
-  ['Spring Boot', 'NestJS', 'Node.js', 'Microservices', 'Postgres', 'Kafka'],
-  ['Docker', 'Terraform', 'CI/CD', 'Observability'],
+  ['TypeScript', 'JavaScript', 'Rust', 'Java', 'SQL'],
+  ['React', 'Next.js', 'Design systems', 'Accessibility', 'Vue', 'Angular'],
+  ['NestJS', 'Node.js', 'Spring Boot', 'PostgreSQL', 'Kafka'],
+  ['Docker', 'Terraform', 'AWS', 'GitHub Actions', 'OpenTelemetry', 'Supply-chain security'],
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -284,7 +290,7 @@ const SKILL_ITEMS: string[][] = [
 
 type ProjectProse = Pick<
   Project,
-  'role' | 'tagline' | 'problem' | 'approach' | 'pieces' | 'decisions'
+  'role' | 'tagline' | 'problem' | 'approach' | 'pieces' | 'decisions' | 'pipeline'
 >;
 
 /** The `cv.*` subtree of the message bundle, as this module expects it. */
