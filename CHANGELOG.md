@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/zigordev/cv/compare/v0.2.0...v0.3.0) (2026-09-07)
+
+
+### Features
+
+* pipelines tab and watch mode ([#36](https://github.com/zigordev/cv/issues/36)) ([fea1c69](https://github.com/zigordev/cv/commit/fea1c6993707cbf59165ca0b4b7c5efd93a01d69))
+
 ## [0.2.0](https://github.com/zigordev/cv/compare/v0.1.0...v0.2.0) (2026-09-06)
 
 
