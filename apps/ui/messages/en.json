@@ -291,12 +291,12 @@
           "stages": [
             {
               "step": "01",
-              "text": "Husky runs gitleaks over the staged diff, then lint, typecheck and build, so a workspace that does not compile never becomes a branch. commitlint holds the message to Conventional Commits — release-please reads those later to decide the version — and a pre-push hook refuses to push to main at all.",
+              "text": "Husky runs gitleaks over the staged diff, then lint, typecheck, the unit suite and build, so a workspace that does not compile or pass its tests never becomes a branch. commitlint holds the message to Conventional Commits — release-please reads those later to decide the version — and a pre-push hook refuses to push to main at all.",
               "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "Six jobs in parallel: quality, a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
+              "text": "Six jobs in parallel: quality (format, lint, typecheck, unit tests and build), a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
               "title": "The pull request"
             },
             {
@@ -341,14 +341,14 @@
         "pipeline": {
           "automation": [
             "The manifest is generated, and CI fails when the committed one differs from a fresh run. A hand-edited manifest is how a component quietly disappears from the list every consumer reads.",
-            "Every component in the manifest is mounted in the test run, so a component that no longer renders fails here rather than in whichever product upgrades first.",
+            "Every component in the manifest is mounted and run through axe in the test run, and the specimen pages are checked in a real browser, so a component that no longer renders — or a token pairing that fails contrast — fails here rather than in whichever product upgrades first.",
             "Dependabot on npm and the Actions; the components themselves have no runtime dependencies to update.",
             "A secret scan and Semgrep on every pull request, the same two gates as everywhere else — a repository with no build is not a repository with no risk."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "No build, no bundle and nothing for a consumer to install — this is components, tokens and guidelines that other repositories vendor. So CI checks the two things that can actually go wrong: a leaked secret, and a manifest that no longer matches what is on disk. The manifest has to be regenerated rather than hand-edited, every component listed in it is mounted, and the JSON files are parsed.",
+              "text": "No build, no bundle and nothing for a consumer to install — this is components, tokens and guidelines that other repositories vendor. So CI checks the things that can actually go wrong: a leaked secret, a manifest that no longer matches what is on disk, and a component or a token pairing that fails accessibility. The manifest has to be regenerated rather than hand-edited, every component listed in it is mounted and run through axe, the JSON files are parsed, and Playwright opens every specimen page in Chromium to check WCAG A and AA — colour contrast included, which only exists where layout and paint do.",
               "title": "The pull request"
             },
             {
@@ -402,12 +402,12 @@
           "stages": [
             {
               "step": "01",
-              "text": "The same three hooks every repository here carries: gitleaks over the staged diff followed by lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main. CI sets HUSKY=0 so the hooks never run a second time on a runner that is already running them as jobs.",
+              "text": "The same three hooks every repository here carries: gitleaks over the staged diff followed by lint, typecheck, build and both unit suites; commitlint on the message; and a pre-push hook that refuses main. CI sets HUSKY=0 so the hooks never run a second time on a runner that is already running them as jobs.",
               "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build and API unit tests with coverage uploaded — a secret scan, an integration smoke that stands the whole stack up under Compose, security and supply chain, and Semgrep.",
+              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build, API unit tests with coverage uploaded and the web suite — a secret scan, an integration smoke that stands the whole stack up under Compose and then opens a real browser on it — the sign-in page rendered, axe against WCAG A and AA, Core Web Vitals budgets — before a k6 load smoke, security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
@@ -458,7 +458,7 @@
             },
             {
               "step": "02",
-              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose, security and supply chain, and Semgrep.",
+              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose from the production images and then drives the web in a real browser — the sign-in card rendered, axe against WCAG A and AA, Core Web Vitals budgets — security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
@@ -583,7 +583,7 @@
             },
             {
               "step": "02",
-              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, shellcheck, workflow and compose linting, terraform validate against both stacks, and the observability kit typechecked and tested. A secret scan and Semgrep alongside them.",
+              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, shellcheck, workflow and compose linting, terraform validate against both stacks, the observability kit typechecked and tested, and the deploy script's env-file helpers under bats. A secret scan and Semgrep alongside them.",
               "title": "The pull request"
             },
             {
@@ -639,7 +639,7 @@
             },
             {
               "step": "02",
-              "text": "Two language lanes running side by side. Rust: cargo fmt --check, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
+              "text": "Two language lanes running side by side. Rust: cargo fmt --check, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
               "title": "The pull request"
             },
             {
