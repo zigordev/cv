@@ -16,8 +16,9 @@ jobs:
   quality:
     name: Quality (Format + Lint + Typecheck + Build)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -42,6 +43,7 @@ jobs:
   secrets-scan:
     name: Secrets Scan (Gitleaks)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # gitleaks-action calls GET /pulls/{n}/commits to scope its scan to the PR's
     # own commits. The workflow-level `contents: read` above doesn't cover that
     # call, and Dependabot-triggered runs get no implicit permissions beyond
@@ -51,7 +53,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           fetch-depth: 0
 
@@ -64,8 +66,9 @@ jobs:
   web-smoke:
     name: Web Smoke (Docker)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Build web image
         run: docker build -f apps/ui/Dockerfile --target prod --build-arg NEXT_PUBLIC_RELEASE=ci -t cv-web:ci .
@@ -114,7 +117,7 @@ jobs:
     # by someone else, so it is where the rules get proven before they move to
     # gpool, kini and the operator console.
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
@@ -151,7 +154,7 @@ jobs:
     timeout-minutes: 25
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
@@ -211,6 +214,7 @@ jobs:
   sast:
     name: SAST (Semgrep)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Semgrep rather than CodeQL: CodeQL code scanning on a *private* repository
     # requires GitHub Code Security, a paid add-on. The CodeQL workflow beside
     # this one is gated on `!repository.private` for that reason and never runs.
@@ -233,7 +237,7 @@ jobs:
     container:
       image: semgrep/semgrep:1.99.0
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Scan
         # `semgrep scan`, not `semgrep ci`: the latter expects a Semgrep AppSec
