@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/zigordev/cv/compare/v0.6.1...v0.6.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deploy:** reuse an image already in ECR instead of failing on it ([#50](https://github.com/zigordev/cv/issues/50)) ([d22371c](https://github.com/zigordev/cv/commit/d22371cb7d1f862bc10faa117f2e7e34f29dfdec))
+
 ## [0.6.1](https://github.com/zigordev/cv/compare/v0.6.0...v0.6.1) (2026-09-08)
 
 
