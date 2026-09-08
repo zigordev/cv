@@ -550,7 +550,7 @@
           },
           {
             "step": "02",
-            "text": "OpenBao guarda todos los secretos detrás de una política limitada a una única ruta del kv, y un wrapper de arranque los recupera y se niega a levantar un contenedor al que le falte una clave que ha declarado. Tolgee guarda los textos, que las aplicaciones descargan como snapshot al construir y mezclan en vivo en cada petición. Unleash guarda los interruptores, accesible solo por la red interna: cada aplicación declara qué flags tiene y con qué valor por defecto, y el servidor aporta los valores, así que perderlo degrada a esos valores por defecto en vez de provocar una caída.",
+            "text": "OpenBao guarda todos los secretos detrás de una política limitada a una única ruta del kv, y un wrapper de arranque los recupera y se niega a levantar un contenedor al que le falte una clave que ha declarado. Se abre solo con una clave de KMS que nada más en el host puede alcanzar, así que un reinicio ya no deja producción sin secretos. Tolgee guarda los textos, que las aplicaciones descargan como snapshot al construir y mezclan en vivo en cada petición. Unleash guarda los interruptores, accesible solo por la red interna: cada aplicación declara qué flags tiene y con qué valor por defecto, y el servidor aporta los valores, así que perderlo degrada a esos valores por defecto en vez de provocar una caída.",
             "title": "Secretos, traducciones y flags"
           },
           {
@@ -594,7 +594,7 @@
             },
             {
               "step": "04",
-              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo.",
+              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo. Solo reinicia el almacén de secretos cuando cambia su propia configuración — una ruta de montaje que llevaba el nombre de la release lo recreaba en cada una.",
               "title": "El despliegue"
             }
           ]
