@@ -286,6 +286,7 @@
             "El auto-merge se activa en cada pull request no borrador en cuanto se abre, lo que deja la protección de rama como lo único que lo sujeta: lo verde se fusiona, lo rojo se queda. Los majors de Dependabot son la única exclusión, porque un major es un cambio que se lee, no un número que se sube.",
             "CodeQL, la revisión de dependencias y Semgrep se ejecutan en cada pull request, y el SBOM se conserva como artefacto de cada uno y no solo de una release.",
             "El PDF lo genera Chromium sin interfaz dentro del build de Docker, que falla si el fichero no se puede producir. Un despliegue no puede publicar una página y un PDF desactualizado que se contradigan.",
+            "El paquete de despliegue es el repositorio en el commit publicado, así que el host ejecuta el script de despliegue que pertenece a la release que está desplegando. Volver a una etiqueta anterior restaura también la lógica de despliegue de esa release, en vez de ejecutar el script de hoy contra el compose del mes pasado.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta la imagen de producción, así que lo que se comprueba es lo que se despliega; `local:dev` construye en su lugar una etapa de desarrollo y ejecuta `next dev` bajo `docker compose watch`, que copia los archivos modificados al contenedor en marcha en vez de reconstruirlo. La reconstrucción que se ahorra incluye el render del PDF con Chromium, el paso más lento de la imagen."
           ],
           "stages": [

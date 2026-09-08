@@ -166,11 +166,11 @@ jobs:
           IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
         run: |
           set -euo pipefail
-          bundle_dir="$(mktemp -d)"
-          cp docker/compose.app.prod.yml "$bundle_dir/"
-          cp docker/.env.app.prod "$bundle_dir/"
-          tar -czf bundle.tar.gz -C "$bundle_dir" .
-          aws s3 cp bundle.tar.gz "s3://${BUCKET}/cv/${IMAGE_TAG}/bundle.tar.gz"
+          mkdir -p artifacts
+          git archive --format=tar.gz --output "artifacts/deploy-bundle-${IMAGE_TAG}.tar.gz" HEAD
+          aws s3 cp \
+            "artifacts/deploy-bundle-${IMAGE_TAG}.tar.gz" \
+            "s3://${BUCKET}/releases/cv/${IMAGE_TAG}/deploy-bundle.tar.gz"
 
   deploy:
     name: Deploy to EC2
@@ -186,6 +186,7 @@ jobs:
 
       - name: Trigger remote deploy via SSM
         env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
           INSTANCE_ID: ${{ vars.AWS_DEPLOY_INSTANCE_ID }}
           BUCKET: ${{ vars.AWS_DEPLOY_BUCKET }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
@@ -193,12 +194,34 @@ jobs:
           SSM_APP_PREFIX: ${{ vars.AWS_SSM_APP_PREFIX }}
         run: |
           set -euo pipefail
-          command_id="$(aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy cv ${IMAGE_TAG}" \
-            --parameters commands="[\"bash /opt/platform/deploy-cv.sh '${BUCKET}' '${IMAGE_TAG}' '${WEB_IMAGE}' '${SSM_APP_PREFIX}'\"]" \
-            --query 'Command.CommandId' --output text)"
+          payload_file="$(mktemp)"
+          jq -n \
+            --arg instance "$INSTANCE_ID" \
+            --arg region "$AWS_REGION" \
+            --arg bucket "$BUCKET" \
+            --arg release "$IMAGE_TAG" \
+            --arg web_image "$WEB_IMAGE" \
+            --arg app_prefix "$SSM_APP_PREFIX" \
+            '{
+              DocumentName: "AWS-RunShellScript",
+              InstanceIds: [$instance],
+              Parameters: {
+                commands: [
+                  "set -euo pipefail",
+                  "BASE_DIR=\"/opt/cv\"",
+                  "RELEASE_DIR=\"$BASE_DIR/releases/\($release)\"",
+                  "mkdir -p \"$BASE_DIR/releases\"",
+                  "rm -rf \"$RELEASE_DIR\"",
+                  "mkdir -p \"$RELEASE_DIR\"",
+                  "aws s3 cp \"s3://\($bucket)/releases/cv/\($release)/deploy-bundle.tar.gz\" \"/tmp/cv-\($release).tar.gz\" --region \($region)",
+                  "tar -xzf \"/tmp/cv-\($release).tar.gz\" -C \"$RELEASE_DIR\"",
+                  "cd \"$RELEASE_DIR\"",
+                  "chmod +x scripts/prod-deploy-remote.sh",
+                  "./scripts/prod-deploy-remote.sh --release-dir \"$RELEASE_DIR\" --region \"\($region)\" --app-ssm-prefix \"\($app_prefix)\" --web-image \"\($web_image)\" --release-tag \"\($release)\""
+                ]
+              }
+            }' > "$payload_file"
+          command_id="$(aws ssm send-command --cli-input-json "file://${payload_file}" --query 'Command.CommandId' --output text)"
 
           echo "SSM command: $command_id"
           aws ssm wait command-executed \
