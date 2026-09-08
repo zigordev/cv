@@ -23,6 +23,7 @@ function connect(): Promise<boolean> {
     url,
     token,
     appName: process.env.UNLEASH_APP_NAME ?? 'cv-web',
+    ...(process.env.UNLEASH_BACKUP_PATH ? { backupPath: process.env.UNLEASH_BACKUP_PATH } : {}),
   });
 
   return connection;
