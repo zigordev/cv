@@ -378,12 +378,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
+            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Es él quien hace el intercambio de OAuth con Google y emite la sesión, así que el secreto de cliente vive en un único servicio y no en dos. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router con salida standalone. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
+            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
             "title": "Web"
           },
           {
@@ -550,7 +550,7 @@
           },
           {
             "step": "02",
-            "text": "OpenBao guarda todos los secretos detrás de una política limitada a una única ruta del kv, y un wrapper de arranque los recupera y se niega a levantar un contenedor al que le falte una clave que ha declarado. Tolgee guarda los textos, que las aplicaciones descargan como snapshot al construir y mezclan en vivo en cada petición. Unleash guarda los interruptores, accesible solo por la red interna: cada aplicación declara qué flags tiene y con qué valor por defecto, y el servidor aporta los valores, así que perderlo degrada a esos valores por defecto en vez de provocar una caída.",
+            "text": "OpenBao guarda todos los secretos detrás de una política limitada a una única ruta del kv, y un wrapper de arranque los recupera y se niega a levantar un contenedor al que le falte una clave que ha declarado. Se abre solo con una clave de KMS que nada más en el host puede alcanzar, así que un reinicio ya no deja producción sin secretos. Tolgee guarda los textos, que las aplicaciones descargan como snapshot al construir y mezclan en vivo en cada petición. Unleash guarda los interruptores, accesible solo por la red interna: cada aplicación declara qué flags tiene y con qué valor por defecto, y el servidor aporta los valores, así que perderlo degrada a esos valores por defecto en vez de provocar una caída.",
             "title": "Secretos, traducciones y flags"
           },
           {
@@ -560,7 +560,7 @@
           },
           {
             "step": "04",
-            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad.",
+            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
             "title": "Tres señales, tres caminos"
           },
           {
@@ -594,7 +594,7 @@
             },
             {
               "step": "04",
-              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo.",
+              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo. Solo reinicia el almacén de secretos cuando cambia su propia configuración — una ruta de montaje que llevaba el nombre de la release lo recreaba en cada una.",
               "title": "El despliegue"
             }
           ]

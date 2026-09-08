@@ -378,12 +378,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "NestJS monolith covering auth, pools and RUM. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
+            "text": "NestJS monolith covering auth, pools and RUM. It owns the Google OAuth exchange and issues the session itself, so the client secret lives in one service rather than two. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router in standalone output. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
+            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
             "title": "Web"
           },
           {
@@ -550,7 +550,7 @@
           },
           {
             "step": "02",
-            "text": "OpenBao holds every application secret behind a policy scoped to exactly one kv path, and a boot wrapper fetches them and refuses to start a container missing a key it declared. Tolgee holds the copy, which applications pull as a snapshot at build time and merge live at request time. Unleash holds the switches, reached only over the internal network: an application declares which flags it has and what they default to, and the server supplies values, so losing it degrades to those defaults rather than to an outage.",
+            "text": "OpenBao holds every application secret behind a policy scoped to exactly one kv path, and a boot wrapper fetches them and refuses to start a container missing a key it declared. It unseals itself from a KMS key nothing else on the host can reach, so a reboot no longer leaves production without secrets. Tolgee holds the copy, which applications pull as a snapshot at build time and merge live at request time. Unleash holds the switches, reached only over the internal network: an application declares which flags it has and what they default to, and the server supplies values, so losing it degrades to those defaults rather than to an outage.",
             "title": "Secrets, translations and flags"
           },
           {
@@ -560,7 +560,7 @@
           },
           {
             "step": "04",
-            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks.",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
             "title": "Three signals, three paths"
           },
           {
@@ -594,7 +594,7 @@
             },
             {
               "step": "04",
-              "text": "A published release, or a manual dispatch, packages the tracked files into a bundle, uploads it to S3 and has SSM apply it on the host. The shared stack deploys down exactly the same path as the products sitting on it, which is how that path stays trustworthy: everything exercises it.",
+              "text": "A published release, or a manual dispatch, packages the tracked files into a bundle, uploads it to S3 and has SSM apply it on the host. The shared stack deploys down exactly the same path as the products sitting on it, which is how that path stays trustworthy: everything exercises it. It restarts the secret store only when that store's own config changed — a mount path carrying the release name used to recreate it on every release.",
               "title": "The deploy"
             }
           ]
