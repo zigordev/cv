@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/zigordev/cv/compare/v0.4.0...v0.5.0) (2026-09-08)
+
+
+### Features
+
+* **deploy:** give cv a working deploy path ([#43](https://github.com/zigordev/cv/issues/43)) ([5374ddb](https://github.com/zigordev/cv/commit/5374ddbf8a7b83f06774a7ba07f54ab43d02e2a0))
+
 ## [0.4.0](https://github.com/zigordev/cv/compare/v0.3.0...v0.4.0) (2026-09-07)
 
 
