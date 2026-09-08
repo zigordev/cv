@@ -158,7 +158,7 @@ if [ "$openbao_secret_code" != "200" ]; then
   exit 1
 fi
 
-for key in TOLGEE_API_KEY CONTACT_RECIPIENT_EMAIL UNLEASH_TOKEN; do
+for key in TOLGEE_API_KEY CONTACT_RECIPIENT_EMAIL; do
   if [ -z "$(jq -r --arg k "$key" '.data.data[$k] // ""' "$openbao_secret_body_file")" ]; then
     echo "OpenBao secret ${OPENBAO_KV_MOUNT}/${OPENBAO_SECRET_PATH} is missing required key: $key" >&2
     rm -f "$openbao_secret_body_file"
