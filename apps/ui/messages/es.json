@@ -378,12 +378,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
+            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Es él quien hace el intercambio de OAuth con Google y emite la sesión, así que el secreto de cliente vive en un único servicio y no en dos. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router con salida standalone. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
+            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
             "title": "Web"
           },
           {

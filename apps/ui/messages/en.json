@@ -378,12 +378,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "NestJS monolith covering auth, pools and RUM. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
+            "text": "NestJS monolith covering auth, pools and RUM. It owns the Google OAuth exchange and issues the session itself, so the client secret lives in one service rather than two. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router in standalone output. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
+            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
             "title": "Web"
           },
           {
