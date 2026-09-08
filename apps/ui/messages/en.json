@@ -560,7 +560,7 @@
           },
           {
             "step": "04",
-            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks.",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
             "title": "Three signals, three paths"
           },
           {

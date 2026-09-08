@@ -560,7 +560,7 @@
           },
           {
             "step": "04",
-            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad.",
+            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
             "title": "Tres señales, tres caminos"
           },
           {
