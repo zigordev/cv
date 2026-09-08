@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/zigordev/cv/compare/v0.6.0...v0.6.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **flags:** land the corrections, and stop the flag service blocking a deploy ([#47](https://github.com/zigordev/cv/issues/47)) ([60eb314](https://github.com/zigordev/cv/commit/60eb314fee10fab133b43858b079f0394f22a4bf))
+
 ## [0.6.0](https://github.com/zigordev/cv/compare/v0.5.0...v0.6.0) (2026-09-08)
 
 
