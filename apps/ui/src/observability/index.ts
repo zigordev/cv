@@ -10,5 +10,11 @@
  */
 export { initRum, trackEvent } from './rum-client';
 export type { RumOptions } from './rum-client';
-export { allFlags, isEnabled, registerFlags } from './feature-flags';
-export type { FlagDefinition, ResolvedFlag } from './feature-flags';
+export {
+  allFlags,
+  connectRemoteFlags,
+  disconnectRemoteFlags,
+  isEnabled,
+  registerFlags,
+} from './feature-flags';
+export type { FlagDefinition, RemoteFlagOptions, ResolvedFlag } from './feature-flags';

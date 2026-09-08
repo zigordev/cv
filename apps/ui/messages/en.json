@@ -550,8 +550,8 @@
           },
           {
             "step": "02",
-            "text": "OpenBao holds every application secret behind a policy scoped to exactly one kv path, and a boot wrapper fetches them and refuses to start a container missing a key it declared. Tolgee holds the copy, which applications pull as a snapshot at build time and merge live at request time.",
-            "title": "Secrets and translations"
+            "text": "OpenBao holds every application secret behind a policy scoped to exactly one kv path, and a boot wrapper fetches them and refuses to start a container missing a key it declared. Tolgee holds the copy, which applications pull as a snapshot at build time and merge live at request time. Unleash holds the switches, reached only over the internal network: an application declares which flags it has and what they default to, and the server supplies values, so losing it degrades to those defaults rather than to an outage.",
+            "title": "Secrets, translations and flags"
           },
           {
             "step": "03",

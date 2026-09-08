@@ -32,7 +32,12 @@ import { display } from '@/lib/type';
  * nearest honest matches from the set: an arrow for the download, a pencil for
  * writing a message.
  */
-export function SiteHeader() {
+interface SiteHeaderProps {
+  /** Gated by the cv-pdf-download flag, resolved on the server. */
+  readonly pdfDownload?: boolean;
+}
+
+export function SiteHeader({ pdfDownload = true }: SiteHeaderProps) {
   const { t, locale, setLocale } = useI18n();
   const { identity, labels } = useCv();
   const [contactOpen, setContactOpen] = useState(false);
@@ -86,16 +91,18 @@ export function SiteHeader() {
                 `md`, not `sm`, to match the globe: the design system sizes icon
                 buttons at 38px and has no small variant, so an `sm` (32px)
                 neighbour sits 6px short of it. */}
-            <Button
-              as="a"
-              variant="primary"
-              size="md"
-              href={`/cv-${locale}.pdf`}
-              download={`${identity.firstName}-${identity.lastName}-CV-${locale.toUpperCase()}.pdf`}
-            >
-              <Icon name="arrow-down" size={15} />
-              <span className="cv-btn-label">{t('rail.pdf')}</span>
-            </Button>
+            {pdfDownload && (
+              <Button
+                as="a"
+                variant="primary"
+                size="md"
+                href={`/cv-${locale}.pdf`}
+                download={`${identity.firstName}-${identity.lastName}-CV-${locale.toUpperCase()}.pdf`}
+              >
+                <Icon name="arrow-down" size={15} />
+                <span className="cv-btn-label">{t('rail.pdf')}</span>
+              </Button>
+            )}
 
             <Menu
               trigger={
