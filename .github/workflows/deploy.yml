@@ -107,12 +107,18 @@ jobs:
         run: |
           set -euo pipefail
           web_image="${WEB_REPO}:${IMAGE_TAG}"
-          docker build \
-            -f apps/ui/Dockerfile \
-            --target prod \
-            --build-arg NEXT_PUBLIC_RELEASE="${RELEASE_TAG}" \
-            -t "$web_image" .
-          docker push "$web_image"
+          web_repo_name="${WEB_REPO#*/}"
+
+          if aws ecr describe-images --repository-name "$web_repo_name" --image-ids imageTag="${IMAGE_TAG}" >/dev/null 2>&1; then
+            echo "Web image already exists in ECR with immutable tag, reusing: $web_image"
+          else
+            docker build \
+              -f apps/ui/Dockerfile \
+              --target prod \
+              --build-arg NEXT_PUBLIC_RELEASE="${RELEASE_TAG}" \
+              -t "$web_image" .
+            docker push "$web_image"
+          fi
           echo "web_image=$web_image" >> "$GITHUB_OUTPUT"
 
       # --- Supply-chain attestation -------------------------------------------
