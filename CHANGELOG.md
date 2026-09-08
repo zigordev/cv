@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/zigordev/cv/compare/v0.5.0...v0.6.0) (2026-09-08)
+
+
+### Features
+
+* **flags:** gate the Download CV button on a feature flag ([#45](https://github.com/zigordev/cv/issues/45)) ([dfb4f8e](https://github.com/zigordev/cv/commit/dfb4f8e92cfcdfde39d261532b8ed604098a15a8))
+
 ## [0.5.0](https://github.com/zigordev/cv/compare/v0.4.0...v0.5.0) (2026-09-08)
 
 
