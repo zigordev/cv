@@ -286,6 +286,7 @@
             "Auto-merge is enabled on every non-draft pull request the moment it opens, which leaves branch protection as the only thing holding it: green checks merge, red ones sit. Dependabot majors are the one exclusion, because a major is a change to read rather than a number to bump.",
             "CodeQL, dependency review and Semgrep run on every pull request, and the SBOM is kept as an artefact of each one rather than only of a release.",
             "The PDF is rendered by headless Chromium inside the Docker build, which fails if the file cannot be produced. A deploy cannot ship a page and a stale PDF that disagree with each other.",
+            "The deploy bundle is the repository at the released commit, so the host runs the deploy script belonging to the release it is deploying. Rolling back to an older tag restores that release's deploy logic with it, rather than running today's script against last month's compose file.",
             "Local development has two modes over one set of containers. `local:up` runs the production image, so what is being checked is what ships; `local:dev` builds a dev stage instead and runs `next dev` under `docker compose watch`, which copies changed files into the running container rather than rebuilding it. The rebuild it skips includes the Chromium PDF render, the slowest step in the image."
           ],
           "stages": [
