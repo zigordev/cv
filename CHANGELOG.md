@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/zigordev/cv/compare/v0.6.2...v0.6.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* **contact:** bound the address and make its pattern linear ([#56](https://github.com/zigordev/cv/issues/56)) ([73cc165](https://github.com/zigordev/cv/commit/73cc16535f0073aa043fe3a3dc4d58b8cc0712c5))
+
 ## [0.6.2](https://github.com/zigordev/cv/compare/v0.6.1...v0.6.2) (2026-09-08)
 
 
