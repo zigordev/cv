@@ -53,8 +53,26 @@ describe('POST /api/contact', () => {
     const response = await post('{', freshAddress());
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: 'invalid_json' });
+    expect(await response.json()).toMatchObject({
+      status: 400,
+      code: 'CONTACT.INVALID_JSON',
+    });
     expect(mocks.publishEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends the problem content type and the full RFC 9457 shape', async () => {
+    const response = await post({ ...valid, email: 'not-an-email' }, freshAddress());
+
+    expect(response.headers.get('content-type')).toContain('application/problem+json');
+    expect(await response.json()).toEqual({
+      type: 'https://zigordev.com/problems/contact-invalid-email',
+      title: 'Bad request',
+      status: 400,
+      detail: 'A valid email address is required.',
+      instance: '/api/contact',
+      code: 'CONTACT.INVALID_EMAIL',
+      params: { maxLength: 254 },
+    });
   });
 
   it('refuses an address longer than an email can be', async () => {
@@ -64,7 +82,10 @@ describe('POST /api/contact', () => {
     );
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: 'invalid_email' });
+    expect(await response.json()).toMatchObject({
+      status: 400,
+      code: 'CONTACT.INVALID_EMAIL',
+    });
   });
 
   it('rejects the shapes the previous pattern accepted or backtracked on', async () => {
@@ -72,7 +93,10 @@ describe('POST /api/contact', () => {
       const response = await post({ ...valid, email }, freshAddress());
 
       expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({ error: 'invalid_email' });
+      expect(await response.json()).toMatchObject({
+        status: 400,
+        code: 'CONTACT.INVALID_EMAIL',
+      });
     }
   });
 
@@ -86,7 +110,10 @@ describe('POST /api/contact', () => {
     expect((await post('"text"', freshAddress())).status).toBe(400);
     const response = await post({ ...valid, email: 'not-an-email' }, freshAddress());
 
-    expect(await response.json()).toEqual({ error: 'invalid_email' });
+    expect(await response.json()).toMatchObject({
+      status: 400,
+      code: 'CONTACT.INVALID_EMAIL',
+    });
     expect(mocks.publishEmail).not.toHaveBeenCalled();
   });
 
@@ -98,7 +125,10 @@ describe('POST /api/contact', () => {
 
     const sixth = await post(valid, address);
     expect(sixth.status).toBe(429);
-    expect(await sixth.json()).toEqual({ error: 'rate_limited' });
+    expect(await sixth.json()).toMatchObject({
+      status: 429,
+      code: 'CONTACT.RATE_LIMITED',
+    });
     expect((await post(valid, freshAddress())).status).toBe(202);
     expect(mocks.publishEmail).toHaveBeenCalledTimes(6);
   });
@@ -120,7 +150,10 @@ describe('POST /api/contact', () => {
     const response = await post(valid, freshAddress());
 
     expect(response.status).toBe(502);
-    expect(await response.json()).toEqual({ error: 'publish_failed' });
+    expect(await response.json()).toMatchObject({
+      status: 502,
+      code: 'CONTACT.PUBLISH_FAILED',
+    });
     consoleError.mockRestore();
   });
 });
