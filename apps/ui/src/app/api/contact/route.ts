@@ -5,7 +5,8 @@ import { buildContactEvent, publishEmail } from '@/lib/notifications';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+const MAX_EMAIL = 254;
 const MAX_NAME = 120;
 const MAX_MESSAGE = 4000;
 
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
   if (!name || name.length > MAX_NAME) {
     return NextResponse.json({ error: 'invalid_name' }, { status: 400 });
   }
-  if (!EMAIL_PATTERN.test(email)) {
+  if (email.length > MAX_EMAIL || !EMAIL_PATTERN.test(email)) {
     return NextResponse.json({ error: 'invalid_email' }, { status: 400 });
   }
   if (!message || message.length > MAX_MESSAGE) {
