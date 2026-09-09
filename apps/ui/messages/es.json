@@ -261,7 +261,8 @@
         "approach": "Una única fuente de contenido, renderizada dos veces. La página es una maquetación editorial con un caso de estudio detrás de cada proyecto; los mismos datos generan un documento aparte a una sola columna que Chromium convierte en PDF durante el build, de modo que la versión que se parsea conserva texto real y no una imagen de texto.",
         "decisions": [
           "El PDF se genera en el build y no en el navegador. Las librerías de html-a-PDF del lado del cliente rasterizan la página y destruyen el texto seleccionable que justifica toda la maquetación pensada para ATS.",
-          "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados."
+          "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados.",
+          "El endpoint de contacto envía problem details de la RFC 9457 igual que las cuatro APIs, de modo que una sola forma de error cubre todo el estate en vez de cuatro."
         ],
         "pieces": [
           {
@@ -373,7 +374,8 @@
         "decisions": [
           "Los secretos se obtienen al arrancar mediante un proceso envoltorio, nunca se hornean en la imagen ni se suben en un fichero de entorno: un token filtrado expone una sola ruta del kv, no todo el almacén.",
           "El correo es un evento, no una llamada. La API publica en un topic y un servicio compartido se encarga de la entrega, la idempotencia y los mensajes muertos.",
-          "La CI regenera el contrato de la API desde la API en ejecución y falla ante cualquier desviación, para que cliente y servidor no puedan discrepar en silencio."
+          "La CI regenera el contrato de la API desde la API en ejecución y falla ante cualquier desviación, para que cliente y servidor no puedan discrepar en silencio.",
+          "Los errores son problem details de la RFC 9457 con un code traducible, y cada ruta declara su código de estado — así salió a la luz que Nest respondía 201 a POSTs que el cliente generado documentaba como 200."
         ],
         "pieces": [
           {
@@ -430,7 +432,8 @@
       "kini": {
         "approach": "Una API en NestJS y un cliente en Next.js dentro de un monorepo, con monitorización montada en local. Buena parte de lo que resolvió — la disposición de compose, el flujo de traducciones con Tolgee, los workflows de release y despliegue — se convirtió en la plantilla desde la que arrancaron los proyectos posteriores.",
         "decisions": [
-          "Se mantuvo como repositorio propio en vez de absorberse en gpool, para que la reescritura pudiera cambiar de opinión sobre la arquitectura sin reescribir la historia."
+          "Se mantuvo como repositorio propio en vez de absorberse en gpool, para que la reescritura pudiera cambiar de opinión sobre la arquitectura sin reescribir la historia.",
+          "Los errores son problem details de la RFC 9457 con un code traducible, y los recursos son plurales y anidados: un partido vive bajo la quiniela que lo contiene, y esa quiniela se comprueba en vez de ser decorativa."
         ],
         "pieces": [
           {
@@ -482,7 +485,8 @@
         "approach": "Un único consumidor se encarga de la entrega para todos. Los productores publican un evento de intención y se desentienden; el servicio valida el contrato, renderiza una plantilla localizada, la envía y guarda un registro duradero de cada intento.",
         "decisions": [
           "Los payloads inválidos fallan como no reintentables y acaban en un registro duradero de mensajes muertos, porque reintentar eternamente un mensaje malformado es peor que perderlo haciendo ruido.",
-          "El nombre del topic va versionado, de modo que un cambio de contrato es un topic nuevo y no una rotura silenciosa para cada productor."
+          "El nombre del topic va versionado, de modo que un cambio de contrato es un topic nuevo y no una rotura silenciosa para cada productor.",
+          "Los errores son problem details de la RFC 9457 como en el resto, aunque este servicio solo sirva health y metrics — los 404 y 500 que sí emite son justo aquellos para los que nadie escribe un cliente."
         ],
         "pieces": [
           {
@@ -541,7 +545,8 @@
         "decisions": [
           "Políticas de OpenBao por aplicación limitadas a una única ruta del kv, de forma que el token de una app no sirve contra ninguna otra.",
           "Los mismos manifiestos de compose describen local y producción, así que una reproducción local es una reproducción de verdad.",
-          "Toda la plataforma corre en un único host por diseño, lo que deja al coste una sola palanca: pararlo. Una franja programada y un interruptor manual apagan producción durante las horas en que nadie la usa, y todo vuelve solo desde el disco."
+          "Toda la plataforma corre en un único host por diseño, lo que deja al coste una sola palanca: pararlo. Una franja programada y un interruptor manual apagan producción durante las horas en que nadie la usa, y todo vuelve solo desde el disco.",
+          "Un único contrato HTTP para cinco servicios: problem details de la RFC 9457 con un code traducible, recursos en plural y anidados, códigos de estado explícitos por verbo, y versión en la URL solo donde llama un servicio que se despliega aparte."
         ],
         "pieces": [
           {
@@ -608,7 +613,8 @@
       "trading-bot": {
         "approach": "El trabajo sensible a la latencia vive en crates de Rust; la orquestación y la supervisión, en TypeScript. Las dos mitades se encuentran en un plano de control, con una consola de operador en Next.js por encima.",
         "decisions": [
-          "El backtesting y la ejecución en vivo consumen la misma crate de estrategia, así que un resultado que no se puede reproducir offline es un bug y no un misterio."
+          "El backtesting y la ejecución en vivo consumen la misma crate de estrategia, así que un resultado que no se puede reproducir offline es un bug y no un misterio.",
+          "El control-plane mantiene versión en la URL porque tres servicios Rust lo llaman por red y se despliegan aparte; los productos que publican su cliente desde el mismo repositorio, no."
         ],
         "pieces": [
           {
