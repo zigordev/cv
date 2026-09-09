@@ -540,7 +540,8 @@
         "approach": "One ops stack, one external Docker network, and a rule that applications own only their own containers. An app declares which secret path it reads and which topics it uses; everything underneath is shared and versioned in one place.",
         "decisions": [
           "Per-application OpenBao policies scoped to exactly one kv path, so an app token is useless against any other app.",
-          "The same compose manifests describe local and production, so a local reproduction is a real reproduction."
+          "The same compose manifests describe local and production, so a local reproduction is a real reproduction.",
+          "The whole estate runs on one host by design, which leaves cost a single lever: stop it. A scheduled window and a manual switch turn production off for the hours nobody uses it, and everything comes back on its own from the disk."
         ],
         "pieces": [
           {
@@ -574,7 +575,8 @@
             "An uptime probe runs every five minutes on GitHub's infrastructure and checks the public health endpoints from outside. Prometheus runs on the same host as the things it watches, so it cannot report its own death — and the silence looks exactly like everything being fine.",
             "The probe opens a GitHub issue rather than sending mail. An issue deduplicates, carries a state, and does not depend on the SMTP relay, which is itself one of the things that could be broken.",
             "Scheduled runs are best effort by design: GitHub delays them under load and skips them outright on a busy account, so this is roughly every five minutes and never a heartbeat.",
-            "Dependabot on npm and the Actions, weekly and grouped, with patch and minor merging on green."
+            "Dependabot on npm and the Actions, weekly and grouped, with patch and minor merging on green.",
+            "A Power workflow stops and starts the single production host on demand, and two EventBridge Scheduler rules do the same on a fixed daily window. Off means a stopped machine, not a torn-down one: every database, the secret store and the certificates stay on its volume, and the uptime probe reads the host's state first, so a deliberate stop is a silence it expects."
           ],
           "stages": [
             {

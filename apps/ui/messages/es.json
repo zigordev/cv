@@ -540,7 +540,8 @@
         "approach": "Un único stack de operaciones, una red Docker externa y una regla: cada aplicación posee solo sus propios contenedores. La aplicación declara qué ruta de secretos lee y qué topics usa; todo lo que hay debajo es compartido y está versionado en un solo sitio.",
         "decisions": [
           "Políticas de OpenBao por aplicación limitadas a una única ruta del kv, de forma que el token de una app no sirve contra ninguna otra.",
-          "Los mismos manifiestos de compose describen local y producción, así que una reproducción local es una reproducción de verdad."
+          "Los mismos manifiestos de compose describen local y producción, así que una reproducción local es una reproducción de verdad.",
+          "Toda la plataforma corre en un único host por diseño, lo que deja al coste una sola palanca: pararlo. Una franja programada y un interruptor manual apagan producción durante las horas en que nadie la usa, y todo vuelve solo desde el disco."
         ],
         "pieces": [
           {
@@ -574,7 +575,8 @@
             "Una sonda de disponibilidad se ejecuta cada cinco minutos en la infraestructura de GitHub y comprueba los endpoints públicos de salud desde fuera. Prometheus corre en el mismo host que aquello que vigila, así que no puede avisar de su propia muerte — y el silencio se parece exactamente a que todo va bien.",
             "La sonda abre una incidencia en GitHub en lugar de enviar un correo. Una incidencia se deduplica, tiene estado y no depende del relé SMTP, que es en sí mismo una de las cosas que podrían estar rotas.",
             "Las ejecuciones programadas son de mejor esfuerzo por diseño: GitHub las retrasa cuando hay carga y las omite del todo en una cuenta ocupada, así que esto es aproximadamente cada cinco minutos y nunca un latido.",
-            "Dependabot sobre npm y las Actions, semanal y agrupado, con patch y minor fusionándose en verde."
+            "Dependabot sobre npm y las Actions, semanal y agrupado, con patch y minor fusionándose en verde.",
+            "Un workflow de encendido y apagado para y arranca el único host de producción bajo demanda, y dos reglas de EventBridge Scheduler hacen lo mismo en una franja fija cada día. Apagado significa una máquina parada, no desmontada: todas las bases de datos, el almacén de secretos y los certificados siguen en su volumen, y la sonda de disponibilidad lee antes el estado del host, así que una parada deliberada es un silencio que ya espera."
           ],
           "stages": [
             {
