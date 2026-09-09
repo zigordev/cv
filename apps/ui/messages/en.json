@@ -80,6 +80,21 @@
         },
         "seam": "one shared docker network"
       },
+      "sity": {
+        "alt": "A road plan feeding a network builder that produces both the directed lane graph and the drawn scene, with the verification reading the graph back through the page.",
+        "caption": "Roads are drawn from the graph rather than the graph fitted to the drawing, so a vehicle on lane data is on the asphalt.",
+        "lanes": {
+          "graph": "Lane graph",
+          "scene": "Scene"
+        },
+        "notes": {
+          "graph": "routes and invariants",
+          "network": "sampled, trimmed, connected",
+          "plan": "nodes and typed roads",
+          "scene": "roads, city, terrain",
+          "verify": "reads the graph in a browser"
+        }
+      },
       "tradingBot": {
         "alt": "A Rust hot path of market data, strategy and execution, where the strategy crate also feeds an offline backtest, above a TypeScript control plane serving a Next.js operator console.",
         "caption": "Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery.",
@@ -609,6 +624,57 @@
         "problem": "Five applications each needed secret storage, translations, an event broker and observability. Duplicating that per repository means five OpenBao instances to unseal and five ways to be inconsistent.",
         "role": "Solo — infrastructure",
         "tagline": "The shared operations stack every other project attaches to instead of rebuilding."
+      },
+      "sity": {
+        "approach": "One plan describes every road as nodes and typed segments. From it the scene builds the geometry it renders and the directed lane graph that vehicles will follow, so the drawing and the data cannot disagree. The city grows from the streets: lots are cut along each frontage and filled with instanced buildings whose facades come from a shader.",
+        "decisions": [
+          "Roads are drawn from the graph rather than the graph fitted to the drawing. A road rendered from the same sampled centreline as its lanes means a vehicle on lane data is on the asphalt, with no second source of truth to reconcile.",
+          "Everything repeated is instanced and everything else is merged per material, which keeps the whole city under 300 draw calls with post-processing on. The facade grid is computed in the shader from the instance box, so building variety costs attributes, not geometry."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "A highway ring with a tunnel, a cable-stayed bridge and viaducts; a diamond, a dumbbell and a half-diamond interchange; a downtown grid with an arterial, collectors, a one-way pair, roundabouts, a curved riverside collector and a hairpin mountain road, each with its class rules for lanes, medians, sidewalks and speed.",
+            "title": "Road plan"
+          },
+          {
+            "step": "02",
+            "text": "Every lane is a directed polyline with successors, predecessors and neighbours. Junction connectors are generated per allowed turn, roundabouts as circulating arcs, ramps as diverges and merges. Dijkstra routing, path enumeration and invariant checks live on the same graph.",
+            "title": "Lane graph"
+          },
+          {
+            "step": "03",
+            "text": "Districts decide what a lot becomes: towers on podiums downtown, brick and plaster blocks, houses with gardens, sheds by the port, hotels on the coast. Facades are a shader over per-instance attributes, so a few thousand buildings cost a handful of draw calls. Forests, street trees, parks, a plaza, an arena, a school and a church fill the rest.",
+            "title": "City"
+          },
+          {
+            "step": "04",
+            "text": "Playwright drives the page through a debug API: graph invariants, routing between the highway and Main Street, city counts, draw-call and triangle budgets, and rendered views checked pixel by pixel and saved as screenshots.",
+            "title": "Verification"
+          }
+        ],
+        "pipeline": {
+          "automation": [
+            "Dependabot over npm and the Actions, grouped weekly with a seven-day cooldown, the same policy as the rest of the estate.",
+            "CodeQL on every pull request and weekly on main, and commitlint on the commits and the pull request title.",
+            "The render verification runs against the production build served by Vite preview, on headless Chromium with software WebGL, and uploads its screenshots as an artefact so a change to the city can be reviewed by eye as well as by assertion."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Typecheck and Vite build, then the render verification: assets loaded, road graph invariants, routing, city and vegetation counts, camera views, the compass, performance budgets and pixel samples of five views on desktop and mobile.",
+              "title": "The pull request"
+            },
+            {
+              "step": "02",
+              "text": "The scene has no users beyond its author until vehicles and traffic devices exist, so there is no release train and no host yet; the built site is verified, not published.",
+              "title": "No release or deploy, yet"
+            }
+          ]
+        },
+        "problem": "Simulating smart traffic — adaptive signals, rerouting when a road clogs — needs a city that is credible to look at and a road network a program can drive: lanes with direction, turns, ramps and roundabouts, not a picture of asphalt.",
+        "role": "Solo — Three.js & TypeScript",
+        "tagline": "A coastal city built in Three.js as the ground for smart-traffic simulations, with every road already a lane graph."
       },
       "trading-bot": {
         "approach": "Latency-sensitive work lives in Rust crates; orchestration and supervision live in TypeScript. The two halves meet at a control plane, with a Next.js operator console on top.",
