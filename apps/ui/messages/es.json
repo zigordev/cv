@@ -80,6 +80,21 @@
         },
         "seam": "una red docker compartida"
       },
+      "sity": {
+        "alt": "Un plan viario que alimenta un constructor de red que produce a la vez el grafo dirigido de carriles y la escena dibujada, con la verificación leyendo el grafo de vuelta a través de la página.",
+        "caption": "Las vías se dibujan desde el grafo en lugar de ajustar el grafo al dibujo, así que un vehículo sobre los datos de carril está sobre el asfalto.",
+        "lanes": {
+          "graph": "Grafo de carriles",
+          "scene": "Escena"
+        },
+        "notes": {
+          "graph": "rutas e invariantes",
+          "network": "muestreada, recortada, unida",
+          "plan": "nodos y vías tipadas",
+          "scene": "vías, ciudad, terreno",
+          "verify": "lee el grafo en el navegador"
+        }
+      },
       "tradingBot": {
         "alt": "Un camino rápido en Rust con datos de mercado, estrategia y ejecución, donde la crate de estrategia alimenta además un backtest offline, sobre un plano de control en TypeScript que sirve una consola de operador en Next.js.",
         "caption": "El backtesting y la ejecución en vivo consumen la misma crate de estrategia, así que un resultado que no se puede reproducir offline es un bug y no un misterio.",
@@ -609,6 +624,57 @@
         "problem": "Cinco aplicaciones necesitaban almacenamiento de secretos, traducciones, un broker de eventos y observabilidad. Duplicar eso en cada repositorio significa cinco instancias de OpenBao que desellar y cinco formas distintas de ser inconsistente.",
         "role": "En solitario — infraestructura",
         "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
+      },
+      "sity": {
+        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. La ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
+        "decisions": [
+          "Las vías se dibujan desde el grafo en lugar de ajustar el grafo al dibujo. Una vía renderizada desde el mismo eje muestreado que sus carriles significa que un vehículo sobre los datos de carril está sobre el asfalto, sin una segunda fuente de verdad que reconciliar.",
+          "Todo lo repetido se instancia y todo lo demás se fusiona por material, lo que mantiene la ciudad entera por debajo de 300 draw calls con el postprocesado activo. La retícula de la fachada se calcula en el shader a partir de la caja de la instancia, así que la variedad de edificios cuesta atributos, no geometría."
+        ],
+        "pieces": [
+          {
+            "step": "01",
+            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa y uno en medio diamante; una retícula céntrica con una arteria, colectoras, un par de sentido único, rotondas, una colectora curva junto al río y una carretera de montaña con horquillas, cada una con las reglas de su clase para carriles, medianas, aceras y velocidad.",
+            "title": "Plan viario"
+          },
+          {
+            "step": "02",
+            "text": "Cada carril es una polilínea dirigida con sucesores, predecesores y vecinos. Los conectores de cruce se generan por giro permitido, las rotondas como arcos de circulación y los ramales como salidas e incorporaciones. El enrutado con Dijkstra, la enumeración de caminos y las comprobaciones de invariantes viven sobre el mismo grafo.",
+            "title": "Grafo de carriles"
+          },
+          {
+            "step": "03",
+            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio y una iglesia rellenan el resto.",
+            "title": "Ciudad"
+          },
+          {
+            "step": "04",
+            "text": "Playwright conduce la página a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, recuentos de la ciudad, presupuestos de draw calls y triángulos, y vistas renderizadas comprobadas píxel a píxel y guardadas como capturas.",
+            "title": "Verificación"
+          }
+        ],
+        "pipeline": {
+          "automation": [
+            "Dependabot sobre npm y las Actions, agrupado semanalmente con siete días de espera, la misma política que el resto del parque.",
+            "CodeQL en cada pull request y semanalmente en main, y commitlint sobre los commits y el título del pull request.",
+            "La verificación de render se ejecuta contra la build de producción servida por Vite preview, en Chromium sin cabeza con WebGL por software, y sube sus capturas como artefacto para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
+          ],
+          "stages": [
+            {
+              "step": "01",
+              "text": "Typecheck y build de Vite, y después la verificación de render: assets cargados, invariantes del grafo viario, enrutado, recuentos de ciudad y vegetación, vistas de cámara, la brújula, presupuestos de rendimiento y muestras de píxeles de cinco vistas en escritorio y móvil.",
+              "title": "El pull request"
+            },
+            {
+              "step": "02",
+              "text": "La escena no tiene más usuarios que su autor hasta que existan vehículos y dispositivos de tráfico, así que todavía no hay tren de releases ni host; la build se verifica, no se publica.",
+              "title": "Sin release ni despliegue, por ahora"
+            }
+          ]
+        },
+        "problem": "Simular tráfico inteligente — semáforos adaptativos, desvíos cuando una vía se atasca — necesita una ciudad creíble a la vista y una red viaria que un programa pueda conducir: carriles con sentido, giros, ramales y rotondas, no una imagen de asfalto.",
+        "role": "En solitario — Three.js y TypeScript",
+        "tagline": "Una ciudad costera construida en Three.js como base para simulaciones de tráfico inteligente, con cada vía convertida ya en un grafo de carriles."
       },
       "trading-bot": {
         "approach": "El trabajo sensible a la latencia vive en crates de Rust; la orquestación y la supervisión, en TypeScript. Las dos mitades se encuentran en un plano de control, con una consola de operador en Next.js por encima.",
