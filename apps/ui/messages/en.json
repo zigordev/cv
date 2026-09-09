@@ -261,7 +261,8 @@
         "approach": "One source of content, rendered twice. The page is an editorial layout with a case study behind each project; the same data renders a separate single-column document that headless Chromium turns into a PDF during the build, so the parsed version keeps real selectable text rather than a picture of it.",
         "decisions": [
           "The PDF is generated at build time rather than in the browser. Client-side html-to-PDF libraries rasterise the page, destroying the selectable text the entire ATS layout exists to produce.",
-          "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data."
+          "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data.",
+          "The contact endpoint sends RFC 9457 problem details like the four APIs, so one error shape covers the whole estate rather than four."
         ],
         "pieces": [
           {
@@ -373,7 +374,8 @@
         "decisions": [
           "Secrets are fetched at boot by a wrapper process, never baked into an image or committed to an env file, so a leaked app token exposes one kv path rather than the whole store.",
           "Email is an event, not a call. The API publishes to a topic and a shared service owns delivery, idempotency and dead-lettering.",
-          "CI regenerates the web API contract from the running API and fails on drift, so client and server cannot disagree silently."
+          "CI regenerates the web API contract from the running API and fails on drift, so client and server cannot disagree silently.",
+          "Errors are RFC 9457 problem details with a translatable code, and every route declares its status code — which is how it came out that Nest was answering 201 to POSTs the generated client documented as 200."
         ],
         "pieces": [
           {
@@ -430,7 +432,8 @@
       "kini": {
         "approach": "A NestJS API and Next.js client in one monorepo, with monitoring wired in locally. Much of what it worked out — the compose layout, the Tolgee translation flow, the release and deploy workflows — became the template the later projects started from.",
         "decisions": [
-          "Kept as its own repository rather than folded into gpool, so the rewrite could change its mind about the architecture without rewriting history."
+          "Kept as its own repository rather than folded into gpool, so the rewrite could change its mind about the architecture without rewriting history.",
+          "Errors are RFC 9457 problem details with a translatable code, and resources are plural and nested: a match now lives under the pool that owns it, and the pool in the path is checked rather than decorative."
         ],
         "pieces": [
           {
@@ -482,7 +485,8 @@
         "approach": "One consumer owns delivery for all of them. Producers publish an intent event and stop caring; the service validates the contract, renders a localised template, sends it, and keeps a durable record of every attempt.",
         "decisions": [
           "Invalid payloads fail as non-retryable and go to a durable dead-letter record, because retrying a malformed message forever is a worse outcome than losing it loudly.",
-          "A versioned topic name, so a contract change is a new topic rather than a silent break for every producer."
+          "A versioned topic name, so a contract change is a new topic rather than a silent break for every producer.",
+          "Errors are RFC 9457 problem details like every other service, even though this one serves nothing but health and metrics — the 404s and 500s it does emit are the ones nobody writes a client for."
         ],
         "pieces": [
           {
@@ -541,7 +545,8 @@
         "decisions": [
           "Per-application OpenBao policies scoped to exactly one kv path, so an app token is useless against any other app.",
           "The same compose manifests describe local and production, so a local reproduction is a real reproduction.",
-          "The whole estate runs on one host by design, which leaves cost a single lever: stop it. A scheduled window and a manual switch turn production off for the hours nobody uses it, and everything comes back on its own from the disk."
+          "The whole estate runs on one host by design, which leaves cost a single lever: stop it. A scheduled window and a manual switch turn production off for the hours nobody uses it, and everything comes back on its own from the disk.",
+          "One HTTP contract for five services: RFC 9457 problem details carrying a translatable code, plural nested resources, explicit status codes per verb, and a URL version only where a separately deployed service is the caller."
         ],
         "pieces": [
           {
@@ -608,7 +613,8 @@
       "trading-bot": {
         "approach": "Latency-sensitive work lives in Rust crates; orchestration and supervision live in TypeScript. The two halves meet at a control plane, with a Next.js operator console on top.",
         "decisions": [
-          "Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery."
+          "Backtesting and live execution consume the same strategy crate, so a result that cannot be reproduced offline is a bug rather than a mystery.",
+          "The control-plane keeps a URL version because three Rust services call it across a network and deploy separately; the products that ship their client from the same repository do not."
         ],
         "pieces": [
           {
