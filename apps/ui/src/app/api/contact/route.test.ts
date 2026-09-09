@@ -21,7 +21,7 @@ const post = (body: unknown, ip: string) =>
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
       body: typeof body === 'string' ? body : JSON.stringify(body),
-    }),
+    })
   );
 
 describe('POST /api/contact', () => {
@@ -55,6 +55,31 @@ describe('POST /api/contact', () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: 'invalid_json' });
     expect(mocks.publishEmail).not.toHaveBeenCalled();
+  });
+
+  it('refuses an address longer than an email can be', async () => {
+    const response = await post(
+      { ...valid, email: `${'a'.repeat(250)}@example.com` },
+      freshAddress()
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalid_email' });
+  });
+
+  it('rejects the shapes the previous pattern accepted or backtracked on', async () => {
+    for (const email of ['ada@example..com', 'ada@example.', 'ada@.com', '!@!.!.!.!.']) {
+      const response = await post({ ...valid, email }, freshAddress());
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ error: 'invalid_email' });
+    }
+  });
+
+  it('still accepts an address with several domain labels', async () => {
+    const response = await post({ ...valid, email: 'ada@mail.example.co.uk' }, freshAddress());
+
+    expect(response.status).toBe(202);
   });
 
   it('refuses a body that is not an object and an address that is not an email', async () => {
