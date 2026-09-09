@@ -522,7 +522,7 @@
             },
             {
               "step": "03",
-              "text": "release-please, with the version mirrored into the API package so the artefact and the tag cannot drift apart.",
+              "text": "release-please, with the version mirrored into the API package and its lockfile entry so the artefact and the tag cannot drift apart.",
               "title": "The release"
             },
             {
@@ -647,7 +647,7 @@
             },
             {
               "step": "03",
-              "text": "One version across two languages. release-please bumps both package.json files and the Cargo workspace from the same conventional commits, so a crate and the console that drives it can never claim different versions of the same release.",
+              "text": "One version across two languages. release-please bumps both package.json files, their lockfile entries and the Cargo workspace from the same conventional commits, so a crate and the console that drives it can never claim different versions of the same release.",
               "title": "The release"
             },
             {

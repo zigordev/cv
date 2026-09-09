@@ -522,7 +522,7 @@
             },
             {
               "step": "03",
-              "text": "release-please, con la versión replicada en el paquete de la API para que el artefacto y la etiqueta no se separen.",
+              "text": "release-please, con la versión replicada en el paquete de la API y en su entrada del lockfile para que el artefacto y la etiqueta no se separen.",
               "title": "La release"
             },
             {
@@ -647,7 +647,7 @@
             },
             {
               "step": "03",
-              "text": "Una sola versión para dos lenguajes. release-please sube ambos package.json y el workspace de Cargo a partir de los mismos conventional commits, de modo que un crate y la consola que lo gobierna nunca pueden declarar versiones distintas de la misma release.",
+              "text": "Una sola versión para dos lenguajes. release-please sube ambos package.json, sus entradas en el lockfile y el workspace de Cargo a partir de los mismos conventional commits, de modo que un crate y la consola que lo gobierna nunca pueden declarar versiones distintas de la misma release.",
               "title": "La release"
             },
             {
