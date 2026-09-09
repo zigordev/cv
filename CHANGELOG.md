@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/zigordev/cv/compare/v0.6.3...v0.7.0) (2026-09-09)
+
+
+### Features
+
+* **contact:** send RFC 9457 problem details ([#58](https://github.com/zigordev/cv/issues/58)) ([56ecaa8](https://github.com/zigordev/cv/commit/56ecaa8ba0d05133aaac1b7f049ca22ad01dcaed))
+
 ## [0.6.3](https://github.com/zigordev/cv/compare/v0.6.2...v0.6.3) (2026-09-09)
 
 
