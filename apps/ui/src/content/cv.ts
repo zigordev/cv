@@ -167,6 +167,11 @@ export interface KiniDiagramCopy extends DiagramCopy {
   notes: { kini: string; carried: string; into: string };
 }
 
+export interface SityDiagramCopy extends DiagramCopy {
+  lanes: { graph: string; scene: string };
+  notes: { plan: string; network: string; graph: string; scene: string; verify: string };
+}
+
 export interface Diagrams {
   cv: CvDiagramCopy;
   platformOps: PlatformOpsDiagramCopy;
@@ -175,6 +180,7 @@ export interface Diagrams {
   tradingBot: TradingBotDiagramCopy;
   notifications: NotificationsDiagramCopy;
   kini: KiniDiagramCopy;
+  sity: SityDiagramCopy;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -239,6 +245,13 @@ const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }
     stack: ['Next.js', 'NestJS', 'Postgres', 'Tolgee'],
   },
   {
+    id: 'sity',
+    kind: 'product',
+    status: 'development',
+    name: 'sity',
+    stack: ['Three.js', 'TypeScript', 'Vite', 'Playwright'],
+  },
+  {
     id: 'platform-ops',
     kind: 'core',
     name: 'platform-ops',
@@ -279,7 +292,7 @@ export const PRODUCT_NAMES: string[] = PROJECT_SKELETON.filter(
  */
 const SKILL_ITEMS: string[][] = [
   ['TypeScript', 'JavaScript', 'Rust', 'Java', 'SQL'],
-  ['React', 'Next.js', 'Design systems', 'Accessibility', 'Vue', 'Angular'],
+  ['React', 'Next.js', 'Three.js', 'Design systems', 'Accessibility', 'Vue', 'Angular'],
   ['NestJS', 'Node.js', 'Spring Boot', 'PostgreSQL', 'Kafka'],
   ['Docker', 'Terraform', 'AWS', 'GitHub Actions', 'OpenTelemetry', 'Supply-chain security'],
 ];

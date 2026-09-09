@@ -6,6 +6,7 @@ import { GpoolDiagram } from './GpoolDiagram';
 import { KiniDiagram } from './KiniDiagram';
 import { NotificationsDiagram } from './NotificationsDiagram';
 import { PlatformOpsDiagram } from './PlatformOpsDiagram';
+import { SityDiagram } from './SityDiagram';
 import { TradingBotDiagram } from './TradingBotDiagram';
 
 /**
@@ -23,4 +24,5 @@ export const PROJECT_DIAGRAMS: Record<string, ComponentType> = {
   'trading-bot': TradingBotDiagram,
   notifications: NotificationsDiagram,
   kini: KiniDiagram,
+  sity: SityDiagram,
 };
