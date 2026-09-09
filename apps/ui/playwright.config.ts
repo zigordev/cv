@@ -16,7 +16,9 @@ export default defineConfig({
   // A failing accessibility assertion is a real failure; a flaky one is worse
   // than none, so retries exist in CI only, where the machine is noisy.
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? [['github'], ['list']] : [['list']],
+  // The html reporter is what writes playwright-report/, which CI uploads on
+  // failure. Its absence is why that artifact has always been empty.
+  reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: 'http://127.0.0.1:3199',
     trace: 'on-first-retry',
