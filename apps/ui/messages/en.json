@@ -91,7 +91,7 @@
           "graph": "routes and invariants",
           "network": "sampled, trimmed, connected",
           "plan": "nodes and typed roads",
-          "scene": "roads, city, terrain",
+          "scene": "roads, rail, city, terrain",
           "verify": "reads the graph in a browser"
         }
       },
@@ -626,15 +626,15 @@
         "tagline": "The shared operations stack every other project attaches to instead of rebuilding."
       },
       "sity": {
-        "approach": "One plan describes every road as nodes and typed segments. From it the scene builds the geometry it renders and the directed lane graph that vehicles will follow, so the drawing and the data cannot disagree. The city grows from the streets: lots are cut along each frontage and filled with instanced buildings whose facades come from a shader.",
+        "approach": "One plan describes every road as nodes and typed segments. From it the scene builds the geometry it renders and the directed lane graph that vehicles will follow, so the drawing and the data cannot disagree. The terrain follows the roads and the streams (cuttings, embankments, tunnel portals and culverts come from the same centrelines), every dead end finishes at a destination whose parking bays are exported for the simulation, and the city grows from the streets: lots are cut along each frontage and filled with instanced buildings whose facades come from a shader.",
         "decisions": [
           "Roads are drawn from the graph rather than the graph fitted to the drawing. A road rendered from the same sampled centreline as its lanes means a vehicle on lane data is on the asphalt, with no second source of truth to reconcile.",
-          "Everything repeated is instanced and everything else is merged per material, which keeps the whole city under 300 draw calls with post-processing on. The facade grid is computed in the shader from the instance box, so building variety costs attributes, not geometry."
+          "Everything repeated is instanced and everything else is merged per material, which keeps the whole 13 km² site under 600 draw calls and 4.6 million triangles with post-processing on. The facade grid is computed in the shader from the instance box, so building variety costs attributes, not geometry."
         ],
         "pieces": [
           {
             "step": "01",
-            "text": "A highway ring with a tunnel, a cable-stayed bridge and viaducts; a diamond, a dumbbell and a half-diamond interchange; a downtown grid with an arterial, collectors, a one-way pair, roundabouts, a curved riverside collector and a hairpin mountain road, each with its class rules for lanes, medians, sidewalks and speed.",
+            "text": "A ring highway with a tunnel, a cable-stayed bridge and viaducts; a diamond, a dumbbell, a half-diamond, a trumpet and a cloverleaf, plus a road under the viaduct; two motorways that leave the map at its edges: one south with a lane drop, a rest area on its own ramps and a rural overpass, one west through a mountain tunnel with a diamond, a services area and free-flow toll gantries; a downtown grid with bus lanes, left-turn pockets and cycle tracks on the arterials, collectors, a one-way pair, a school zone, roundabouts, a curved riverside collector and two river bridges; a railway with a gated level crossing and a station forecourt, a village loop, a hospital drive and farm lanes; in the mountains a forest road, a valley road to a pass and a switchback col road to an alpine village; and beyond the pass, rural roads through a dense pine forest with a hamlet and a lake and across farmland with a farm village, where brooks are crossed by culverts and small bridges. Each road carries its class rules for lanes, medians, sidewalks and speed, and every dead end is a car park, forecourt, yard or viewpoint.",
             "title": "Road plan"
           },
           {
@@ -644,31 +644,41 @@
           },
           {
             "step": "03",
-            "text": "Districts decide what a lot becomes: towers on podiums downtown, brick and plaster blocks, houses with gardens, sheds by the port, hotels on the coast. Facades are a shader over per-instance attributes, so a few thousand buildings cost a handful of draw calls. Forests, street trees, parks, a plaza, an arena, a school and a church fill the rest.",
+            "text": "Districts decide what a lot becomes: towers on podiums downtown, brick and plaster blocks, houses with gardens, chalets on the mountain, sheds by the port, hotels on the coast. Facades are a shader over per-instance attributes, so a few thousand buildings cost a handful of draw calls. Forests, street trees, parks, a plaza, an arena, a multi-storey car park, a school, churches, a station, a hospital, hedged fields and a generated farmland grid with farmyards, a manor, a sawmill, a farmers' co-op, a wind farm, a golf course, a campsite, two motorway services, a chairlift, a container terminal, an amusement pier and a beach with its promenade fill the rest, with parked cars in every bay and bus stops on the main streets. A footprint audit keeps buildings off pavements and off each other.",
             "title": "City"
           },
           {
             "step": "04",
-            "text": "Playwright drives the page through a debug API: graph invariants, routing between the highway and Main Street, city counts, draw-call and triangle budgets, and rendered views checked pixel by pixel and saved as screenshots.",
+            "text": "Vitest covers the network builder, the lane graph and the city plan without a browser: turn connectors at a crossroads, lane assignment and adjacency, roundabout rings, ramp diverges and merges, invariants and routing. Playwright drives the built site through a debug API: graph invariants, routing between the highway and Main Street, the building-footprint audit, a check that no dead end is left without a destination, city counts, draw-call and triangle budgets, rendered views checked pixel by pixel and kept as screenshots, and the panel against WCAG A and AA.",
             "title": "Verification"
           }
         ],
         "pipeline": {
           "automation": [
-            "Dependabot over npm and the Actions, grouped weekly with a seven-day cooldown, the same policy as the rest of the estate.",
-            "CodeQL on every pull request and weekly on main, and commitlint on the commits and the pull request title.",
-            "The render verification runs against the production build served by Vite preview, on headless Chromium with software WebGL, and uploads its screenshots as an artefact so a change to the city can be reviewed by eye as well as by assertion."
+            "Dependabot over npm, the Docker base images and the Actions, grouped weekly with a seven-day cooldown; auto-merge on green for patch and minor, the same policy as the rest of the estate.",
+            "CodeQL on every pull request and weekly on main, dependency review, commitlint on the commits and the pull request title, and gitleaks over the full history.",
+            "The Playwright suite runs against the production build served by Vite preview, on headless Chromium with software WebGL, on a desktop and a mobile viewport, and keeps a screenshot of every camera view as test output so a change to the city can be reviewed by eye as well as by assertion."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "Typecheck and Vite build, then the render verification: assets loaded, road graph invariants, routing, city and vegetation counts, camera views, the compass, performance budgets and pixel samples of five views on desktop and mobile.",
-              "title": "The pull request"
+              "text": "gitleaks over the staged diff, then format check, lint, typecheck, unit tests with coverage and the build; commitlint on the message; and a pre-push hook that refuses main. The same hooks as the other repositories.",
+              "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "The scene has no users beyond its author until vehicles and traffic devices exist, so there is no release train and no host yet; the built site is verified, not published.",
-              "title": "No release or deploy, yet"
+              "text": "Quality, then a Docker smoke test of the nginx image, the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, performance budgets, pixel samples of every camera view and axe against WCAG A and AA — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please derives the version and changelog from the conventional commits on main, and publishes the tag when its pull request is merged.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "The image is built and smoke-tested but not shipped: the scene has no users beyond its author until vehicles and traffic devices exist, so there is no host and no deploy workflow yet.",
+              "title": "No deploy, yet"
             }
           ]
         },
