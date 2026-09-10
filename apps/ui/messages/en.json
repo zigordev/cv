@@ -649,26 +649,36 @@
           },
           {
             "step": "04",
-            "text": "Playwright drives the page through a debug API: graph invariants, routing between the highway and Main Street, city counts, draw-call and triangle budgets, and rendered views checked pixel by pixel and saved as screenshots.",
+            "text": "Vitest covers the network builder, the lane graph and the city plan without a browser: turn connectors at a crossroads, lane assignment and adjacency, roundabout rings, ramp diverges and merges, invariants and routing. Playwright drives the built site through a debug API: graph invariants, routing between the highway and Main Street, city counts, draw-call and triangle budgets, rendered views checked pixel by pixel and kept as screenshots, and the panel against WCAG A and AA.",
             "title": "Verification"
           }
         ],
         "pipeline": {
           "automation": [
-            "Dependabot over npm and the Actions, grouped weekly with a seven-day cooldown, the same policy as the rest of the estate.",
-            "CodeQL on every pull request and weekly on main, and commitlint on the commits and the pull request title.",
-            "The render verification runs against the production build served by Vite preview, on headless Chromium with software WebGL, and uploads its screenshots as an artefact so a change to the city can be reviewed by eye as well as by assertion."
+            "Dependabot over npm, the Docker base images and the Actions, grouped weekly with a seven-day cooldown; auto-merge on green for patch and minor, the same policy as the rest of the estate.",
+            "CodeQL on every pull request and weekly on main, dependency review, commitlint on the commits and the pull request title, and gitleaks over the full history.",
+            "The Playwright suite runs against the production build served by Vite preview, on headless Chromium with software WebGL, on a desktop and a mobile viewport, and keeps a screenshot of every camera view as test output so a change to the city can be reviewed by eye as well as by assertion."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "Typecheck and Vite build, then the render verification: assets loaded, road graph invariants, routing, city and vegetation counts, camera views, the compass, performance budgets and pixel samples of five views on desktop and mobile.",
-              "title": "The pull request"
+              "text": "gitleaks over the staged diff, then format check, lint, typecheck, unit tests with coverage and the build; commitlint on the message; and a pre-push hook that refuses main. The same hooks as the other repositories.",
+              "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "The scene has no users beyond its author until vehicles and traffic devices exist, so there is no release train and no host yet; the built site is verified, not published.",
-              "title": "No release or deploy, yet"
+              "text": "Quality, then a Docker smoke test of the nginx image, the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, performance budgets, pixel samples of every camera view and axe against WCAG A and AA — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
+              "title": "The pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please derives the version and changelog from the conventional commits on main, and publishes the tag when its pull request is merged.",
+              "title": "The release"
+            },
+            {
+              "step": "04",
+              "text": "The image is built and smoke-tested but not shipped: the scene has no users beyond its author until vehicles and traffic devices exist, so there is no host and no deploy workflow yet.",
+              "title": "No deploy, yet"
             }
           ]
         },
