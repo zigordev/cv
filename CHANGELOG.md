@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/zigordev/cv/compare/v0.8.0...v0.8.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **cv:** keep sity out of the platform and design system diagrams ([#67](https://github.com/zigordev/cv/issues/67)) ([b4a3f33](https://github.com/zigordev/cv/commit/b4a3f3368dea1410317737c9e192a5143ead94eb))
+
 ## [0.8.0](https://github.com/zigordev/cv/compare/v0.7.0...v0.8.0) (2026-09-10)
 
 
