@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/zigordev/cv/compare/v0.7.0...v0.8.0) (2026-09-10)
+
+
+### Features
+
+* **cv:** add the sity case study ([#63](https://github.com/zigordev/cv/issues/63)) ([2f4bd14](https://github.com/zigordev/cv/commit/2f4bd1405b01e55ea632f45a32bd89a0658e5453))
+
 ## [0.7.0](https://github.com/zigordev/cv/compare/v0.6.3...v0.7.0) (2026-09-09)
 
 
