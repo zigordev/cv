@@ -634,7 +634,7 @@
         "pieces": [
           {
             "step": "01",
-            "text": "A highway ring with a tunnel, a cable-stayed bridge and viaducts; a diamond, a dumbbell and a half-diamond interchange, and a road passing under the viaduct; a downtown grid with an arterial, collectors, a one-way pair, roundabouts, a curved riverside collector, two river bridges and a mountain road to a viewpoint; north of the ring, a railway with a gated level crossing, a station forecourt, a village loop, a hospital drive and farm lanes. Each road carries its class rules for lanes, medians, sidewalks and speed, and every dead end is a car park, forecourt or yard.",
+            "text": "A ring highway with a tunnel, a cable-stayed bridge and viaducts; a diamond, a dumbbell, a half-diamond and a trumpet interchange, plus a road under the viaduct; a motorway with two carriageways, a rest area on its own ramps, a rural overpass and free-flow toll gantries, leaving the map at the edge; a downtown grid with bus lanes on the arterials, collectors, a one-way pair, roundabouts, a curved riverside collector and two river bridges; a railway with a gated level crossing and a station forecourt, a village loop, a hospital drive and farm lanes; and, in the mountains, a forest road, a valley road to the west edge and a switchback col road to an alpine village. Each road carries its class rules for lanes, medians, sidewalks and speed, and every dead end is a car park, forecourt, yard or viewpoint.",
             "title": "Road plan"
           },
           {
@@ -644,7 +644,7 @@
           },
           {
             "step": "03",
-            "text": "Districts decide what a lot becomes: towers on podiums downtown, brick and plaster blocks, houses with gardens, sheds by the port, hotels on the coast. Facades are a shader over per-instance attributes, so a few thousand buildings cost a handful of draw calls. Forests, street trees, parks, a plaza, an arena, a school, churches, a station, a hospital, hedged fields and a container terminal fill the rest, with parked cars in every bay and bus stops on the main streets. A footprint audit keeps buildings off pavements and off each other.",
+            "text": "Districts decide what a lot becomes: towers on podiums downtown, brick and plaster blocks, houses with gardens, chalets on the mountain, sheds by the port, hotels on the coast. Facades are a shader over per-instance attributes, so a few thousand buildings cost a handful of draw calls. Forests, street trees, parks, a plaza, an arena, a school, churches, a station, a hospital, hedged fields, a golf course, a campsite, a motorway services, a chairlift, a container terminal, an amusement pier and a beach with its promenade fill the rest, with parked cars in every bay and bus stops on the main streets. A footprint audit keeps buildings off pavements and off each other.",
             "title": "City"
           },
           {

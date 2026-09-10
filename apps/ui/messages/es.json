@@ -634,7 +634,7 @@
         "pieces": [
           {
             "step": "01",
-            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa y uno en medio diamante, y una vía que pasa bajo el viaducto; una retícula céntrica con una arteria, colectoras, un par de sentido único, rotondas, una colectora curva junto al río, dos puentes sobre el río y una carretera de montaña hasta un mirador; al norte del anillo, un ferrocarril con un paso a nivel con barreras, la explanada de una estación, un bucle de aldea, el acceso a un hospital y caminos de granja. Cada vía lleva las reglas de su clase para carriles, medianas, aceras y velocidad, y cada fondo de saco es un aparcamiento, una explanada o un patio.",
+            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa, uno en medio diamante y una trompeta, más una vía bajo el viaducto; una autovía de dos calzadas, un área de servicio con sus propios ramales, un paso superior rural y pórticos de peaje sin barreras, que sale del mapa por el borde; una retícula céntrica con carriles bus en las arterias, colectoras, un par de sentido único, rotondas, una colectora curva junto al río y dos puentes; un ferrocarril con paso a nivel y la explanada de una estación, un bucle de aldea, el acceso a un hospital y caminos de granja; y, en la montaña, una pista forestal, una carretera de valle hasta el borde oeste y una carretera de collado con horquillas hasta una aldea alpina. Cada vía lleva las reglas de su clase para carriles, medianas, aceras y velocidad, y cada fondo de saco es un aparcamiento, una explanada, un patio o un mirador.",
             "title": "Plan viario"
           },
           {
@@ -644,7 +644,7 @@
           },
           {
             "step": "03",
-            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio, iglesias, una estación, un hospital, campos con setos y una terminal de contenedores rellenan el resto, con coches aparcados en cada plaza y paradas de autobús en las calles principales. Una auditoría de huellas mantiene los edificios fuera de las aceras y separados entre sí.",
+            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, chalés en la montaña, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio, iglesias, una estación, un hospital, campos con setos, un campo de golf, un camping, un área de servicio, un telesilla, una terminal de contenedores, un muelle de atracciones y una playa con su paseo rellenan el resto, con coches aparcados en cada plaza y paradas de autobús en las calles principales. Una auditoría de huellas mantiene los edificios fuera de las aceras y separados entre sí.",
             "title": "Ciudad"
           },
           {
