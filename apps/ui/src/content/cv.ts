@@ -63,6 +63,7 @@ export interface Project {
   id: string;
   kind: ProjectKind;
   status?: ProjectStatus;
+  standalone?: boolean;
   /**
    * Where a reader can use the running thing, for products that have one.
    * Separate from `links` because a live product and its source repository are
@@ -248,6 +249,7 @@ const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }
     id: 'sity',
     kind: 'product',
     status: 'development',
+    standalone: true,
     name: 'sity',
     stack: ['Three.js', 'TypeScript', 'Vite', 'Playwright'],
   },
@@ -280,7 +282,7 @@ const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }
  * name lists are how a diagram comes to disagree with the page above it.
  */
 export const PRODUCT_NAMES: string[] = PROJECT_SKELETON.filter(
-  (project) => project.kind === 'product'
+  (project) => project.kind === 'product' && !project.standalone
 ).map((project) => project.name);
 
 /**
