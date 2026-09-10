@@ -91,7 +91,7 @@
           "graph": "rutas e invariantes",
           "network": "muestreada, recortada, unida",
           "plan": "nodos y vías tipadas",
-          "scene": "vías, ciudad, terreno",
+          "scene": "vías, ferrocarril, ciudad, terreno",
           "verify": "lee el grafo en el navegador"
         }
       },
@@ -626,15 +626,15 @@
         "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
       },
       "sity": {
-        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. La ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
+        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. El terreno sigue a las vías y a los arroyos (desmontes, terraplenes, bocas de túnel y alcantarillas salen de los mismos ejes), cada fondo de saco termina en un destino cuyas plazas de aparcamiento se exportan para la simulación, y la ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
         "decisions": [
           "Las vías se dibujan desde el grafo en lugar de ajustar el grafo al dibujo. Una vía renderizada desde el mismo eje muestreado que sus carriles significa que un vehículo sobre los datos de carril está sobre el asfalto, sin una segunda fuente de verdad que reconciliar.",
-          "Todo lo repetido se instancia y todo lo demás se fusiona por material, lo que mantiene la ciudad entera por debajo de 300 draw calls con el postprocesado activo. La retícula de la fachada se calcula en el shader a partir de la caja de la instancia, así que la variedad de edificios cuesta atributos, no geometría."
+          "Todo lo repetido se instancia y todo lo demás se fusiona por material, lo que mantiene los 13 km² del emplazamiento por debajo de 600 draw calls y 4,6 millones de triángulos con el postprocesado activo. La retícula de la fachada se calcula en el shader a partir de la caja de la instancia, así que la variedad de edificios cuesta atributos, no geometría."
         ],
         "pieces": [
           {
             "step": "01",
-            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa y uno en medio diamante; una retícula céntrica con una arteria, colectoras, un par de sentido único, rotondas, una colectora curva junto al río y una carretera de montaña con horquillas, cada una con las reglas de su clase para carriles, medianas, aceras y velocidad.",
+            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa, uno en medio diamante, una trompeta y un trébol, más una vía bajo el viaducto; dos autovías que salen del mapa por sus bordes: una al sur con una pérdida de carril, un área de servicio con sus propios ramales y un paso superior rural, y otra al oeste que atraviesa la montaña en túnel con un diamante, un área de servicio y pórticos de peaje sin barreras; una retícula céntrica con carriles bus, carriles de espera para girar a la izquierda y carriles bici en las arterias, colectoras, un par de sentido único, una zona escolar, rotondas, una colectora curva junto al río y dos puentes; un ferrocarril con paso a nivel y la explanada de una estación, un bucle de aldea, el acceso a un hospital y caminos de granja; en la montaña, una pista forestal, una carretera de valle hasta un puerto y una carretera de collado con horquillas hasta una aldea alpina; y, pasado el puerto, carreteras rurales que cruzan un pinar denso con una aldea y un lago y unas tierras de labor con un pueblo agrícola, donde los arroyos se salvan con alcantarillas y puentes pequeños. Cada vía lleva las reglas de su clase para carriles, medianas, aceras y velocidad, y cada fondo de saco es un aparcamiento, una explanada, un patio o un mirador.",
             "title": "Plan viario"
           },
           {
@@ -644,31 +644,41 @@
           },
           {
             "step": "03",
-            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio y una iglesia rellenan el resto.",
+            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, chalés en la montaña, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un aparcamiento en altura, un colegio, iglesias, una estación, un hospital, campos con setos y una retícula generada de tierras de labor con sus granjas, una casa señorial, un aserradero, una cooperativa agrícola, un parque eólico, un campo de golf, un camping, dos áreas de servicio, un telesilla, una terminal de contenedores, un muelle de atracciones y una playa con su paseo rellenan el resto, con coches aparcados en cada plaza y paradas de autobús en las calles principales. Una auditoría de huellas mantiene los edificios fuera de las aceras y separados entre sí.",
             "title": "Ciudad"
           },
           {
             "step": "04",
-            "text": "Playwright conduce la página a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, recuentos de la ciudad, presupuestos de draw calls y triángulos, y vistas renderizadas comprobadas píxel a píxel y guardadas como capturas.",
+            "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, la auditoría de huellas de edificios, una comprobación de que ningún fondo de saco queda sin destino, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
             "title": "Verificación"
           }
         ],
         "pipeline": {
           "automation": [
-            "Dependabot sobre npm y las Actions, agrupado semanalmente con siete días de espera, la misma política que el resto del parque.",
-            "CodeQL en cada pull request y semanalmente en main, y commitlint sobre los commits y el título del pull request.",
-            "La verificación de render se ejecuta contra la build de producción servida por Vite preview, en Chromium sin cabeza con WebGL por software, y sube sus capturas como artefacto para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
+            "Dependabot sobre npm, las imágenes base de Docker y las Actions, agrupado semanalmente con siete días de espera; auto-merge en verde para patch y minor, la misma política que el resto del parque.",
+            "CodeQL en cada pull request y semanalmente en main, revisión de dependencias, commitlint sobre los commits y el título del pull request, y gitleaks sobre todo el historial.",
+            "La suite de Playwright se ejecuta contra la build de producción servida por Vite preview, en Chromium sin cabeza con WebGL por software, en un viewport de escritorio y otro móvil, y conserva una captura de cada vista de cámara como salida de la prueba, para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "Typecheck y build de Vite, y después la verificación de render: assets cargados, invariantes del grafo viario, enrutado, recuentos de ciudad y vegetación, vistas de cámara, la brújula, presupuestos de rendimiento y muestras de píxeles de cinco vistas en escritorio y móvil.",
-              "title": "El pull request"
+              "text": "gitleaks sobre el diff en stage y después comprobación de formato, lint, typecheck, pruebas unitarias con cobertura y la build; commitlint en el mensaje; y un hook de pre-push que rechaza main. Los mismos hooks que el resto de repositorios.",
+              "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "La escena no tiene más usuarios que su autor hasta que existan vehículos y dispositivos de tráfico, así que todavía no hay tren de releases ni host; la build se verifica, no se publica.",
-              "title": "Sin release ni despliegue, por ahora"
+              "text": "Calidad, después un smoke en Docker de la imagen de nginx, la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara y axe contra WCAG A y AA —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
+              "title": "El pull request"
+            },
+            {
+              "step": "03",
+              "text": "release-please deriva la versión y el changelog de los conventional commits en main, y publica la etiqueta cuando su pull request se fusiona.",
+              "title": "La release"
+            },
+            {
+              "step": "04",
+              "text": "La imagen se construye y se prueba con un smoke, pero no se envía: la escena no tiene más usuarios que su autor hasta que existan vehículos y dispositivos de tráfico, así que todavía no hay host ni workflow de despliegue.",
+              "title": "Sin despliegue, por ahora"
             }
           ]
         },
