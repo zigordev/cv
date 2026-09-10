@@ -714,12 +714,12 @@
             },
             {
               "step": "02",
-              "text": "Two language lanes running side by side. Rust: cargo fmt --check, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
+              "text": "Two language lanes running side by side. Rust: cargo fmt --check, a lock check that refuses a Cargo.lock disagreeing with the manifests, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
               "title": "The pull request"
             },
             {
               "step": "03",
-              "text": "One version across two languages. release-please bumps both package.json files, their lockfile entries and the Cargo workspace from the same conventional commits, so a crate and the console that drives it can never claim different versions of the same release.",
+              "text": "One version across two languages. release-please bumps both package.json files, the Cargo workspace and both lockfiles from the same conventional commits, so a crate and the console that drives it can never claim different versions of the same release, and no build after a release rewrites a lock.",
               "title": "The release"
             },
             {
