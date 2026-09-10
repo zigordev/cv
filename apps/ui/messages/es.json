@@ -714,12 +714,12 @@
             },
             {
               "step": "02",
-              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, typecheck, build y tests del plano de control y de la consola de operación. Un tercer carril levanta un PostgreSQL real con Compose y ejecuta contra él la proyección de operaciones del plano de control. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
+              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, una comprobación que rechaza un Cargo.lock que no concuerde con los manifiestos, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, typecheck, build y tests del plano de control y de la consola de operación. Un tercer carril levanta un PostgreSQL real con Compose y ejecuta contra él la proyección de operaciones del plano de control. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
               "title": "El pull request"
             },
             {
               "step": "03",
-              "text": "Una sola versión para dos lenguajes. release-please sube ambos package.json, sus entradas en el lockfile y el workspace de Cargo a partir de los mismos conventional commits, de modo que un crate y la consola que lo gobierna nunca pueden declarar versiones distintas de la misma release.",
+              "text": "Una sola versión para dos lenguajes. release-please sube ambos package.json, el workspace de Cargo y los dos lockfiles a partir de los mismos conventional commits, de modo que un crate y la consola que lo gobierna nunca pueden declarar versiones distintas de la misma release, y ninguna construcción posterior reescribe un lock.",
               "title": "La release"
             },
             {
