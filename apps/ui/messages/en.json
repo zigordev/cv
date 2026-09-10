@@ -19,7 +19,7 @@
         }
       },
       "designSystem": {
-        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into every product.",
+        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into each consumer.",
         "caption": "Themes override colour and nothing else. Shape, type scale and spacing stay on shared tokens, so a full reskin touches no component file.",
         "notes": {
           "components": "tokens only, no literals",

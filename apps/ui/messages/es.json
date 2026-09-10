@@ -19,7 +19,7 @@
         }
       },
       "designSystem": {
-        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada producto.",
+        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada consumidor.",
         "caption": "Los temas sobrescriben color y nada más. La forma, la escala tipográfica y el espaciado siguen en tokens compartidos, así que un rediseño completo no toca ningún componente.",
         "notes": {
           "components": "solo tokens, sin literales",
