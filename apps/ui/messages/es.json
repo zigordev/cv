@@ -91,7 +91,7 @@
           "graph": "rutas e invariantes",
           "network": "muestreada, recortada, unida",
           "plan": "nodos y vías tipadas",
-          "scene": "vías, ciudad, terreno",
+          "scene": "vías, ferrocarril, ciudad, terreno",
           "verify": "lee el grafo en el navegador"
         }
       },
@@ -626,7 +626,7 @@
         "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
       },
       "sity": {
-        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. La ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
+        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. El terreno sigue a las vías (desmontes, terraplenes y bocas de túnel salen de los mismos ejes), cada fondo de saco termina en un destino cuyas plazas de aparcamiento se exportan para la simulación, y la ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
         "decisions": [
           "Las vías se dibujan desde el grafo en lugar de ajustar el grafo al dibujo. Una vía renderizada desde el mismo eje muestreado que sus carriles significa que un vehículo sobre los datos de carril está sobre el asfalto, sin una segunda fuente de verdad que reconciliar.",
           "Todo lo repetido se instancia y todo lo demás se fusiona por material, lo que mantiene la ciudad entera por debajo de 300 draw calls con el postprocesado activo. La retícula de la fachada se calcula en el shader a partir de la caja de la instancia, así que la variedad de edificios cuesta atributos, no geometría."
@@ -634,7 +634,7 @@
         "pieces": [
           {
             "step": "01",
-            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa y uno en medio diamante; una retícula céntrica con una arteria, colectoras, un par de sentido único, rotondas, una colectora curva junto al río y una carretera de montaña con horquillas, cada una con las reglas de su clase para carriles, medianas, aceras y velocidad.",
+            "text": "Un anillo de autopista con un túnel, un puente atirantado y viaductos; un enlace en diamante, uno en pesa y uno en medio diamante, y una vía que pasa bajo el viaducto; una retícula céntrica con una arteria, colectoras, un par de sentido único, rotondas, una colectora curva junto al río, dos puentes sobre el río y una carretera de montaña hasta un mirador; al norte del anillo, un ferrocarril con un paso a nivel con barreras, la explanada de una estación, un bucle de aldea, el acceso a un hospital y caminos de granja. Cada vía lleva las reglas de su clase para carriles, medianas, aceras y velocidad, y cada fondo de saco es un aparcamiento, una explanada o un patio.",
             "title": "Plan viario"
           },
           {
@@ -644,12 +644,12 @@
           },
           {
             "step": "03",
-            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio y una iglesia rellenan el resto.",
+            "text": "Los distritos deciden en qué se convierte una parcela: torres sobre podio en el centro, bloques de ladrillo y enlucido, casas con jardín, naves junto al puerto, hoteles en la costa. Las fachadas son un shader sobre atributos por instancia, así que unos miles de edificios cuestan un puñado de draw calls. Bosques, arbolado de calle, parques, una plaza, un estadio, un colegio, iglesias, una estación, un hospital, campos con setos y una terminal de contenedores rellenan el resto, con coches aparcados en cada plaza y paradas de autobús en las calles principales. Una auditoría de huellas mantiene los edificios fuera de las aceras y separados entre sí.",
             "title": "Ciudad"
           },
           {
             "step": "04",
-            "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
+            "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, la auditoría de huellas de edificios, una comprobación de que ningún fondo de saco queda sin destino, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
             "title": "Verificación"
           }
         ],
