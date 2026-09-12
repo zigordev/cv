@@ -53,7 +53,7 @@ The container enforces both at startup through `scripts/openbao-run.mjs` and exi
 
 ## 5. Configure The GitHub Environment
 
-Create a `production` environment on the repository and set these variables. The values come from `platform-ops` outputs, except the ECR URI from step 3 — the contract is mirrored in `infra/terraform/aws-compose/README.md`.
+Create a `production` environment on the repository and set these variables. The values come from `platform-ops` outputs, except the ECR URI from step 3 — cv declares no infrastructure of its own, and the host, deploy bucket, ingress and observability stack are all owned by platform-ops.
 
 | Variable                     | Source       |
 | ---------------------------- | ------------ |
@@ -144,7 +144,7 @@ It receives four arguments — deploy bucket, image tag, the fully qualified web
 1. download `s3://<bucket>/cv/<tag>/bundle.tar.gz` and unpack it
 2. `docker login` to ECR and pull the web image
 3. read `OPENBAO_TOKEN` from `<ssm-prefix>/OPENBAO_TOKEN` with `--with-decryption`
-4. run `docker compose -f compose.app.prod.yml --env-file .env.app.prod up -d` with `CV_WEB_IMAGE` and `OPENBAO_TOKEN` set
+4. run `docker compose -f compose.app.prod.yml --env-file .env.app.prod up -d` with `WEB_IMAGE` and `OPENBAO_TOKEN` set
 5. wait for `/health` on the container and roll back on failure
 
 ## 9. Deploy
