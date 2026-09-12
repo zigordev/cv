@@ -14,6 +14,7 @@ RUN set -eux; \
     echo "npm ci failed (attempt $attempt), retrying in 10s..."; \
     sleep 10; \
   done
+RUN mkdir -p /workspace/apps/ui/node_modules
 
 FROM base AS deps-prod
 COPY package.json package-lock.json ./
@@ -28,6 +29,7 @@ RUN set -eux; \
     echo "npm ci failed (attempt $attempt), retrying in 10s..."; \
     sleep 10; \
   done
+RUN mkdir -p /workspace/apps/ui/node_modules
 
 FROM base AS build
 ENV NODE_ENV=production
@@ -45,6 +47,7 @@ ENV CV_PDF_REQUIRED=1
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY package.json /workspace/package.json
 COPY apps/ui /workspace/apps/ui
+COPY --from=deps-build /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
 WORKDIR /workspace/apps/ui
 RUN mkdir -p public && npm run build
 
@@ -81,6 +84,7 @@ COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY package.json package-lock.json /workspace/
 COPY scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
 COPY apps/ui /workspace/apps/ui
+COPY --from=deps-build /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
 WORKDIR /workspace/apps/ui
 EXPOSE 3001
 CMD ["npm", "exec", "--", "next", "dev", "-H", "0.0.0.0", "-p", "3001"]
