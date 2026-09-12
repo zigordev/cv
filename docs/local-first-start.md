@@ -60,7 +60,7 @@ Seed the project by pushing the tracked message files once:
 npm run i18n:push -w @cv/web
 ```
 
-After that, Tolgee is the source of truth. A key added locally and not pushed is overwritten by the next pull.
+After that, Tolgee is the source of truth. The next pull keeps a key Tolgee does not have yet, but reverts any value Tolgee has that was changed locally and not pushed.
 
 ## 4. Store Secrets In OpenBao
 
@@ -232,6 +232,7 @@ Tolgee pull fails:
 - `platform-ops` is not running, so Tolgee is not reachable on `http://localhost:8090`
 - `TOLGEE_PROJECT_ID` in `docker/.env.app.local` does not match a real project
 - `TOLGEE_API_KEY` in `kv/cv` was revoked or belongs to a different project
+- `apps/ui/messages/en.json` or `es.json` is not valid JSON, usually a leftover merge conflict; resolve it and rerun, the pull writes nothing until both files parse
 
 The UI shows raw keys such as `nav.contact` instead of text:
 
