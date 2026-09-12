@@ -344,7 +344,7 @@ export function resolveCv(messages: Messages) {
   if (!cv?.identity) {
     throw new Error(
       'Missing `cv.*` translations. Push the CV keys to Tolgee, or restore ' +
-        'apps/ui/messages/*.json — a pull has overwritten them.'
+        'apps/web/messages/*.json — a pull has overwritten them.'
     );
   }
 

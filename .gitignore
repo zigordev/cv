@@ -10,12 +10,12 @@ docker/.env.app.local
 coverage/
 artifacts/
 
-# Generated at build time by apps/ui/scripts/generate-pdf.mjs
-apps/ui/public/cv-*.pdf
+# Generated at build time by apps/web/scripts/generate-pdf.mjs
+apps/web/public/cv-*.pdf
 
 # Playwright
-apps/ui/playwright-report/
-apps/ui/test-results/
+apps/web/playwright-report/
+apps/web/test-results/
 
 # Claude Code scratch worktrees. These are local git worktrees; committing
 # one records a gitlink with no .gitmodules entry, which makes every
