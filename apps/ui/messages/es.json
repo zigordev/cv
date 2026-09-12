@@ -298,7 +298,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot abre pull requests agrupados una vez por semana y espera siete días antes de proponer una versión recién publicada. Una release comprometida suele detectarse y retirarse en cuestión de días, y aquí nada es tan urgente como para merecer instalarla el primero.",
+            "Dependabot abre pull requests agrupados una vez por semana y espera siete días antes de proponer una versión recién publicada. Una release comprometida suele detectarse y retirarse en cuestión de días, y aquí nada es tan urgente como para merecer instalarla el primero. Los majors de la imagen base nunca se proponen: un major nuevo de Node cambia el runtime, así que llega a propósito, junto con la versión fijada y el rango de engines.",
             "El auto-merge se activa en cada pull request no borrador en cuanto se abre, lo que deja la protección de rama como lo único que lo sujeta: lo verde se fusiona, lo rojo se queda. Los majors de Dependabot son la única exclusión, porque un major es un cambio que se lee, no un número que se sube.",
             "CodeQL, la revisión de dependencias y Semgrep se ejecutan en cada pull request, y el SBOM se conserva como artefacto de cada uno y no solo de una release.",
             "El PDF lo genera Chromium sin interfaz dentro del build de Docker, que falla si el fichero no se puede producir. Un despliegue no puede publicar una página y un PDF desactualizado que se contradigan.",
@@ -412,7 +412,7 @@
         "pipeline": {
           "automation": [
             "Las traducciones se promocionan solas. Un push a main que toque los ficheros de mensajes, la configuración de Tolgee o el entorno de producción promociona el texto al proyecto de Tolgee de producción, así que el copy se publica sin una release.",
-            "Dependabot vigila cuatro ecosistemas — npm, ambos Dockerfiles y las propias Actions — agrupados semanalmente, con patch y minor fusionándose en verde y los majors reservados a una persona.",
+            "Dependabot vigila cuatro ecosistemas — npm, ambos Dockerfiles y las propias Actions — agrupados semanalmente, con patch y minor fusionándose en verde y los majors reservados a una persona. Los majors de la imagen base ni siquiera se proponen, así que el runtime de Node solo cambia a propósito.",
             "platform-ops sondea los endpoints públicos cada cinco minutos desde fuera del estado y abre una incidencia cuando alguno deja de responder.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request; Trivy y el SBOM otra vez en el despliegue, contra la imagen que realmente se publica y no contra la que la CI construyó en su momento.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
@@ -465,7 +465,7 @@
         "pipeline": {
           "automation": [
             "Una prueba de concepto usa el mismo pipeline que producción. La ventaja de tener la plantilla propia es que una idea nueva empieza con imágenes firmadas, un smoke y un changelog en lugar de ganárselos más tarde, cuando adaptarlo todo es justo lo que nadie tiene tiempo de hacer.",
-            "Dependabot sobre npm, ambos Dockerfiles y las Actions, agrupado semanalmente, con patch y minor fusionándose en verde.",
+            "Dependabot sobre npm, ambos Dockerfiles y las Actions, agrupado semanalmente, con patch y minor fusionándose en verde. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
           ],
@@ -524,7 +524,7 @@
           "automation": [
             "Los manifiestos de compose se renderizan en la CI, así que un fichero que ya no parsea falla en el pull request y no en el host, a mitad de un despliegue.",
             "El job de integración vuelca los logs de los contenedores cuando falla. Una ejecución roja sin ellos solo te dice que lo reproduzcas en local, que es la forma más lenta posible de averiguar qué hizo el broker.",
-            "Dependabot sobre npm, el Dockerfile y las Actions, semanal y agrupado; patch y minor se fusionan en verde.",
+            "Dependabot sobre npm, el Dockerfile y las Actions, semanal y agrupado; patch y minor se fusionan en verde. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
             "El desarrollo local tiene dos modos sobre un mismo contenedor. `local:up` ejecuta la imagen de producción; `local:dev` construye una etapa de desarrollo y ejecuta `nest start --watch` bajo `docker compose watch`, de modo que una edición del worker le llega como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
           ],
@@ -655,7 +655,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot sobre npm, las imágenes base de Docker y las Actions, agrupado semanalmente con siete días de espera; auto-merge en verde para patch y minor, la misma política que el resto del parque.",
+            "Dependabot sobre npm, las imágenes base de Docker y las Actions, agrupado semanalmente con siete días de espera; auto-merge en verde para patch y minor, la misma política que el resto del parque. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL en cada pull request y semanalmente en main, revisión de dependencias, commitlint sobre los commits y el título del pull request, y gitleaks sobre todo el historial.",
             "La suite de Playwright se ejecuta contra la build de producción servida por Vite preview, en Chromium sin cabeza con WebGL por software, en un viewport de escritorio y otro móvil, y conserva una captura de cada vista de cámara como salida de la prueba, para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
           ],
@@ -711,7 +711,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot cubre npm, Cargo y ambos Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio.",
+            "Dependabot cubre npm, Cargo y los cinco Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio. Los majors de la imagen base no se proponen, así que un major de runtime solo llega a propósito.",
             "Auto-merge en verde para patch y minor; los majors esperan a una persona, en los dos ecosistemas.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request — la misma barrera que usan los repositorios en producción, porque el código la va a necesitar antes de desplegarse y no después.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores, en los dos lenguajes. `local:dev` ejecuta el plano de control con `tsx watch`, la consola con `next dev` y los tres servicios Rust con `cargo watch`, todos alimentados por `docker compose watch`. Los servicios Rust comparten un único volumen para el directorio target de cargo, así que los artefactos de las dependencias que tienen en común se compilan una vez y no tres: la primera construcción es larga y una incremental son unos segundos."

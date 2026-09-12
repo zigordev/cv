@@ -298,7 +298,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot opens grouped pull requests once a week and waits seven days before proposing a newly published version. A compromised release is usually caught and yanked within days, and nothing here is urgent enough to be worth installing first.",
+            "Dependabot opens grouped pull requests once a week and waits seven days before proposing a newly published version. A compromised release is usually caught and yanked within days, and nothing here is urgent enough to be worth installing first. Base-image majors are never proposed: a new Node major changes the runtime, so it lands on purpose, together with the version pin and the engines range.",
             "Auto-merge is enabled on every non-draft pull request the moment it opens, which leaves branch protection as the only thing holding it: green checks merge, red ones sit. Dependabot majors are the one exclusion, because a major is a change to read rather than a number to bump.",
             "CodeQL, dependency review and Semgrep run on every pull request, and the SBOM is kept as an artefact of each one rather than only of a release.",
             "The PDF is rendered by headless Chromium inside the Docker build, which fails if the file cannot be produced. A deploy cannot ship a page and a stale PDF that disagree with each other.",
@@ -412,7 +412,7 @@
         "pipeline": {
           "automation": [
             "Translations promote themselves. A push to main touching the message files, the Tolgee config or the production env promotes the copy to the production Tolgee project, so wording ships without a release.",
-            "Dependabot watches four ecosystems — npm, both Dockerfiles and the Actions themselves — grouped weekly, with patch and minor merging on green and majors left for a person.",
+            "Dependabot watches four ecosystems — npm, both Dockerfiles and the Actions themselves — grouped weekly, with patch and minor merging on green and majors left for a person. Base-image majors are not proposed at all, so the Node runtime only moves on purpose.",
             "The public endpoints are probed every five minutes from outside the estate by platform-ops, which opens an issue when one stops answering.",
             "CodeQL, dependency review and Semgrep on every pull request; Trivy and the SBOM again at deploy, against the image that is actually shipping rather than the one CI happened to build.",
             "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
@@ -465,7 +465,7 @@
         "pipeline": {
           "automation": [
             "A proof of concept runs the same pipeline as production. The point of owning the template is that a new idea starts with signed images, a smoke test and a changelog rather than earning them later, when retrofitting is exactly what nobody has time for.",
-            "Dependabot across npm, both Dockerfiles and the Actions, grouped weekly, with patch and minor merging on green.",
+            "Dependabot across npm, both Dockerfiles and the Actions, grouped weekly, with patch and minor merging on green. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL, dependency review and Semgrep on every pull request.",
             "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
           ],
@@ -524,7 +524,7 @@
           "automation": [
             "Compose manifests are rendered in CI, so a file that no longer parses fails on the pull request rather than on the host, halfway through a deploy.",
             "The integration job dumps the container logs when it fails. A red run without them only tells you to reproduce it locally, which is the slowest possible way to learn what the broker did.",
-            "Dependabot on npm, the Dockerfile and the Actions, weekly and grouped; patch and minor merge on green.",
+            "Dependabot on npm, the Dockerfile and the Actions, weekly and grouped; patch and minor merge on green. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL, dependency review and Semgrep on every pull request.",
             "Local development has two modes over one container. `local:up` runs the production image; `local:dev` builds a dev stage and runs `nest start --watch` under `docker compose watch`, so an edit to the worker reaches it as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
           ],
@@ -655,7 +655,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot over npm, the Docker base images and the Actions, grouped weekly with a seven-day cooldown; auto-merge on green for patch and minor, the same policy as the rest of the estate.",
+            "Dependabot over npm, the Docker base images and the Actions, grouped weekly with a seven-day cooldown; auto-merge on green for patch and minor, the same policy as the rest of the estate. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL on every pull request and weekly on main, dependency review, commitlint on the commits and the pull request title, and gitleaks over the full history.",
             "The Playwright suite runs against the production build served by Vite preview, on headless Chromium with software WebGL, on a desktop and a mobile viewport, and keeps a screenshot of every camera view as test output so a change to the city can be reviewed by eye as well as by assertion."
           ],
@@ -711,7 +711,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot covers npm, Cargo and both Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly.",
+            "Dependabot covers npm, Cargo and all five Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly. Base-image majors are not proposed, so a runtime major only lands on purpose.",
             "Auto-merge on green for patch and minor; majors wait for a person, in both ecosystems.",
             "CodeQL, dependency review and Semgrep on every pull request — the same gate the production repositories use, because the code will need it before it deploys, not after.",
             "Local development has two modes over one set of containers, across both languages. `local:dev` runs the control plane under `tsx watch`, the console under `next dev` and the three Rust services under `cargo watch`, all fed by `docker compose watch`. The Rust services share one named volume for the cargo target directory, so the dependency artefacts they have in common are compiled once rather than three times: the first build is long, an incremental one is a few seconds."
