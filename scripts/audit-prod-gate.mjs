@@ -1,12 +1,22 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const HIGH_OR_CRITICAL = new Set(['high', 'critical']);
-// Empty on purpose. Add a CVE here only when a remediation path exists but
-// cannot be applied yet, and pair it with the owning package below.
-const ALLOWED_GHSA = new Set([]);
-const ALLOWED_CHAIN_PACKAGES = new Set([]);
+
+// Advisories this repository accepts for now, and the packages they arrive
+// through. The body of this script is identical in every repository; what
+// differs is data, so it lives beside it in audit-allowlist.json. Add a CVE
+// there only when a remediation path exists but cannot be applied yet, and
+// pair it with the owning package.
+const allowlistPath = fileURLToPath(new URL('./audit-allowlist.json', import.meta.url));
+const allowlist = existsSync(allowlistPath)
+  ? JSON.parse(readFileSync(allowlistPath, 'utf8'))
+  : { ghsa: [], chainPackages: [] };
+const ALLOWED_GHSA = new Set(allowlist.ghsa ?? []);
+const ALLOWED_CHAIN_PACKAGES = new Set(allowlist.chainPackages ?? []);
 
 function normalizeSeverity(value) {
   return String(value ?? '').toLowerCase();
