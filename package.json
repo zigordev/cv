@@ -1,6 +1,6 @@
 {
   "name": "cv",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": true,
   "description": "Personal CV web app (editorial single-page)",
   "engines": {
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "husky": "^9.1.7",
     "prettier": "^3.1.0",
     "typescript": "^5.3.0"
