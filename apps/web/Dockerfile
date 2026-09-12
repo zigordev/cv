@@ -3,7 +3,7 @@ WORKDIR /workspace
 
 FROM base AS deps-build
 COPY package.json package-lock.json ./
-COPY apps/ui/package.json apps/ui/package.json
+COPY apps/web/package.json apps/web/package.json
 COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN set -eux; \
   for attempt in 1 2 3; do \
@@ -14,11 +14,11 @@ RUN set -eux; \
     echo "npm ci failed (attempt $attempt), retrying in 10s..."; \
     sleep 10; \
   done
-RUN mkdir -p /workspace/apps/ui/node_modules
+RUN mkdir -p /workspace/apps/web/node_modules
 
 FROM base AS deps-prod
 COPY package.json package-lock.json ./
-COPY apps/ui/package.json apps/ui/package.json
+COPY apps/web/package.json apps/web/package.json
 COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN set -eux; \
   for attempt in 1 2 3; do \
@@ -29,7 +29,7 @@ RUN set -eux; \
     echo "npm ci failed (attempt $attempt), retrying in 10s..."; \
     sleep 10; \
   done
-RUN mkdir -p /workspace/apps/ui/node_modules
+RUN mkdir -p /workspace/apps/web/node_modules
 
 FROM base AS build
 ENV NODE_ENV=production
@@ -46,9 +46,9 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV CV_PDF_REQUIRED=1
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY package.json /workspace/package.json
-COPY apps/ui /workspace/apps/ui
-COPY --from=deps-build /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
-WORKDIR /workspace/apps/ui
+COPY apps/web /workspace/apps/web
+COPY --from=deps-build /workspace/apps/web/node_modules /workspace/apps/web/node_modules
+WORKDIR /workspace/apps/web
 RUN mkdir -p public && npm run build
 
 FROM node:24-alpine AS prod
@@ -60,20 +60,20 @@ RUN apk upgrade --no-cache zlib libcrypto3 libssl3 \
  && rm -rf /usr/local/lib/node_modules/npm /opt/yarn-v1.22.22 \
  && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 COPY --from=deps-prod /workspace/node_modules /app/node_modules
-COPY --from=build /workspace/apps/ui/.next/standalone ./
-COPY --from=build /workspace/apps/ui/.next/static ./apps/ui/.next/static
-COPY --from=build /workspace/apps/ui/public ./apps/ui/public
-COPY --from=build /workspace/apps/ui/messages ./apps/ui/messages
+COPY --from=build /workspace/apps/web/.next/standalone ./
+COPY --from=build /workspace/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build /workspace/apps/web/public ./apps/web/public
+COPY --from=build /workspace/apps/web/messages ./apps/web/messages
 COPY scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
 # next/image writes optimised variants into .next/cache at runtime. Everything
 # above is copied as root, so the unprivileged user the container drops to
 # cannot create it — which surfaces as an EACCES unhandledRejection on the
 # first image request rather than anything that mentions permissions.
-RUN mkdir -p /app/apps/ui/.next/cache \
- && chown -R node:node /app/apps/ui/.next
+RUN mkdir -p /app/apps/web/.next/cache \
+ && chown -R node:node /app/apps/web/.next
 USER node
 EXPOSE 3001
-CMD ["node", "apps/ui/server.js"]
+CMD ["node", "apps/web/server.js"]
 
 FROM prod AS local
 
@@ -83,8 +83,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY package.json package-lock.json /workspace/
 COPY scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
-COPY apps/ui /workspace/apps/ui
-COPY --from=deps-build /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
-WORKDIR /workspace/apps/ui
+COPY apps/web /workspace/apps/web
+COPY --from=deps-build /workspace/apps/web/node_modules /workspace/apps/web/node_modules
+WORKDIR /workspace/apps/web
 EXPOSE 3001
 CMD ["npm", "exec", "--", "next", "dev", "-H", "0.0.0.0", "-p", "3001"]

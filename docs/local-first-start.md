@@ -143,7 +143,7 @@ npm run local:up
 1. create the shared `platform_ops_shared` network if it is missing
 2. wait for OpenBao to be reachable, and fail clearly if it is sealed or uninitialized
 3. verify `kv/cv` is readable and holds both required keys
-4. pull Tolgee snapshots into `apps/ui/messages/`
+4. pull Tolgee snapshots into `apps/web/messages/`
 5. build and start the `cv_web` container
 
 The app is then on `http://localhost:3021`, with `http://localhost:3021/health` as the liveness probe.
@@ -185,7 +185,7 @@ If the `notifications` stack is running, the mail arrives through its configured
 npm run local:dev
 ```
 
-Runs the same preflight and the same URL, but builds the `dev` stage of `apps/ui/Dockerfile` and starts `next dev` under `docker compose watch`. Edits under `apps/ui/src`, `apps/ui/messages` and `apps/ui/public` are copied into the running container and hot-reload in about a second; `package.json` and `package-lock.json` trigger a rebuild instead, because a dependency change cannot be copied in.
+Runs the same preflight and the same URL, but builds the `dev` stage of `apps/web/Dockerfile` and starts `next dev` under `docker compose watch`. Edits under `apps/web/src`, `apps/web/messages` and `apps/web/public` are copied into the running container and hot-reload in about a second; `package.json` and `package-lock.json` trigger a rebuild instead, because a dependency change cannot be copied in.
 
 It keeps everything the plain dev server gives up: OpenBao secrets, the shared network, and a working contact form.
 
@@ -232,7 +232,7 @@ Tolgee pull fails:
 - `platform-ops` is not running, so Tolgee is not reachable on `http://localhost:8090`
 - `TOLGEE_PROJECT_ID` in `docker/.env.app.local` does not match a real project
 - `TOLGEE_API_KEY` in `kv/cv` was revoked or belongs to a different project
-- `apps/ui/messages/en.json` or `es.json` is not valid JSON, usually a leftover merge conflict; resolve it and rerun, the pull writes nothing until both files parse
+- `apps/web/messages/en.json` or `es.json` is not valid JSON, usually a leftover merge conflict; resolve it and rerun, the pull writes nothing until both files parse
 
 The UI shows raw keys such as `nav.contact` instead of text:
 

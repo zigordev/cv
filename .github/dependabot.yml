@@ -49,7 +49,7 @@ updates:
       prefix: chore
       include: scope
   - package-ecosystem: docker
-    directory: /apps/ui
+    directory: /apps/web
     schedule:
       interval: weekly
       day: tuesday
