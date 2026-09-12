@@ -7,7 +7,7 @@ shared notifications service.
 Built from the "CV Editorial" design handoff on the
 [shared product design system](https://github.com/zigordev/design-system).
 
-## Shape
+## Repository shape
 
 One workspace, `apps/web`: a Next.js 15 App Router app built with
 `output: 'standalone'` and run as a container on the shared `platform_ops_shared`
@@ -26,9 +26,9 @@ service already.
 | UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                            |
 | Secrets       | OpenBao, kv mount, path `cv`                                         |
 | Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`        |
-| Design system | `apps/web/design-system` (vendored copy)                             |
+| Design system | `design-system`, pinned to a tag from the shared repository          |
 
-## Local development
+## Quick start
 
 The app needs the `platform-ops` stack (OpenBao, Tolgee, Redpanda) running
 first — see that repo's `docs/local-first-start.md`.
@@ -77,6 +77,31 @@ the contact form needs Kafka):
 ```bash
 npm run dev -w @cv/web
 ```
+
+## Quality commands
+
+```bash
+npm run precommit:checks
+```
+
+Gitleaks, lint, typecheck and build. There is no integration-e2e stage — with
+no API and no database there is no stack to bring up; CI covers the runtime
+path with a Docker smoke test that asserts the CV is present in the
+server-rendered HTML.
+
+## Release + deploy model
+
+- `Release Please` manages versioning/changelog + release PR.
+- On release publish, `Deploy AWS App (EC2 Compose)` builds and pushes the web
+  image to ECR, signs and attests it by digest, uploads the release bundle to S3
+  and deploys remotely over AWS SSM.
+- Runtime env comes from the SSM prefix in `AWS_SSM_APP_PREFIX` (conventionally
+  `/cv/prod/app`) rendered into `docker/.env.app.prod` on the host, with
+  `OPENBAO_TOKEN` read from that same prefix.
+- The production host is powered on only inside its weekday window, so a deploy
+  outside it has nothing to reach. `docs/cloud-first-deploy.md` is the runbook.
+- Platform infra/ops services are owned by `platform-ops`; this repo only ships
+  app stack compose + app config under `docker/`.
 
 ## Required OpenBao keys
 
@@ -297,14 +322,3 @@ system has no small icon size, so an `sm` neighbour sits 6px short.
 
 The CV uses the design system's **default** theme (neutral, blue accent, light
 only), so unlike kini/gpool/operator-console there is no `themes/cv.css`.
-
-## Checks
-
-```bash
-npm run precommit:checks
-```
-
-Gitleaks, lint, typecheck and build. There is no integration-e2e stage — with
-no API and no database there is no stack to bring up; CI covers the runtime
-path with a Docker smoke test that asserts the CV is present in the
-server-rendered HTML.
