@@ -245,7 +245,7 @@ already sorts, and languages is an array, whose order is preserved.
 ### Running a sync
 
 ```bash
-npm run i18n:push
+npm run i18n:push:local
 ```
 
 That is the **root** script, not the workspace one. The Tolgee CLI needs

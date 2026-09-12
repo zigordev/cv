@@ -124,7 +124,7 @@ done
 
 openbao_token="$(fetch_ssm_secret_value "${APP_SSM_PREFIX%/}/OPENBAO_TOKEN")"
 upsert_env_var "$APP_ENV_FILE" "OPENBAO_TOKEN" "$openbao_token"
-upsert_env_var "$APP_ENV_FILE" "CV_WEB_IMAGE" "$WEB_IMAGE"
+upsert_env_var "$APP_ENV_FILE" "WEB_IMAGE" "$WEB_IMAGE"
 upsert_env_var "$APP_ENV_FILE" "NEXT_PUBLIC_RELEASE" "$RELEASE_TAG"
 
 docker network create "platform_ops_shared" >/dev/null 2>&1 || true
