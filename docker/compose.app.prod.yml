@@ -32,7 +32,7 @@ services:
       NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
     ports:
       - '3021:3001'
-    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/ui/server.js']
+    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/web/server.js']
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1 || exit 1']
       interval: 10s

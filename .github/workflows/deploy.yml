@@ -113,7 +113,7 @@ jobs:
             echo "Web image already exists in ECR with immutable tag, reusing: $web_image"
           else
             docker build \
-              -f apps/ui/Dockerfile \
+              -f apps/web/Dockerfile \
               --target prod \
               --build-arg NEXT_PUBLIC_RELEASE="${RELEASE_TAG}" \
               -t "$web_image" .

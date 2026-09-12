@@ -9,7 +9,7 @@ Built from the "CV Editorial" design handoff on the
 
 ## Shape
 
-One workspace, `apps/ui`: a Next.js 15 App Router app built with
+One workspace, `apps/web`: a Next.js 15 App Router app built with
 `output: 'standalone'` and run as a container on the shared `platform_ops_shared`
 network, like every other app on the platform.
 
@@ -19,14 +19,14 @@ NestJS service alongside would be one endpoint's worth of ceremony. Delivery
 state, idempotency and dead-letter auditing all live in the notifications
 service already.
 
-| Concern       | Where                                                               |
-| ------------- | ------------------------------------------------------------------- |
-| UI            | `apps/ui/src/components` — sections composed from the design system |
-| CV content    | Tolgee → `cv.*`; skeleton in `apps/ui/src/content/cv.ts`            |
-| UI copy       | Tolgee → `apps/ui/messages/{en,es}.json`                            |
-| Secrets       | OpenBao, kv mount, path `cv`                                        |
-| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`       |
-| Design system | `apps/ui/design-system` (vendored copy)                             |
+| Concern       | Where                                                                |
+| ------------- | -------------------------------------------------------------------- |
+| UI            | `apps/web/src/components` — sections composed from the design system |
+| CV content    | Tolgee → `cv.*`; skeleton in `apps/web/src/content/cv.ts`            |
+| UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                            |
+| Secrets       | OpenBao, kv mount, path `cv`                                         |
+| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`        |
+| Design system | `apps/web/design-system` (vendored copy)                             |
 
 ## Local development
 
@@ -59,7 +59,7 @@ npm run local:dev
 Same preflight, same URL, same OpenBao secrets and shared network — but the
 container runs `next dev` and `docker compose watch` copies changed files into
 it, so an edit under `src/`, `messages/` or `public/` reaches the browser in
-about a second. `package-lock.json` and `apps/ui/package.json` trigger a
+about a second. `package-lock.json` and `apps/web/package.json` trigger a
 rebuild rather than a sync, since a dependency change cannot be copied in.
 
 The two modes are the same container on the same port, so they do not run at
@@ -100,7 +100,7 @@ terminal) were built to compare against it and removed once this one won —
 ## PDF
 
 `Download PDF` is a plain download link to `public/cv-{locale}.pdf`, generated
-at build time by `apps/ui/scripts/generate-pdf.mjs`. It used to call
+at build time by `apps/web/scripts/generate-pdf.mjs`. It used to call
 `window.print()`, which opens a dialog rather than downloading anything.
 
 Headless Chromium renders the same `@media print` document a browser would, so

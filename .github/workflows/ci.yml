@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-web
-          path: apps/ui/coverage
+          path: apps/web/coverage
           retention-days: 7
           if-no-files-found: warn
 
@@ -78,14 +78,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Build web image
-        run: docker build -f apps/ui/Dockerfile --target prod --build-arg NEXT_PUBLIC_RELEASE=ci -t cv-web:ci .
+        run: docker build -f apps/web/Dockerfile --target prod --build-arg NEXT_PUBLIC_RELEASE=ci -t cv-web:ci .
 
       # The container normally boots through openbao-run, which needs the ops
       # stack. CI has no OpenBao, so the smoke test runs the server directly:
       # it proves the image serves the CV, not that secrets wiring works.
       - name: Run container
         run: |
-          docker run -d --name cv-web -p 3001:3001 cv-web:ci node apps/ui/server.js
+          docker run -d --name cv-web -p 3001:3001 cv-web:ci node apps/web/server.js
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3001/health > /dev/null; then
               echo "web is up"; exit 0
@@ -136,7 +136,7 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-        working-directory: apps/ui
+        working-directory: apps/web
 
       - name: Build
         run: npm run build
@@ -145,7 +145,7 @@ jobs:
       # port to keep in sync between the workflow and the config.
       - name: Run accessibility and performance suite
         run: npm run e2e
-        working-directory: apps/ui
+        working-directory: apps/web
 
       - name: Upload report on failure
         if: failure()
@@ -153,8 +153,8 @@ jobs:
         with:
           name: playwright-report-web
           path: |
-            apps/ui/playwright-report
-            apps/ui/test-results
+            apps/web/playwright-report
+            apps/web/test-results
           retention-days: 7
           if-no-files-found: ignore
 
@@ -184,7 +184,7 @@ jobs:
         run: npm run audit:prod:gate
 
       - name: Build prod image
-        run: docker build --build-arg NEXT_PUBLIC_RELEASE=ci -f apps/ui/Dockerfile --target prod -t cv-web:ci .
+        run: docker build --build-arg NEXT_PUBLIC_RELEASE=ci -f apps/web/Dockerfile --target prod -t cv-web:ci .
 
       - name: Prepare artifacts dir
         run: mkdir -p artifacts
