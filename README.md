@@ -222,6 +222,13 @@ which cost this repo its entire CV content once.
 The trade-off: a key deliberately removed in Tolgee lingers locally until it is
 deleted here too. Stale keys are cheap; lost copy is not.
 
+**The pull never replaces a file it cannot parse.** A missing file is a first
+pull and takes the export as it is. A file that exists but is not valid JSON,
+usually one a merge or stash pop left with conflict markers, stops the pull
+before either locale is written. Taking the export alone there drops every key
+Tolgee does not hold, including the empty arrays it cannot store, and the image
+built from those files fails to render.
+
 **Arrays survive the round trip only because the export asks them to.** Tolgee
 has no array type: pushing `bullets: [...]` stores three keys literally named
 `bullets[0]`, `bullets[1]`, `bullets[2]`. The pull sets `supportArrays=true` so
