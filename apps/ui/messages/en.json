@@ -626,7 +626,7 @@
         "tagline": "The shared operations stack every other project attaches to instead of rebuilding."
       },
       "sity": {
-        "approach": "One plan describes every road as nodes and typed segments. From it the scene builds the geometry it renders and the directed lane graph that vehicles will follow, so the drawing and the data cannot disagree. The terrain follows the roads and the streams (cuttings, embankments, tunnel portals and culverts come from the same centrelines), every dead end finishes at a destination whose parking bays are exported for the simulation, and the city grows from the streets: lots are cut along each frontage and filled with instanced buildings whose facades come from a shader.",
+        "approach": "One plan describes every road as nodes and typed segments. From it the scene builds the geometry it renders and the directed lane graph that vehicles will follow, so the drawing and the data cannot disagree. The terrain follows the roads and the streams (cuttings, embankments, tunnel portals and culverts come from the same centrelines, and the ground is clamped below every paved surface), every dead end finishes at a destination whose parking bays are exported for the simulation, and the city grows from the streets: lots are cut along each frontage and filled with instanced buildings whose facades come from a shader.",
         "decisions": [
           "Roads are drawn from the graph rather than the graph fitted to the drawing. A road rendered from the same sampled centreline as its lanes means a vehicle on lane data is on the asphalt, with no second source of truth to reconcile.",
           "Everything repeated is instanced and everything else is merged per material, which keeps the whole 13 km² site under 600 draw calls and 4.6 million triangles with post-processing on. The facade grid is computed in the shader from the instance box, so building variety costs attributes, not geometry."
@@ -649,7 +649,7 @@
           },
           {
             "step": "04",
-            "text": "Vitest covers the network builder, the lane graph and the city plan without a browser: turn connectors at a crossroads, lane assignment and adjacency, roundabout rings, ramp diverges and merges, invariants and routing. Playwright drives the built site through a debug API: graph invariants, routing between the highway and Main Street, the building-footprint audit, a check that no dead end is left without a destination, city counts, draw-call and triangle budgets, rendered views checked pixel by pixel and kept as screenshots, and the panel against WCAG A and AA.",
+            "text": "Vitest covers the network builder, the lane graph and the city plan without a browser: turn connectors at a crossroads, lane assignment and adjacency, roundabout rings, ramp diverges and merges, invariants and routing. Playwright drives the built site through a debug API: graph invariants, routing between the highway and Main Street, the building-footprint audit, a road-clearance audit that fails if any terrain, tree or prop reaches the pavement, a check that no dead end is left without a destination, city counts, draw-call and triangle budgets, rendered views checked pixel by pixel and kept as screenshots, and the panel against WCAG A and AA.",
             "title": "Verification"
           }
         ],
@@ -667,7 +667,7 @@
             },
             {
               "step": "02",
-              "text": "Quality, then a Docker smoke test of the nginx image, the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, performance budgets, pixel samples of every camera view and axe against WCAG A and AA — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
+              "text": "Quality, then a Docker smoke test of the nginx image, the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, a road-clearance audit, performance budgets, pixel samples of every camera view and axe against WCAG A and AA — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
               "title": "The pull request"
             },
             {
