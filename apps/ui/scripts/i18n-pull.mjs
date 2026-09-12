@@ -104,15 +104,26 @@ function sortKeys(value) {
 }
 
 async function readLocal(dest) {
+  let raw;
   try {
-    return JSON.parse(await readFile(dest, 'utf8'));
-  } catch {
-    return null; // first pull, or an unreadable file: treat the export as authoritative
+    raw = await readFile(dest, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error(
+      `${path.relative(process.cwd(), dest)} is not valid JSON (${error.message}). ` +
+        'Fix it, usually by resolving a merge conflict, and pull again. Nothing was written.'
+    );
+    process.exit(1);
   }
 }
 
 const skipped = [];
-const writes = [];
+const entries = [];
 zip.forEach((relativePath, file) => {
   if (!relativePath.endsWith('.json')) return;
   const filename = path.basename(relativePath);
@@ -121,22 +132,26 @@ zip.forEach((relativePath, file) => {
     skipped.push(filename);
     return;
   }
-  const dest = path.join(outDir, `${locale}.json`);
-  const task = file.async('string').then(async (content) => {
-    const remote = JSON.parse(content);
-    const local = await readLocal(dest);
-    const merged = local ? mergeMessages(local, remote) : remote;
-    return writeFile(dest, JSON.stringify(sortKeys(merged), null, 2) + '\n', 'utf8');
-  });
-  writes.push(task);
+  entries.push({ file, dest: path.join(outDir, `${locale}.json`) });
 });
 
-if (!writes.length) {
+if (!entries.length) {
   console.error('Tolgee export zip contained no JSON files.');
   process.exit(1);
 }
 
-await Promise.all(writes);
+const results = [];
+for (const { file, dest } of entries) {
+  const remote = JSON.parse(await file.async('string'));
+  const local = await readLocal(dest);
+  results.push({ dest, messages: local ? mergeMessages(local, remote) : remote });
+}
+
+await Promise.all(
+  results.map(({ dest, messages }) =>
+    writeFile(dest, JSON.stringify(sortKeys(messages), null, 2) + '\n', 'utf8')
+  )
+);
 console.log(`Updated translations in ${outDir}`);
 if (skipped.length) {
   console.warn(`Skipped unsupported locales from Tolgee: ${skipped.join(', ')}`);
