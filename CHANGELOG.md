@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.2](https://github.com/zigordev/cv/compare/v0.8.1...v0.8.2) (2026-09-12)
+
+
+### Bug Fixes
+
+* **docker:** build the web image on node 24 ([#70](https://github.com/zigordev/cv/issues/70)) ([ee246e0](https://github.com/zigordev/cv/commit/ee246e0af08ebf75d4ed7d8ce9f80e80405309ef))
+* **i18n:** stop the pull from replacing a message file it cannot parse ([#69](https://github.com/zigordev/cv/issues/69)) ([e4280f5](https://github.com/zigordev/cv/commit/e4280f51751bd51416d3d37989354a8170b1ba18))
+
 ## [0.8.1](https://github.com/zigordev/cv/compare/v0.8.0...v0.8.1) (2026-09-10)
 
 
