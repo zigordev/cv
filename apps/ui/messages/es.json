@@ -626,7 +626,7 @@
         "tagline": "El stack de operaciones compartido al que se conectan el resto de proyectos en lugar de reconstruirlo."
       },
       "sity": {
-        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. El terreno sigue a las vías y a los arroyos (desmontes, terraplenes, bocas de túnel y alcantarillas salen de los mismos ejes), cada fondo de saco termina en un destino cuyas plazas de aparcamiento se exportan para la simulación, y la ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
+        "approach": "Un único plan describe cada vía como nodos y tramos tipados. A partir de él la escena construye la geometría que dibuja y el grafo dirigido de carriles que seguirán los vehículos, de modo que el dibujo y los datos no pueden discrepar. El terreno sigue a las vías y a los arroyos (desmontes, terraplenes, bocas de túnel y alcantarillas salen de los mismos ejes, y el terreno queda por debajo de toda superficie pavimentada), cada fondo de saco termina en un destino cuyas plazas de aparcamiento se exportan para la simulación, y la ciudad crece desde las calles: las parcelas se cortan a lo largo de cada fachada y se rellenan con edificios instanciados cuyas fachadas salen de un shader.",
         "decisions": [
           "Las vías se dibujan desde el grafo en lugar de ajustar el grafo al dibujo. Una vía renderizada desde el mismo eje muestreado que sus carriles significa que un vehículo sobre los datos de carril está sobre el asfalto, sin una segunda fuente de verdad que reconciliar.",
           "Todo lo repetido se instancia y todo lo demás se fusiona por material, lo que mantiene los 13 km² del emplazamiento por debajo de 600 draw calls y 4,6 millones de triángulos con el postprocesado activo. La retícula de la fachada se calcula en el shader a partir de la caja de la instancia, así que la variedad de edificios cuesta atributos, no geometría."
@@ -649,7 +649,7 @@
           },
           {
             "step": "04",
-            "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, la auditoría de huellas de edificios, una comprobación de que ningún fondo de saco queda sin destino, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
+            "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, la auditoría de huellas de edificios, una auditoría de calzada que falla si el terreno, un árbol o cualquier elemento alcanza el pavimento, una comprobación de que ningún fondo de saco queda sin destino, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
             "title": "Verificación"
           }
         ],
@@ -667,7 +667,7 @@
             },
             {
               "step": "02",
-              "text": "Calidad, después un smoke en Docker de la imagen de nginx, la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara y axe contra WCAG A y AA —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
+              "text": "Calidad, después un smoke en Docker de la imagen de nginx, la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, una auditoría de calzada limpia, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara y axe contra WCAG A y AA —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
               "title": "El pull request"
             },
             {
