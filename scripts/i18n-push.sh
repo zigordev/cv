@@ -10,7 +10,7 @@ set -euo pipefail
 # and fails with a misleading "Can't open config file" when they are not (the
 # config throws while the CLI is requiring it).
 #
-# This is the pull invocation from local-stack-up.sh with the direction
+# This is the pull invocation from the local stack with the direction
 # reversed, so push has the same one-command path that pull already had.
 #
 # Note the workspace script pushes with --force-mode OVERRIDE: Tolgee's copy of
