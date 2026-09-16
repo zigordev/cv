@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   quality:
-    name: Quality (Format + Lint + Typecheck + Build)
+    name: Quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
