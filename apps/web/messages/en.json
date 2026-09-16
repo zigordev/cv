@@ -313,7 +313,7 @@
             },
             {
               "step": "02",
-              "text": "Six jobs in parallel: quality (format, lint, typecheck, unit tests and build), a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
+              "text": "Seven jobs in parallel: quality (format, lint, typecheck, unit tests and build), a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, the three compose manifests rendered against a placeholder environment, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
               "title": "The pull request"
             },
             {
