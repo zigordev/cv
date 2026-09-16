@@ -178,7 +178,6 @@ export function PrintResume() {
           <strong>{language.name}:</strong> {language.level}
         </p>
       ))}
-
     </div>
   );
 }

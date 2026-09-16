@@ -53,33 +53,33 @@ export function Experience() {
                   {job.summary}
                 </p>
                 {job.bullets.length > 0 ? (
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: 0,
-                    display: 'grid',
-                    gap: 8,
-                  }}
-                >
-                  {job.bullets.map((bullet) => (
-                    <li
-                      key={bullet}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '16px minmax(0, 1fr)',
-                        fontSize: 'var(--ds-text-sm)',
-                        lineHeight: 1.6,
-                        maxWidth: '74ch',
-                      }}
-                    >
-                      <span aria-hidden="true" style={{ color: 'var(--ds-color-fg-faint)' }}>
-                        —
-                      </span>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul
+                    style={{
+                      listStyle: 'none',
+                      margin: 0,
+                      padding: 0,
+                      display: 'grid',
+                      gap: 8,
+                    }}
+                  >
+                    {job.bullets.map((bullet) => (
+                      <li
+                        key={bullet}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '16px minmax(0, 1fr)',
+                          fontSize: 'var(--ds-text-sm)',
+                          lineHeight: 1.6,
+                          maxWidth: '74ch',
+                        }}
+                      >
+                        <span aria-hidden="true" style={{ color: 'var(--ds-color-fg-faint)' }}>
+                          —
+                        </span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
               </div>
             </div>

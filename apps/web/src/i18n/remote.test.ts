@@ -47,7 +47,7 @@ describe('loadRemoteMessages', () => {
     process.env.TOLGEE_API_KEY = 'test-key';
     process.env.TOLGEE_PROJECT_ID = '1';
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response('nope', { status: 500 }) as Response,
+      new Response('nope', { status: 500 }) as Response
     );
 
     await expect(loadRemoteMessages('en')).resolves.toBeNull();

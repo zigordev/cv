@@ -23,11 +23,7 @@ export function Projects() {
 
         <div>
           {projects.map((project) => (
-            <ProjectRow
-              key={project.id}
-              project={project}
-              onOpen={() => setOpenId(project.id)}
-            />
+            <ProjectRow key={project.id} project={project} onOpen={() => setOpenId(project.id)} />
           ))}
         </div>
       </div>
@@ -82,7 +78,9 @@ function ProjectRow({ project, onOpen }: Readonly<{ project: Project; onOpen: ()
         }}
       />
 
-      <span style={{ display: 'grid', gap: 'var(--ds-space-2)', minWidth: 0, justifyItems: 'start' }}>
+      <span
+        style={{ display: 'grid', gap: 'var(--ds-space-2)', minWidth: 0, justifyItems: 'start' }}
+      >
         <ProjectTags project={project} />
         <span className="cv-row-name" style={display('clamp(26px, 3vw, 36px)', 1.05, '-0.02em')}>
           {project.name}
