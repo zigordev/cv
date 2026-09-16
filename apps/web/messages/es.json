@@ -19,7 +19,7 @@
         }
       },
       "designSystem": {
-        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — copiado dentro de cada consumidor.",
+        "alt": "El design system en tres capas — tokens, componentes que solo referencian tokens y temas por producto — fijado como dependencia etiquetada en cada consumidor.",
         "caption": "Los temas sobrescriben color y nada más. La forma, la escala tipográfica y el espaciado siguen en tokens compartidos, así que un rediseño completo no toca ningún componente.",
         "notes": {
           "components": "solo tokens, sin literales",
@@ -336,7 +336,7 @@
         "approach": "Los componentes son React puro, estilados únicamente con propiedades personalizadas de CSS, sin Tailwind, sin CSS-in-JS y sin paso de compilación. Cualquiera de los tres puede importarlos tal cual, y cada uno aporta su propio fichero de tema en lugar de tocar el código de los componentes.",
         "decisions": [
           "Los temas solo sobrescriben color. La forma, la escala tipográfica y el espaciado siguen en tokens base compartidos, de modo que todos los productos renderizan la misma geometría y solo cambian de pintura.",
-          "Se copia dentro de cada consumidor en vez de publicarse como paquete: los productos son privados y una copia mantiene plano el grafo de dependencias."
+          "Se publica como dependencia etiquetada en vez de copiarse dentro de cada consumidor: un cambio llega como una actualización de versión en un pull request revisable, y se puede comprobar que todos los productos usan la misma etiqueta."
         ],
         "pieces": [
           {
