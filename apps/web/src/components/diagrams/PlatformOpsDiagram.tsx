@@ -84,7 +84,12 @@ export function PlatformOpsDiagram() {
         stroke="var(--ds-color-accent)"
         strokeWidth={1.25}
       />
-      <text x={430} y={120} textAnchor="middle" style={{ ...svgName, fill: 'var(--ds-color-accent)' }}>
+      <text
+        x={430}
+        y={120}
+        textAnchor="middle"
+        style={{ ...svgName, fill: 'var(--ds-color-accent)' }}
+      >
         platform_ops_shared
         <tspan dx={12} style={{ fontSize: 10, opacity: 0.8 }}>
           {copy.seam}

@@ -13,7 +13,15 @@ export function KiniDiagram() {
   return (
     <DiagramFigure alt={copy.alt} caption={copy.caption} viewBox="0 0 860 110" minWidth={520}>
       <Node x={X[0]} y={16} w={W} h={56} label="kini" note={copy.notes.kini} />
-      <Node x={X[1]} y={16} w={W} h={56} label="i18n · releases · compose" note={copy.notes.carried} accent />
+      <Node
+        x={X[1]}
+        y={16}
+        w={W}
+        h={56}
+        label="i18n · releases · compose"
+        note={copy.notes.carried}
+        accent
+      />
       {/* Everything that came after it — the products, minus kini itself. */}
       <Node
         x={X[2]}
