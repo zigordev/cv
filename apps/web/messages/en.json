@@ -323,7 +323,7 @@
             },
             {
               "step": "04",
-              "text": "A published release builds the image, pushes it to ECR and has cosign sign it keylessly by digest with SLSA provenance attached — by digest, because a tag can be repointed after signing. The compose bundle goes to S3 and SSM runs the deploy script on the EC2 host, so no runner ever holds an SSH key. A smoke job then probes the public health endpoint, so a deploy that reports success but serves nothing fails here rather than in a browser.",
+              "text": "A published release builds the image, pushes it to ECR, scans the pushed image with Trivy before anything signs it — a signature over an unscanned image says it was built here, not that it is fit to run — and has cosign sign it keylessly by digest, with SLSA provenance and an SPDX SBOM attached — by digest, because a tag can be repointed after signing. The compose bundle goes to S3 and SSM runs the deploy script on the EC2 host, so no runner ever holds an SSH key. A smoke job then probes the public health endpoint, so a deploy that reports success but serves nothing fails here rather than in a browser.",
               "title": "The deploy"
             }
           ]
@@ -487,7 +487,7 @@
             },
             {
               "step": "04",
-              "text": "API and web images built and pushed, signed with cosign by digest with SLSA provenance attached, bundled to S3, applied on the host through SSM, then smoke-tested against the public health endpoint.",
+              "text": "API and web images built and pushed, scanned with Trivy before signing, signed with cosign by digest with SLSA provenance and an SPDX SBOM attached, bundled to S3, applied on the host through SSM, then smoke-tested against the public health endpoint.",
               "title": "The deploy"
             }
           ]
@@ -546,7 +546,7 @@
             },
             {
               "step": "04",
-              "text": "The API image is built and pushed, signed with cosign by digest with SLSA provenance attached, bundled to S3 and applied on the host through SSM, then smoke-tested against the public health endpoint.",
+              "text": "The API image is built and pushed, scanned with Trivy before signing, signed with cosign by digest with SLSA provenance and an SPDX SBOM attached, bundled to S3 and applied on the host through SSM, then smoke-tested against the public health endpoint.",
               "title": "The deploy"
             }
           ]
