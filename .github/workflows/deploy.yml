@@ -250,8 +250,8 @@ jobs:
             "artifacts/deploy-bundle-${IMAGE_TAG}.tar.gz" \
             "s3://${BUCKET}/releases/cv/${IMAGE_TAG}/deploy-bundle.tar.gz"
 
-  deploy:
-    name: Deploy to EC2
+  deploy-app:
+    name: Remote App Deploy via SSM
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
@@ -329,7 +329,7 @@ jobs:
     name: Post Deploy Smoke
     runs-on: ubuntu-latest
     environment: production
-    needs: deploy
+    needs: deploy-app
 
     steps:
       - name: Smoke health check
