@@ -726,7 +726,7 @@
             },
             {
               "step": "02",
-              "text": "Two language lanes running side by side. Rust: cargo fmt --check, a lock check that refuses a Cargo.lock disagreeing with the manifests, clippy with warnings denied, and the workspace test suite. TypeScript: format, typecheck, build and tests for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
+              "text": "Two language lanes running side by side. Rust: cargo fmt --check, a lock check that refuses a Cargo.lock disagreeing with the manifests, clippy with warnings denied, and the workspace test suite. TypeScript: format, lint, typecheck, build and tests with coverage for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
               "title": "The pull request"
             },
             {
