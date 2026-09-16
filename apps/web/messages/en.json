@@ -19,7 +19,7 @@
         }
       },
       "designSystem": {
-        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — vendored as a copy into each consumer.",
+        "alt": "The design system in three layers — tokens, then components that reference only tokens, then per-product themes — pinned as a tagged dependency in each consumer.",
         "caption": "Themes override colour and nothing else. Shape, type scale and spacing stay on shared tokens, so a full reskin touches no component file.",
         "notes": {
           "components": "tokens only, no literals",
@@ -336,7 +336,7 @@
         "approach": "Components are plain React styled only through CSS custom properties, with no Tailwind, no CSS-in-JS and no build step. Any of the three can import them as-is, and each supplies its own theme file rather than editing component source.",
         "decisions": [
           "Themes override colour only. Shape, type scale and spacing stay on shared base tokens, so every product renders identical geometry and differs solely in paint.",
-          "Vendored into each consumer rather than published as a package: the products are private and a copy keeps the dependency graph flat."
+          "Published as a tagged dependency rather than vendored into each consumer: a change arrives as a version bump in a reviewable pull request, and every product can be checked to be on the same tag."
         ],
         "pieces": [
           {
