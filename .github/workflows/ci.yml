@@ -158,6 +158,25 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  compose-validation:
+    name: Compose Manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+
+      - name: Validate compose manifests
+        env:
+          NEXT_PUBLIC_RELEASE: ci
+          OPENBAO_TOKEN: ci-openbao-token
+          TOLGEE_PROJECT_ID: '3'
+          WEB_IMAGE: cv-web:ci
+        run: |
+          docker compose -f docker/compose.app.dev.yml config > /dev/null
+          docker compose -f docker/compose.app.local.yml config > /dev/null
+          docker compose -f docker/compose.app.prod.yml config > /dev/null
+
   security-supply-chain:
     name: Security + Supply Chain
     runs-on: ubuntu-latest

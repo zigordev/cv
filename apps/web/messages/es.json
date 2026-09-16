@@ -313,7 +313,7 @@
             },
             {
               "step": "02",
-              "text": "Seis jobs en paralelo: calidad (formato, lint, typecheck, tests unitarios y build), un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
+              "text": "Siete jobs en paralelo: calidad (formato, lint, typecheck, tests unitarios y build), un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, los tres manifiestos de compose renderizados contra un entorno de ejemplo, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
               "title": "El pull request"
             },
             {
