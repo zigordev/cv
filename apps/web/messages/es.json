@@ -323,7 +323,7 @@
             },
             {
               "step": "04",
-              "text": "Una release publicada construye la imagen, la sube a ECR y cosign la firma sin claves por digest, con la procedencia SLSA adjunta — por digest, porque una etiqueta se puede reapuntar después de firmar. El bundle de compose va a S3 y SSM ejecuta el script de despliegue en el host EC2, de modo que ningún runner guarda jamás una clave SSH.",
+              "text": "Una release publicada construye la imagen, la sube a ECR y cosign la firma sin claves por digest, con la procedencia SLSA adjunta — por digest, porque una etiqueta se puede reapuntar después de firmar. El bundle de compose va a S3 y SSM ejecuta el script de despliegue en el host EC2, de modo que ningún runner guarda jamás una clave SSH. Después un job de smoke prueba el endpoint público de salud, así un despliegue que dice que ha ido bien pero no sirve nada falla ahí y no en un navegador.",
               "title": "El despliegue"
             }
           ]
@@ -546,7 +546,7 @@
             },
             {
               "step": "04",
-              "text": "La imagen de la API se construye y se sube, se firma con cosign por digest con la procedencia SLSA adjunta, se empaqueta a S3 y se aplica en el host mediante SSM.",
+              "text": "La imagen de la API se construye y se sube, se firma con cosign por digest con la procedencia SLSA adjunta, se empaqueta a S3 y se aplica en el host mediante SSM, y después se prueba con un smoke contra el endpoint público de salud.",
               "title": "El despliegue"
             }
           ]
