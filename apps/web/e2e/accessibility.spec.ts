@@ -20,9 +20,9 @@ test.describe('accessibility', () => {
 
     // Named in the failure output, so a regression says which rule and which
     // element rather than just a count.
-    expect(
-      results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s) — ${v.help}`),
-    ).toEqual([]);
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s) — ${v.help}`)).toEqual(
+      []
+    );
   });
 
   test('every case-study modal opens and is announced', async ({ page }) => {
@@ -33,9 +33,7 @@ test.describe('accessibility', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa'])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(results.violations.map((v) => v.id)).toEqual([]);
   });
 });

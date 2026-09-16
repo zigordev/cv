@@ -38,7 +38,7 @@ test('meets its Core Web Vitals budgets', async ({ page }) => {
         }).observe({ type: 'largest-contentful-paint', buffered: true });
         // A page with no LCP entry at all is a pass, not a hang.
         setTimeout(() => resolve(0), 5_000);
-      }),
+      })
   );
   expect(lcp, `LCP ${Math.round(lcp)}ms`).toBeLessThan(BUDGETS.lcpMs);
 
@@ -55,7 +55,7 @@ test('meets its Core Web Vitals budgets', async ({ page }) => {
           }
         }).observe({ type: 'layout-shift', buffered: true });
         setTimeout(() => resolve(total), 2_000);
-      }),
+      })
   );
   expect(cls, `CLS ${cls.toFixed(3)}`).toBeLessThan(BUDGETS.cls);
 });
@@ -71,6 +71,6 @@ test('stays inside its transfer budget', async ({ page }) => {
   await page.waitForLoadState('networkidle');
 
   expect(transferred, `${Math.round(transferred / 1024)} KB transferred`).toBeLessThan(
-    BUDGETS.transferBytes,
+    BUDGETS.transferBytes
   );
 });

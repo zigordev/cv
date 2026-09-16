@@ -42,9 +42,7 @@ export function CaseStudyModal({
       size="xl"
       closeLabel={t('modal.close')}
       style={{ padding: 40 }}
-      title={
-        <span style={display('clamp(34px, 5vw, 52px)', 1, '-0.025em')}>{project.name}</span>
-      }
+      title={<span style={display('clamp(34px, 5vw, 52px)', 1, '-0.025em')}>{project.name}</span>}
       description={
         <span style={{ display: 'grid', gap: 'var(--ds-space-4)', justifyItems: 'start' }}>
           <ProjectTags project={project} />
