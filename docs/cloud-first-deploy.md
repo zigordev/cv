@@ -55,21 +55,35 @@ The container enforces both at startup through `scripts/openbao-run.mjs` and exi
 
 Create a `production` environment on the repository and set these variables. The values come from `platform-ops` outputs, except the ECR URI from step 3 — cv declares no infrastructure of its own, and the host, deploy bucket, ingress and observability stack are all owned by platform-ops.
 
-| Variable                     | Source       |
-| ---------------------------- | ------------ |
-| `AWS_REGION`                 | platform-ops |
-| `AWS_ECR_WEB_REPOSITORY_URI` | step 3       |
-| `AWS_DEPLOY_BUCKET`          | platform-ops |
-| `AWS_DEPLOY_INSTANCE_ID`     | platform-ops |
-| `AWS_SSM_APP_PREFIX`         | platform-ops |
+| Variable                     | Source                                                          |
+| ---------------------------- | --------------------------------------------------------------- |
+| `AWS_REGION`                 | platform-ops                                                    |
+| `AWS_ECR_WEB_REPOSITORY_URI` | step 3                                                          |
+| `AWS_DEPLOY_BUCKET`          | platform-ops                                                    |
+| `AWS_DEPLOY_INSTANCE_ID`     | platform-ops                                                    |
+| `AWS_SSM_APP_PREFIX`         | platform-ops                                                    |
+| `TOLGEE_SYNC_API_URL`        | the public production Tolgee URL, `https://tolgee.zigordev.com` |
 
-And one secret:
+And two secrets:
 
-| Secret                | Source                                            |
-| --------------------- | ------------------------------------------------- |
-| `AWS_DEPLOY_ROLE_ARN` | platform-ops — the OIDC role the workflow assumes |
+| Secret                | Source                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| `AWS_DEPLOY_ROLE_ARN` | platform-ops — the OIDC role the workflow assumes                 |
+| `TOLGEE_SYNC_API_KEY` | a write-capable production Tolgee key, scoped to **cv's** project |
 
 Deploys use GitHub OIDC. No long-lived AWS keys are stored.
+
+`TOLGEE_SYNC_API_KEY` is used only by `Promote Prod Translations`, and it is not
+the key the container reads at runtime — that one lives in OpenBao at `kv/cv` as
+`TOLGEE_API_KEY` and only needs read access. Create a second, write-capable key
+in the production Tolgee project named in `docker/.env.app.prod`
+(`TOLGEE_PROJECT_ID`, currently 3). It has to be able to create keys as well as
+update them, because the promotion pushes with `--force-mode OVERRIDE` and will
+add any key that is in git but not yet in the project.
+
+A project API key belongs to one project, so gpool's promotion key cannot be
+reused here. A personal access token would span both, which is the reason not to
+use one: cv's workflow would then be able to write gpool's translations.
 
 ## 6. Create The OpenBao Read Policy And App Token
 
