@@ -279,3 +279,16 @@ jobs:
             echo "Deploy failed with status: $status" >&2
             exit 1
           fi
+
+  post-deploy-smoke:
+    name: Post Deploy Smoke
+    runs-on: ubuntu-latest
+    environment: production
+    needs: deploy
+
+    steps:
+      - name: Smoke health check
+        if: ${{ vars.DEPLOY_HEALTHCHECK_URL != '' }}
+        run: |
+          curl -fsS "${{ vars.DEPLOY_HEALTHCHECK_URL }}" > /dev/null
+          echo "Health check passed: ${{ vars.DEPLOY_HEALTHCHECK_URL }}"
