@@ -26,8 +26,9 @@ test.describe('accessibility', () => {
   });
 
   test('every case-study modal opens and is announced', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
-    const firstProject = page.getByRole('button').first();
+    const firstProject = page.locator('.cv-row-hit').first();
     await firstProject.click();
 
     const dialog = page.getByRole('dialog');

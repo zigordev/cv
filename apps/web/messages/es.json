@@ -1,5 +1,9 @@
 {
   "ask": {
+    "bar": {
+      "placeholder": "Pregunta lo que quieras a este CV…",
+      "hint": "Las respuestas salen solo de este CV · Intro para preguntar · Esc para cerrar"
+    },
     "button": "Preguntar",
     "contact": "Enviar un mensaje",
     "error": "La respuesta no ha llegado. Tu pregunta sigue en el cuadro, así que inténtalo de nuevo en un momento.",

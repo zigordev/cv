@@ -1,5 +1,9 @@
 {
   "ask": {
+    "bar": {
+      "placeholder": "Ask this CV anything…",
+      "hint": "Answers come only from this CV · Enter to ask · Esc to close"
+    },
     "button": "Ask",
     "contact": "Send a message",
     "error": "The answer did not come through. Your question is back in the box, so try again in a moment.",

@@ -109,11 +109,269 @@ a:not(.ds-btn):hover {
   color: var(--ds-color-accent);
 }
 
+/* --- Ask bar ----------------------------------------------------------- */
+
+/*
+ * The question box as a search bar. One considered motion draws the eye — a
+ * thin conic sweep around the pill — and the placeholder types the suggested
+ * questions out, so the bar demonstrates what it is for without a label.
+ * Both stop under reduced motion; the ring stays as a still accent.
+ */
+@property --cv-ask-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.cv-ask-bar {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 520px;
+  margin: 0 var(--ds-space-6);
+  transition: max-width var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-ask-bar[data-open='true'],
+.cv-ask-bar:focus-within {
+  max-width: 680px;
+}
+
+.cv-ask-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 6px 0 14px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  transition:
+    border-color var(--ds-duration-base) var(--ds-ease-out),
+    box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-ask-pill::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--cv-ask-angle),
+    transparent 0 58%,
+    var(--ds-color-accent-soft) 74%,
+    var(--ds-color-accent) 90%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: cv-ask-sweep 6s linear infinite;
+  pointer-events: none;
+  transition: opacity var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-ask-bar:focus-within .cv-ask-pill {
+  border-color: var(--ds-color-accent);
+  box-shadow: 0 0 0 3px var(--ds-color-accent-soft);
+}
+
+.cv-ask-bar:focus-within .cv-ask-pill::after {
+  opacity: 0;
+}
+
+@keyframes cv-ask-sweep {
+  to {
+    --cv-ask-angle: 360deg;
+  }
+}
+
+.cv-ask-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-fg);
+  outline: none;
+}
+
+.cv-ask-input::placeholder {
+  color: var(--ds-color-fg-faint);
+}
+
+.cv-ask-input:disabled {
+  color: var(--ds-color-fg-faint);
+}
+
+.cv-ask-ghost {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 40px;
+  right: 44px;
+  display: flex;
+  align-items: center;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-fg-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cv-ask-caret {
+  display: inline-block;
+  width: 1px;
+  height: 1.1em;
+  margin-left: 2px;
+  background: var(--ds-color-accent);
+  animation: cv-ask-blink 1s steps(2) infinite;
+}
+
+@keyframes cv-ask-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.cv-ask-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-color-accent);
+  color: var(--ds-color-bg);
+  cursor: pointer;
+  transition:
+    opacity var(--ds-duration-base) var(--ds-ease-out),
+    background var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cv-ask-go:hover:not(:disabled) {
+  background: var(--ds-color-accent-hover);
+}
+
+.cv-ask-go:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.cv-ask-go:focus-visible {
+  outline: 2px solid var(--ds-color-accent);
+  outline-offset: 2px;
+}
+
+.cv-ask-go[data-pending='true'] svg {
+  animation: cv-ask-spin 1s linear infinite;
+}
+
+@keyframes cv-ask-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cv-ask-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: min(70vh, 640px);
+  overflow: auto;
+  padding: 16px 20px 14px;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xl);
+  display: grid;
+  gap: var(--ds-space-4);
+}
+
+.cv-ask-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-ask-listbox {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cv-ask-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-color-fg);
+  cursor: pointer;
+}
+
+.cv-ask-option svg {
+  color: var(--ds-color-accent);
+}
+
+.cv-ask-option[aria-selected='true'] {
+  background: var(--ds-color-accent-soft);
+}
+
+.cv-ask-hint {
+  margin: 0;
+  font-family: var(--cv-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ds-color-fg-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-ask-pill::after {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .cv-ask-caret,
+  .cv-ask-go[data-pending='true'] svg {
+    animation: none;
+  }
+
+  .cv-ask-bar {
+    transition: none;
+  }
+}
+
+@media (min-width: 901px) {
+  .cv-ask-button {
+    display: none !important;
+  }
+}
+
 /* --- Responsive -------------------------------------------------------- */
 
 @media (max-width: 900px) {
   .cv-header > div {
     padding: 0 24px !important;
+  }
+
+  .cv-ask-bar {
+    display: none;
   }
 
   /* Three controls plus the name do not fit a phone. The icons carry the
