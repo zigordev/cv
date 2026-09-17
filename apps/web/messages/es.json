@@ -1,8 +1,8 @@
 {
   "ask": {
     "bar": {
-      "placeholder": "Pregunta lo que quieras a este CV…",
-      "hint": "Las respuestas salen solo de este CV · Intro para preguntar · Esc para cerrar"
+      "hint": "Las respuestas salen solo de este CV · Intro para preguntar · Esc para cerrar",
+      "placeholder": "Pregunta lo que quieras a este CV…"
     },
     "button": "Preguntar",
     "contact": "Enviar un mensaje",
@@ -27,6 +27,10 @@
       "¿Por qué Rust en el bot de trading?",
       "¿Sobre qué infraestructura funciona la plataforma?"
     ],
+    "thinking": {
+      "finding": "Buscando los pasajes…",
+      "writing": "Escribiendo la respuesta…"
+    },
     "title": "Pregunta a este CV",
     "try": "Prueba a preguntar",
     "unavailable": "El cuadro de preguntas no está disponible ahora mismo.",

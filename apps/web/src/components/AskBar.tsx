@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Icon } from 'design-system/components/icons/Icon.jsx';
@@ -8,7 +8,7 @@ import { Icon } from 'design-system/components/icons/Icon.jsx';
 import { AskConversation } from '@/components/AskConversation';
 import { useI18n } from '@/i18n/client';
 import type { AskSource } from '@/lib/ask/contract';
-import type { Ask } from '@/lib/ask/use-ask';
+import { useReducedMotion, type Ask } from '@/lib/ask/use-ask';
 import { mono } from '@/lib/type';
 import { trackEvent } from '@/observability';
 
@@ -19,22 +19,6 @@ const DELETE_MS = 16;
 const GAP_MS = 600;
 
 type Typing = { index: number; length: number; phase: 'typing' | 'deleting' };
-
-const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
-
-function subscribeReducedMotion(onChange: () => void): () => void {
-  const query = globalThis.matchMedia?.(REDUCED_MOTION);
-  query?.addEventListener('change', onChange);
-  return () => query?.removeEventListener('change', onChange);
-}
-
-function useReducedMotion(): boolean {
-  return useSyncExternalStore(
-    subscribeReducedMotion,
-    () => globalThis.matchMedia?.(REDUCED_MOTION).matches ?? false,
-    () => false
-  );
-}
 
 function useTypewriter(lines: readonly string[], active: boolean): string | null {
   const reduced = useReducedMotion();
@@ -137,7 +121,12 @@ export function AskBar({ ask, onContact }: Readonly<{ ask: Ask; onContact: () =>
   };
 
   return (
-    <div ref={rootRef} className="cv-ask-bar cv-no-print" data-open={open}>
+    <div
+      ref={rootRef}
+      className="cv-ask-bar cv-no-print"
+      data-open={open}
+      data-pending={ask.pending}
+    >
       <div className="cv-ask-pill">
         <Icon
           name="wand-sparkles"

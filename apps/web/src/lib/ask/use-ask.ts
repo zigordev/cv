@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useI18n } from '@/i18n/client';
 import type { Messages } from '@/i18n/translator';
@@ -41,8 +41,20 @@ async function problemCode(response: Response): Promise<string | null> {
   }
 }
 
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+
 export function prefersReducedMotion(): boolean {
-  return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  return globalThis.matchMedia?.(REDUCED_MOTION).matches ?? false;
+}
+
+function subscribeReducedMotion(onChange: () => void): () => void {
+  const query = globalThis.matchMedia?.(REDUCED_MOTION);
+  query?.addEventListener('change', onChange);
+  return () => query?.removeEventListener('change', onChange);
+}
+
+export function useReducedMotion(): boolean {
+  return useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
 }
 
 export interface Ask {

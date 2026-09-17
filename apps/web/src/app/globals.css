@@ -341,10 +341,121 @@ a:not(.ds-btn):hover {
   color: var(--ds-color-fg-faint);
 }
 
+.cv-ask-bar[data-pending='true'] .cv-ask-pill::after {
+  opacity: 1;
+  animation-duration: 1.2s;
+}
+
+.cv-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cv-ask-thinking {
+  display: grid;
+  gap: 12px;
+}
+
+.cv-ask-thinking-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--cv-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ds-color-accent);
+}
+
+.cv-ask-thinking-label svg {
+  animation: cv-ask-pulse 1.6s ease-in-out infinite;
+}
+
+.cv-ask-thinking-text {
+  animation: cv-ask-fade-in 320ms var(--ds-ease-out);
+}
+
+.cv-ask-skeleton {
+  display: grid;
+  gap: 9px;
+}
+
+.cv-ask-skeleton span {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--ds-color-surface-2) 0%,
+    var(--ds-color-accent-soft) 50%,
+    var(--ds-color-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: cv-ask-shimmer 1.6s linear infinite;
+}
+
+.cv-ask-skeleton span:nth-child(1) {
+  width: 92%;
+}
+
+.cv-ask-skeleton span:nth-child(2) {
+  width: 78%;
+}
+
+.cv-ask-skeleton span:nth-child(3) {
+  width: 55%;
+}
+
+@keyframes cv-ask-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes cv-ask-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+}
+
+@keyframes cv-ask-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cv-ask-pill::after {
+  .cv-ask-pill::after,
+  .cv-ask-bar[data-pending='true'] .cv-ask-pill::after {
     animation: none;
     opacity: 0.6;
+  }
+
+  .cv-ask-skeleton span,
+  .cv-ask-thinking-label svg,
+  .cv-ask-thinking-text {
+    animation: none;
   }
 
   .cv-ask-caret,

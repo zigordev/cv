@@ -1,8 +1,8 @@
 {
   "ask": {
     "bar": {
-      "placeholder": "Ask this CV anything…",
-      "hint": "Answers come only from this CV · Enter to ask · Esc to close"
+      "hint": "Answers come only from this CV · Enter to ask · Esc to close",
+      "placeholder": "Ask this CV anything…"
     },
     "button": "Ask",
     "contact": "Send a message",
@@ -27,6 +27,10 @@
       "Why Rust in the trading bot?",
       "What does the platform run on?"
     ],
+    "thinking": {
+      "finding": "Finding the passages…",
+      "writing": "Writing the answer…"
+    },
     "title": "Ask this CV",
     "try": "Try asking",
     "unavailable": "The question box is not available right now.",

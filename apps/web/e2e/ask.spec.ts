@@ -132,6 +132,25 @@ test.describe('the question bar', () => {
     await expect(page.locator('#experience')).toBeInViewport();
   });
 
+  test('shows that it is reading while the answer is on its way', async ({ page }) => {
+    await answerWith(page, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      await route.fulfill({ json: ANSWERED });
+    });
+    await page.goto('/');
+
+    await bar(page).fill('Why Rust?');
+    await bar(page).press('Enter');
+
+    await expect(panel(page).locator('.cv-ask-thinking')).toBeVisible();
+    await expect(page.locator('.cv-ask-bar')).toHaveAttribute('data-pending', 'true');
+    await expect(panel(page).getByText('Reading the CV…').first()).toBeAttached();
+
+    await expect(panel(page).getByText(ANSWERED.answer)).toBeVisible();
+    await expect(panel(page).locator('.cv-ask-thinking')).toHaveCount(0);
+    await expect(page.locator('.cv-ask-bar')).toHaveAttribute('data-pending', 'false');
+  });
+
   test('closes with Escape and comes back with the transcript', async ({ page }) => {
     await answerWith(page, (route) => route.fulfill({ json: ANSWERED }));
     await page.goto('/');

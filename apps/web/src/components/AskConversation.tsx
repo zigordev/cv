@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from 'design-system/components/core/Button.jsx';
+import { Icon } from 'design-system/components/icons/Icon.jsx';
 
 import { useI18n } from '@/i18n/client';
 import type { AskSource, Refusal } from '@/lib/ask/contract';
-import type { Ask, Availability, Exchange } from '@/lib/ask/use-ask';
+import { useReducedMotion, type Ask, type Availability, type Exchange } from '@/lib/ask/use-ask';
 import { mono } from '@/lib/type';
+
+const THINKING_STAGES = ['ask.sending', 'ask.thinking.finding', 'ask.thinking.writing'] as const;
+const THINKING_STAGE_MS = 1800;
 
 const REFUSAL_KEYS: Record<Refusal, string> = {
   not_in_cv: 'ask.refusals.notInCv',
@@ -142,7 +146,7 @@ function ExchangeView({
       <span style={mono(11, '0.14em')}>{t('ask.you')}</span>
       <p style={{ ...prose, color: 'var(--ds-color-fg-muted)' }}>{exchange.question}</p>
 
-      {exchange.state === 'pending' ? <p style={muted}>{t('ask.sending')}</p> : null}
+      {exchange.state === 'pending' ? <Thinking /> : null}
 
       {exchange.state === 'done' && exchange.answer.outcome === 'answered' ? (
         <>
@@ -177,5 +181,39 @@ function ExchangeView({
         </div>
       ) : null}
     </article>
+  );
+}
+
+function Thinking() {
+  const { t } = useI18n();
+  const reduced = useReducedMotion();
+  const [stage, setStage] = useState(0);
+
+  useEffect(() => {
+    if (reduced) return undefined;
+    const timer = setInterval(
+      () => setStage((current) => (current + 1) % THINKING_STAGES.length),
+      THINKING_STAGE_MS
+    );
+    return () => clearInterval(timer);
+  }, [reduced]);
+
+  const label = t(THINKING_STAGES[reduced ? 0 : stage]);
+
+  return (
+    <div className="cv-ask-thinking">
+      <span className="cv-sr-only">{t('ask.sending')}</span>
+      <span className="cv-ask-thinking-label" aria-hidden="true">
+        <Icon name="wand-sparkles" size={13} />
+        <span key={label} className="cv-ask-thinking-text">
+          {label}
+        </span>
+      </span>
+      <div className="cv-ask-skeleton" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
   );
 }
