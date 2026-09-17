@@ -69,6 +69,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+          GITLEAKS_ENABLE_COMMENTS: false
 
   web-smoke:
     name: Web Smoke (Docker)
