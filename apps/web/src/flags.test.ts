@@ -14,6 +14,8 @@ describe('cv-pdf-download', () => {
     delete process.env.UNLEASH_URL;
     delete process.env.UNLEASH_TOKEN;
     delete process.env.FLAG_CV_PDF_DOWNLOAD;
+    delete process.env.FLAG_CV_ASK;
+    delete process.env.ANTHROPIC_API_KEY;
     process.env.UNLEASH_BACKUP_PATH = mkdtempSync(join(tmpdir(), 'cv-flags-'));
   });
 
@@ -73,5 +75,45 @@ describe('cv-pdf-download', () => {
     const { pdfDownloadEnabled } = await import('./flags');
 
     await expect(pdfDownloadEnabled()).resolves.toBe(false);
+  });
+});
+
+describe('cv-ask', () => {
+  const saved = { ...process.env };
+
+  beforeEach(() => {
+    vi.resetModules();
+    delete process.env.UNLEASH_URL;
+    delete process.env.UNLEASH_TOKEN;
+    delete process.env.FLAG_CV_ASK;
+    delete process.env.ANTHROPIC_API_KEY;
+  });
+
+  afterEach(async () => {
+    const { disconnectRemoteFlags } = await import('@/observability');
+    disconnectRemoteFlags();
+    process.env = { ...saved };
+  });
+
+  it('is off until someone turns it on', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test';
+    const { askEnabled } = await import('./flags');
+
+    await expect(askEnabled()).resolves.toBe(false);
+  });
+
+  it('stays off with the flag on but no key to call the API with', async () => {
+    process.env.FLAG_CV_ASK = 'true';
+    const { askEnabled } = await import('./flags');
+
+    await expect(askEnabled()).resolves.toBe(false);
+  });
+
+  it('is on with the flag on and a key present', async () => {
+    process.env.FLAG_CV_ASK = 'true';
+    process.env.ANTHROPIC_API_KEY = 'sk-test';
+    const { askEnabled } = await import('./flags');
+
+    await expect(askEnabled()).resolves.toBe(true);
   });
 });

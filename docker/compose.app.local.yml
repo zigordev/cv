@@ -30,6 +30,11 @@ services:
       OPENBAO_KV_MOUNT: kv
       OPENBAO_SECRET_PATH: cv
       OPENBAO_REQUIRED_KEYS: TOLGEE_API_KEY,CONTACT_RECIPIENT_EMAIL
+      ASK_BUDGET_LIMIT_USD: ${ASK_BUDGET_LIMIT_USD:-10}
+      ASK_BUDGET_PATH: /var/lib/cv/ask-budget.json
+      ASK_LOG_QUESTIONS: ${ASK_LOG_QUESTIONS:-true}
+      ASK_LOG_ANSWERS: ${ASK_LOG_ANSWERS:-false}
+      UNLEASH_BACKUP_PATH: /var/lib/cv
       UNLEASH_URL: ${UNLEASH_URL:-}
       UNLEASH_TOKEN: ${UNLEASH_TOKEN:-}
       UNLEASH_APP_NAME: ${UNLEASH_APP_NAME:-cv-web}
@@ -39,6 +44,8 @@ services:
       NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
     ports:
       - '3021:3001'
+    volumes:
+      - cv_state:/var/lib/cv
     command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/web/server.js']
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1 || exit 1']
@@ -56,3 +63,6 @@ networks:
   platform_ops_shared:
     name: platform_ops_shared
     external: true
+
+volumes:
+  cv_state:

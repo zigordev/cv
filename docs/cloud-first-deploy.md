@@ -44,12 +44,15 @@ Note the returned `repositoryUri` for `AWS_ECR_WEB_REPOSITORY_URI`.
 
 At `kv/cv`:
 
-| Key                       | Purpose                                   |
-| ------------------------- | ----------------------------------------- |
-| `TOLGEE_API_KEY`          | Pulling translation snapshots at boot     |
-| `CONTACT_RECIPIENT_EMAIL` | Where contact-form messages are delivered |
+| Key                       | Purpose                                              |
+| ------------------------- | ---------------------------------------------------- |
+| `TOLGEE_API_KEY`          | Pulling translation snapshots at boot                |
+| `CONTACT_RECIPIENT_EMAIL` | Where contact-form messages are delivered            |
+| `ANTHROPIC_API_KEY`       | Answering visitors' questions through the Claude API |
 
-The container enforces both at startup through `scripts/openbao-run.mjs` and exits if either is missing, so a misconfigured deploy fails fast rather than serving a broken contact form.
+The container enforces the first two at startup through `scripts/openbao-run.mjs` and exits if either is missing, so a misconfigured deploy fails fast rather than serving a broken contact form. `ANTHROPIC_API_KEY` is optional: without it the deploy script prints a notice and the question box stays hidden. Add it with `bao kv patch`, not `kv put`, which would replace the other two.
+
+The key should belong to an API workspace of its own with a spending limit set in the console. The app caps itself at `ASK_BUDGET_LIMIT_USD` a month (ten dollars unless the compose environment says otherwise), persisted on the `cv_state` volume; the workspace limit is the ceiling that holds if that volume is ever lost. The box is behind the `cv-ask` flag, off by default, so turning it on is a change in Unleash rather than a deploy.
 
 ## 5. Configure The GitHub Environment
 

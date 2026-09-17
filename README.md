@@ -19,14 +19,15 @@ NestJS service alongside would be one endpoint's worth of ceremony. Delivery
 state, idempotency and dead-letter auditing all live in the notifications
 service already.
 
-| Concern       | Where                                                                |
-| ------------- | -------------------------------------------------------------------- |
-| UI            | `apps/web/src/components` — sections composed from the design system |
-| CV content    | Tolgee → `cv.*`; skeleton in `apps/web/src/content/cv.ts`            |
-| UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                            |
-| Secrets       | OpenBao, kv mount, path `cv`                                         |
-| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`        |
-| Design system | `design-system`, pinned to a tag from the shared repository          |
+| Concern       | Where                                                                     |
+| ------------- | ------------------------------------------------------------------------- |
+| UI            | `apps/web/src/components` — sections composed from the design system      |
+| CV content    | Tolgee → `cv.*`; skeleton in `apps/web/src/content/cv.ts`                 |
+| UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                                 |
+| Secrets       | OpenBao, kv mount, path `cv`                                              |
+| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`             |
+| Questions     | `POST /api/ask` → Claude API, answers cite the CV; `apps/web/src/lib/ask` |
+| Design system | `design-system`, pinned to a tag from the shared repository               |
 
 ## Quick start
 

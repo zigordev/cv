@@ -130,7 +130,14 @@ export interface PlatformOpsDiagramCopy extends DiagramCopy {
 }
 
 export interface CvDiagramCopy extends DiagramCopy {
-  notes: { content: string; page: string; pdf: string; events: string; handoff: string };
+  notes: {
+    content: string;
+    page: string;
+    pdf: string;
+    events: string;
+    handoff: string;
+    ask: string;
+  };
 }
 
 export interface GpoolDiagramCopy extends DiagramCopy {
@@ -221,7 +228,7 @@ const PROJECT_SKELETON: Array<Omit<Project, keyof ProjectProse> & { id: string }
     kind: 'product',
     status: 'production',
     name: 'cv',
-    stack: ['Next.js', 'Tolgee', 'OpenBao', 'Kafka'],
+    stack: ['Next.js', 'Tolgee', 'OpenBao', 'Kafka', 'Claude API'],
   },
   {
     id: 'gpool',

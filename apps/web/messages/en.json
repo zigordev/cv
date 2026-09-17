@@ -1,4 +1,33 @@
 {
+  "ask": {
+    "button": "Ask",
+    "contact": "Send a message",
+    "error": "The answer did not come through. Your question is back in the box, so try again in a moment.",
+    "hint": "Answers come only from this CV, and link to the part they came from.",
+    "intro": "Ask about the experience, projects or skills on this page.",
+    "label": "Your question",
+    "placeholder": "Which projects use Terraform?",
+    "rateLimited": "That is quite a few questions in a short time. Try again later.",
+    "refusals": {
+      "contact": "No contact details are published on this site. The contact form reaches the same inbox.",
+      "notInCv": "The CV does not cover that.",
+      "offTopic": "That is outside what this CV can answer.",
+      "speculation": "The CV does not say, and it is not something to guess at. Worth asking directly."
+    },
+    "resting": "The question box has used its budget for this month. The contact form still works.",
+    "sending": "Reading the CV…",
+    "sources": "From the CV",
+    "submit": "Ask",
+    "suggestions": [
+      "Where has Kafka been used in production?",
+      "Why Rust in the trading bot?",
+      "What does the platform run on?"
+    ],
+    "title": "Ask this CV",
+    "try": "Try asking",
+    "unavailable": "The question box is not available right now.",
+    "you": "You asked"
+  },
   "contact": {
     "copyAction": "Copy {label}",
     "copyDone": "✓ {label}",
@@ -8,9 +37,10 @@
   "cv": {
     "diagrams": {
       "cv": {
-        "alt": "Tolgee supplying content to a Next.js page, which also renders a PDF built by Chromium, and publishes contact messages to Kafka for the shared notifications service to deliver.",
-        "caption": "The same content renders twice: an editorial page for a person, and a single-column document for a parser. Building the PDF at compile time is what keeps its text real rather than a picture of text.",
+        "alt": "Tolgee supplying content to a Next.js page, which also renders a PDF built by Chromium, publishes contact messages to Kafka for the shared notifications service to deliver, and sends visitors' questions with the CV to the Claude API for answers that cite it.",
+        "caption": "The same content renders twice: an editorial page for a person, and a single-column document for a parser. Building the PDF at compile time is what keeps its text real rather than a picture of text. A third path reads the same content again: a question and the whole CV go to Claude, and only an answer that cites the CV comes back.",
         "notes": {
+          "ask": "answers that cite the CV",
           "content": "every word, both locales",
           "events": "contact as an event",
           "handoff": "owns delivery",
@@ -273,11 +303,14 @@
     ],
     "projects": {
       "cv": {
-        "approach": "One source of content, rendered twice. The page is an editorial layout with a case study behind each project; the same data renders a separate single-column document that headless Chromium turns into a PDF during the build, so the parsed version keeps real selectable text rather than a picture of it.",
+        "approach": "One source of content, rendered twice. The page is an editorial layout with a case study behind each project; the same data renders a separate single-column document that headless Chromium turns into a PDF during the build, so the parsed version keeps real selectable text rather than a picture of it. The same source also answers questions: a box in the header sends the question together with the whole CV to Claude, and an answer only reaches the reader if it cites the parts of the CV it came from, each one a link back into the page.",
         "decisions": [
           "The PDF is generated at build time rather than in the browser. Client-side html-to-PDF libraries rasterise the page, destroying the selectable text the entire ATS layout exists to produce.",
-          "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data.",
-          "The contact endpoint sends RFC 9457 problem details like the four APIs, so one error shape covers the whole estate rather than four."
+          "Nothing it publishes carries a way to reach a person directly. The contact form reaches the same inbox through a secret held in OpenBao, so no address appears in the page, the PDF or the structured data. The answer box inherits the rule: a reply containing anything shaped like an address, a phone number or a profile link is replaced before it is sent.",
+          "The contact endpoint sends RFC 9457 problem details like the four APIs, so one error shape covers the whole estate rather than four.",
+          "An answer is grounded by the citations the API returns, not by an instruction to stay on topic. One that cites nothing is replaced with a refusal before it leaves the server, which is why answers are checked whole rather than streamed.",
+          "Spend is capped in three places that fail differently: a per-visitor rate limit in memory, a monthly budget written to a volume so a restart cannot reset it, and a spending limit on the API workspace that holds even if both of those are lost. The API key itself is optional, so a deploy without it still serves the CV and simply hides the box.",
+          "Every question is logged with its outcome, citations, tokens and cost, and never with the address it came from, so what was asked cannot be joined back to who asked it. The questions the CV fails to answer are the most useful thing the box produces."
         ],
         "pieces": [
           {
@@ -294,6 +327,11 @@
             "step": "03",
             "text": "A separate print document built for extraction — one column, conventional headings, no icons, contact details in plain text — rendered by Chromium during the Docker build, which fails if the file cannot be produced.",
             "title": "The PDF"
+          },
+          {
+            "step": "04",
+            "text": "A route handler sends the question with the CV as one document split into content blocks — one per role, skill group and part of a case study — with citations switched on. Each citation comes back as a block index that maps straight to a section or a case-study tab, so every source is a link rather than a quote. The CV sits in a cached prefix, so the later questions of a visit reread it at a tenth of the price.",
+            "title": "The answer box"
           }
         ],
         "pipeline": {
@@ -313,7 +351,7 @@
             },
             {
               "step": "02",
-              "text": "Seven jobs in parallel: quality (format, lint, typecheck, unit tests and build), a full-repository secret scan, a Docker smoke that boots the production image and probes it, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, the three compose manifests rendered against a placeholder environment, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
+              "text": "Seven jobs in parallel: quality (format, lint, typecheck, unit tests and build), a full-repository secret scan, a Docker smoke that boots the production image and probes it, including that the question endpoint stays closed without a key and that the unprivileged user can write the directory holding the monthly budget, Playwright asserting WCAG 2.1 AA and Core Web Vitals budgets in a real browser, the three compose manifests rendered against a placeholder environment, licences with a production-only audit alongside an SBOM and Trivy, and Semgrep. A run superseded by a newer commit is cancelled rather than left holding a runner.",
               "title": "The pull request"
             },
             {
@@ -328,7 +366,7 @@
             }
           ]
         },
-        "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other.",
+        "problem": "A CV is read by two audiences that want opposite things. A person wants something worth looking at; an applicant tracking system wants one column of plain text under conventional headings. Serving either one well usually breaks the other. And a reader who arrives with one specific question still has to read all of it to find the answer.",
         "role": "Solo — product",
         "tagline": "This site: a CV that renders itself twice, once for a person and once for a parser."
       },
