@@ -86,7 +86,7 @@ To add the question box later, patch rather than put — `kv put` replaces the w
 bao kv patch kv/cv ANTHROPIC_API_KEY='<anthropic api key>'
 ```
 
-Use a key scoped to a workspace of its own with a spending limit set on it, so the API stops the spend even if the app's own monthly budget (`ASK_BUDGET_LIMIT_USD`, ten dollars by default) is lost. The box also needs the `cv-ask` flag on; it defaults to off, so with no flag server set `FLAG_CV_ASK=true` in `docker/.env.app.local`.
+Use a key scoped to a workspace of its own with a spending limit set on it, so the API stops the spend even if the app's own monthly budget (`ASK_BUDGET_LIMIT_USD`, ten dollars by default) is lost. The box also needs the `cv-ask` flag on; it defaults to off, so with no flag server set `FLAG_CV_ASK=true` in `docker/.env.app.local`. Run `npm run i18n:push` before `local:up` on a branch that changes `cv.*` copy: the pull at boot merges Tolgee over the files and replaces whole arrays, so unpushed case-study pieces and decisions vanish from the running app.
 
 ## 5. Create A Read-Only Policy For `cv`
 
