@@ -151,6 +151,23 @@ test.describe('the question bar', () => {
     await expect(page.locator('.cv-ask-bar')).toHaveAttribute('data-pending', 'false');
   });
 
+  test('puts the latest question first', async ({ page }) => {
+    await answerWith(page, (route) => route.fulfill({ json: ANSWERED }));
+    await page.goto('/');
+
+    await bar(page).fill('First question?');
+    await bar(page).press('Enter');
+    await expect(panel(page).getByText(ANSWERED.answer)).toBeVisible();
+    await bar(page).fill('Second question?');
+    await bar(page).press('Enter');
+    await expect(panel(page).getByText(ANSWERED.answer)).toHaveCount(2);
+
+    const questions = panel(page).getByRole('article');
+    await expect(questions).toHaveCount(2);
+    await expect(questions.first()).toContainText('Second question?');
+    await expect(questions.last()).toContainText('First question?');
+  });
+
   test('closes with Escape and comes back with the transcript', async ({ page }) => {
     await answerWith(page, (route) => route.fulfill({ json: ANSWERED }));
     await page.goto('/');

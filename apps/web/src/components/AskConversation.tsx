@@ -55,7 +55,7 @@ export function AskConversation({
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    logRef.current?.lastElementChild?.scrollIntoView({ block: 'nearest' });
+    logRef.current?.firstElementChild?.scrollIntoView({ block: 'nearest' });
   }, [ask.exchanges]);
 
   return (
@@ -86,7 +86,7 @@ export function AskConversation({
         aria-busy={ask.pending}
         style={{ display: 'grid', gap: 'var(--ds-space-5)' }}
       >
-        {ask.exchanges.map((exchange) => (
+        {[...ask.exchanges].reverse().map((exchange) => (
           <ExchangeView
             key={exchange.id}
             exchange={exchange}
