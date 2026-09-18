@@ -1,3 +1,6 @@
+import os from 'node:os';
+import path from 'node:path';
+
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -24,10 +27,20 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // The question box is on for the suite, with a key that cannot reach the API:
+  // every /api/ask call is answered from the test with page.route, so the
+  // panel, its states and its links into the page are checked without a
+  // network and without spending anything.
   webServer: {
     command: 'npm run start -- --port 3199',
     url: 'http://127.0.0.1:3199/health',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      FLAG_CV_ASK: 'true',
+      ANTHROPIC_API_KEY: 'e2e-placeholder-not-a-key',
+      ASK_BUDGET_PATH: path.join(os.tmpdir(), 'cv-e2e-ask-budget.json'),
+    },
   },
 });

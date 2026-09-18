@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Flag } from 'design-system/components/icons/Flag.jsx';
@@ -8,11 +9,18 @@ import { Icon } from 'design-system/components/icons/Icon.jsx';
 import { Menu, MenuItem } from 'design-system/components/overlay/Menu.jsx';
 import { Modal } from 'design-system/components/overlay/Modal.jsx';
 
+import { AskBar } from '@/components/AskBar';
 import { ContactForm } from '@/components/ContactForm';
 import { useCv } from '@/content/useCv';
 import { useI18n } from '@/i18n/client';
 import { LOCALE_META, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
+import { useAsk } from '@/lib/ask/use-ask';
 import { display } from '@/lib/type';
+import { trackEvent } from '@/observability';
+
+const AskPanel = dynamic(() => import('@/components/AskPanel').then((module) => module.AskPanel), {
+  ssr: false,
+});
 
 /**
  * Fixed header: the name on the left, chrome-level controls on the right.
@@ -28,6 +36,11 @@ import { display } from '@/lib/type';
  * nothing to read in it. Reaching it from the fixed bar means it is available
  * from anywhere on the page instead of only from the bottom.
  *
+ * The question box lives between the name and the controls as a search bar on
+ * wide screens, and collapses to an icon that opens a dialog below 900px. Both
+ * surfaces share one conversation, so a reader who starts on a phone and turns
+ * it sideways keeps what they asked.
+ *
  * The design system has no `download` or `mail` icon, so these reuse the
  * nearest honest matches from the set: an arrow for the download, a pencil for
  * writing a message.
@@ -35,12 +48,28 @@ import { display } from '@/lib/type';
 interface SiteHeaderProps {
   /** Gated by the cv-pdf-download flag, resolved on the server. */
   readonly pdfDownload?: boolean;
+  /** Gated by the cv-ask flag and the presence of an API key, resolved on the server. */
+  readonly ask?: boolean;
 }
 
-export function SiteHeader({ pdfDownload = true }: SiteHeaderProps) {
+export function SiteHeader({ pdfDownload = true, ask = false }: SiteHeaderProps) {
   const { t, locale, setLocale } = useI18n();
   const { identity, labels } = useCv();
+  const conversation = useAsk();
   const [contactOpen, setContactOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [askLoaded, setAskLoaded] = useState(false);
+
+  const openAsk = () => {
+    setAskLoaded(true);
+    setAskOpen(true);
+    trackEvent('ask-opened');
+  };
+
+  const contactFromAsk = () => {
+    setAskOpen(false);
+    requestAnimationFrame(() => setContactOpen(true));
+  };
 
   return (
     <>
@@ -69,11 +98,20 @@ export function SiteHeader({ pdfDownload = true }: SiteHeaderProps) {
             padding: '0 48px',
           }}
         >
-          <span style={display(26, 1, '-0.01em')}>
+          <span style={{ ...display(26, 1, '-0.01em'), flexShrink: 0 }}>
             {identity.firstName} {identity.lastName}
           </span>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-space-2)' }}>
+          {ask ? <AskBar ask={conversation} onContact={contactFromAsk} /> : null}
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--ds-space-2)',
+              flexShrink: 0,
+            }}
+          >
             <Button
               variant="outline"
               size="md"
@@ -84,6 +122,20 @@ export function SiteHeader({ pdfDownload = true }: SiteHeaderProps) {
               <Icon name="pencil" size={15} />
               <span className="cv-btn-label">{labels.sections.contact}</span>
             </Button>
+
+            {ask ? (
+              <Button
+                variant="outline"
+                size="md"
+                type="button"
+                className="cv-ask-button"
+                onClick={openAsk}
+                aria-haspopup="dialog"
+              >
+                <Icon name="wand-sparkles" size={15} />
+                <span className="cv-btn-label">{t('ask.button')}</span>
+              </Button>
+            ) : null}
 
             {/* A real download of a build-time PDF, not window.print() — that
                 opened a dialog and left the visitor to choose "Save as PDF".
@@ -147,6 +199,15 @@ export function SiteHeader({ pdfDownload = true }: SiteHeaderProps) {
       >
         <ContactForm />
       </Modal>
+
+      {ask && askLoaded ? (
+        <AskPanel
+          ask={conversation}
+          open={askOpen}
+          onClose={() => setAskOpen(false)}
+          onContact={contactFromAsk}
+        />
+      ) : null}
     </>
   );
 }

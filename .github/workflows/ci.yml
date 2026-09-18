@@ -107,6 +107,18 @@ jobs:
           for needle in "Curriculum vitae" "Experience" "Skills" "Education"; do
             printf '%s' "$body" | grep -qF "$needle" || { echo "missing: $needle" >&2; exit 1; }
           done
+          # Without an API key the question endpoint must answer 503 and the
+          # header must not offer the box, whatever the flag says.
+          status="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' \
+            -d '{"question":"Kafka?","locale":"en"}' http://localhost:3001/api/ask)"
+          [ "$status" = "503" ] || { echo "expected 503 from /api/ask without a key, got $status" >&2; exit 1; }
+          printf '%s' "$body" | grep -qF 'cv-ask-question' && { echo "the question box rendered without a key" >&2; exit 1; }
+          # The monthly budget lives on a volume mounted at /var/lib/cv. The
+          # image runs as `node`, so the directory has to be writable by that
+          # user or the budget silently never persists.
+          docker exec cv-web sh -c 'touch /var/lib/cv/.writable && rm /var/lib/cv/.writable'
+          docker exec cv-web sh -c 'test "$(stat -c %U /var/lib/cv)" = node'
+          curl -sf http://localhost:3001/metrics | grep -q '^cv_ask_budget_used_ratio '
 
       - name: Container logs (on failure)
         if: failure()

@@ -1,4 +1,41 @@
 {
+  "ask": {
+    "bar": {
+      "hint": "Las respuestas salen solo de este CV · Intro para preguntar · Esc para cerrar",
+      "placeholder": "Pregunta lo que quieras a este CV…"
+    },
+    "button": "Preguntar",
+    "contact": "Enviar un mensaje",
+    "error": "La respuesta no ha llegado. Tu pregunta sigue en el cuadro, así que inténtalo de nuevo en un momento.",
+    "hint": "Las respuestas salen solo de este CV y enlazan a la parte de la que vienen.",
+    "intro": "Pregunta por la experiencia, los proyectos o las habilidades de esta página.",
+    "label": "Tu pregunta",
+    "placeholder": "¿Qué proyectos usan Terraform?",
+    "rateLimited": "Son bastantes preguntas en poco tiempo. Inténtalo más tarde.",
+    "refusals": {
+      "contact": "Este sitio no publica datos de contacto. El formulario de contacto llega al mismo buzón.",
+      "notInCv": "El CV no trata ese tema.",
+      "offTopic": "Eso queda fuera de lo que este CV puede responder.",
+      "speculation": "El CV no lo dice y no es algo que convenga suponer. Mejor preguntarlo directamente."
+    },
+    "resting": "El cuadro de preguntas ha agotado su presupuesto de este mes. El formulario de contacto sigue funcionando.",
+    "sending": "Leyendo el CV…",
+    "sources": "Del CV",
+    "submit": "Preguntar",
+    "suggestions": [
+      "¿Dónde se ha usado Kafka en producción?",
+      "¿Por qué Rust en el bot de trading?",
+      "¿Sobre qué infraestructura funciona la plataforma?"
+    ],
+    "thinking": {
+      "finding": "Buscando los pasajes…",
+      "writing": "Escribiendo la respuesta…"
+    },
+    "title": "Pregunta a este CV",
+    "try": "Prueba a preguntar",
+    "unavailable": "El cuadro de preguntas no está disponible ahora mismo.",
+    "you": "Has preguntado"
+  },
   "contact": {
     "copyAction": "Copiar {label}",
     "copyDone": "✓ {label}",
@@ -8,9 +45,10 @@
   "cv": {
     "diagrams": {
       "cv": {
-        "alt": "Tolgee alimentando de contenido a una página en Next.js, que además genera un PDF construido por Chromium y publica los mensajes de contacto en Kafka para que los entregue el servicio compartido de notificaciones.",
-        "caption": "El mismo contenido se renderiza dos veces: una página editorial para una persona y un documento a una columna para un parser. Generar el PDF en el build es lo que mantiene su texto real y no una imagen de texto.",
+        "alt": "Tolgee alimentando de contenido a una página en Next.js, que además genera un PDF construido por Chromium, publica los mensajes de contacto en Kafka para que los entregue el servicio compartido de notificaciones y envía las preguntas de los visitantes junto al CV a la API de Claude para obtener respuestas que lo citan.",
+        "caption": "El mismo contenido se renderiza dos veces: una página editorial para una persona y un documento a una columna para un parser. Generar el PDF en el build es lo que mantiene su texto real y no una imagen de texto. Un tercer camino vuelve a leer el mismo contenido: una pregunta y el CV entero van a Claude, y solo vuelve una respuesta que cite el CV.",
         "notes": {
+          "ask": "respuestas que citan el CV",
           "content": "cada palabra, dos idiomas",
           "events": "el contacto es un evento",
           "handoff": "se encarga del envío",
@@ -273,11 +311,14 @@
     ],
     "projects": {
       "cv": {
-        "approach": "Una única fuente de contenido, renderizada dos veces. La página es una maquetación editorial con un caso de estudio detrás de cada proyecto; los mismos datos generan un documento aparte a una sola columna que Chromium convierte en PDF durante el build, de modo que la versión que se parsea conserva texto real y no una imagen de texto.",
+        "approach": "Una única fuente de contenido, renderizada dos veces. La página es una maquetación editorial con un caso de estudio detrás de cada proyecto; los mismos datos generan un documento aparte a una sola columna que Chromium convierte en PDF durante el build, de modo que la versión que se parsea conserva texto real y no una imagen de texto. La misma fuente también responde preguntas: un cuadro en la cabecera envía la pregunta junto al CV entero a Claude, y una respuesta solo llega al lector si cita las partes del CV de las que sale, cada una como enlace de vuelta a la página.",
         "decisions": [
           "El PDF se genera en el build y no en el navegador. Las librerías de html-a-PDF del lado del cliente rasterizan la página y destruyen el texto seleccionable que justifica toda la maquetación pensada para ATS.",
-          "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados.",
-          "El endpoint de contacto envía problem details de la RFC 9457 igual que las cuatro APIs, de modo que una sola forma de error cubre todo el estate en vez de cuatro."
+          "Nada de lo que publica incluye una forma de contactar directamente con una persona. El formulario llega al mismo buzón mediante un secreto guardado en OpenBao, así que ninguna dirección aparece en la página, el PDF ni los datos estructurados. El cuadro de preguntas hereda la regla: una respuesta que contenga algo con forma de dirección, teléfono o enlace a un perfil se sustituye antes de enviarse.",
+          "El endpoint de contacto envía problem details de la RFC 9457 igual que las cuatro APIs, de modo que una sola forma de error cubre todo el estate en vez de cuatro.",
+          "Una respuesta se fundamenta en las citas que devuelve la API, no en una instrucción de no salirse del tema. La que no cita nada se sustituye por una negativa antes de salir del servidor, y por eso las respuestas se comprueban enteras en lugar de enviarse en streaming.",
+          "El gasto se limita en tres sitios que fallan de forma distinta: un límite por visitante en memoria, un presupuesto mensual escrito en un volumen para que un reinicio no lo ponga a cero y un límite de gasto en el workspace de la API que se mantiene aunque se pierdan los otros dos. La propia clave de la API es opcional, así que un despliegue sin ella sigue sirviendo el CV y simplemente oculta el cuadro.",
+          "Cada pregunta se registra con su resultado, sus citas, sus tokens y su coste, y nunca con la dirección desde la que llega, así que lo que se preguntó no se puede cruzar con quién lo preguntó. Las preguntas que el CV no sabe responder son lo más útil que produce el cuadro."
         ],
         "pieces": [
           {
@@ -294,6 +335,11 @@
             "step": "03",
             "text": "Un documento de impresión aparte pensado para la extracción — una columna, encabezados convencionales, sin iconos, contacto en texto plano — generado por Chromium durante el build de Docker, que falla si el fichero no se puede producir.",
             "title": "El PDF"
+          },
+          {
+            "step": "04",
+            "text": "Un route handler envía la pregunta con el CV como un único documento dividido en bloques de contenido — uno por puesto, grupo de habilidades y parte de un caso de estudio — con las citas activadas. Cada cita vuelve como un índice de bloque que apunta directamente a una sección o a una pestaña del caso de estudio, así que cada fuente es un enlace y no una cita textual. El CV va en un prefijo cacheado, de modo que las siguientes preguntas de una visita lo releen a una décima parte del precio.",
+            "title": "El cuadro de preguntas"
           }
         ],
         "pipeline": {
@@ -313,7 +359,7 @@
             },
             {
               "step": "02",
-              "text": "Siete jobs en paralelo: calidad (formato, lint, typecheck, tests unitarios y build), un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, los tres manifiestos de compose renderizados contra un entorno de ejemplo, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
+              "text": "Siete jobs en paralelo: calidad (formato, lint, typecheck, tests unitarios y build), un escaneo de secretos sobre todo el repositorio, un smoke con Docker que arranca la imagen de producción y la sondea, comprobando también que el endpoint de preguntas sigue cerrado sin clave y que el usuario sin privilegios puede escribir en el directorio del presupuesto mensual, Playwright comprobando WCAG 2.1 AA y los presupuestos de Core Web Vitals en un navegador real, los tres manifiestos de compose renderizados contra un entorno de ejemplo, licencias con una auditoría solo de producción junto al SBOM y Trivy, y Semgrep. Una ejecución que un commit posterior deja obsoleta se cancela en lugar de retener un runner.",
               "title": "El pull request"
             },
             {
@@ -328,7 +374,7 @@
             }
           ]
         },
-        "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro.",
+        "problem": "Un CV lo leen dos públicos que quieren cosas opuestas. Una persona quiere algo que merezca la pena mirar; un sistema de seguimiento de candidaturas quiere una sola columna de texto plano bajo encabezados convencionales. Servir bien a uno suele romper al otro. Y quien llega con una pregunta concreta tiene que leerlo entero para encontrar la respuesta.",
         "role": "En solitario — producto",
         "tagline": "Este sitio: un CV que se renderiza dos veces, una para una persona y otra para un parser."
       },

@@ -165,6 +165,9 @@ for key in TOLGEE_API_KEY CONTACT_RECIPIENT_EMAIL; do
     exit 1
   fi
 done
+if [ -z "$(jq -r '.data.data.ANTHROPIC_API_KEY // ""' "$openbao_secret_body_file")" ]; then
+  echo "[deploy] OpenBao secret ${OPENBAO_KV_MOUNT}/${OPENBAO_SECRET_PATH} has no ANTHROPIC_API_KEY; the question box will stay hidden."
+fi
 rm -f "$openbao_secret_body_file"
 
 is_ecr_registry() {

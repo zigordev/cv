@@ -64,12 +64,13 @@ After that, Tolgee is the source of truth. The next pull keeps a key Tolgee does
 
 ## 4. Store Secrets In OpenBao
 
-`cv` reads its secrets from `kv/cv`. Both keys are required — the container refuses to start without them.
+`cv` reads its secrets from `kv/cv`. The first two keys are required — the container refuses to start without them. The third is optional: without it the question box stays hidden and everything else runs.
 
-| Key                       | Purpose                                   |
-| ------------------------- | ----------------------------------------- |
-| `TOLGEE_API_KEY`          | Pulling translation snapshots at boot     |
-| `CONTACT_RECIPIENT_EMAIL` | Where contact-form messages are delivered |
+| Key                       | Purpose                                              |
+| ------------------------- | ---------------------------------------------------- |
+| `TOLGEE_API_KEY`          | Pulling translation snapshots at boot                |
+| `CONTACT_RECIPIENT_EMAIL` | Where contact-form messages are delivered            |
+| `ANTHROPIC_API_KEY`       | Answering visitors' questions through the Claude API |
 
 ```bash
 bao kv put kv/cv \
@@ -78,6 +79,14 @@ bao kv put kv/cv \
 ```
 
 `CONTACT_RECIPIENT_EMAIL` is not secret in the cryptographic sense. It lives in OpenBao so a personal inbox address is never committed to the repository.
+
+To add the question box later, patch rather than put — `kv put` replaces the whole secret and would drop the two keys above:
+
+```bash
+bao kv patch kv/cv ANTHROPIC_API_KEY='<anthropic api key>'
+```
+
+Use a key scoped to a workspace of its own with a spending limit set on it, so the API stops the spend even if the app's own monthly budget (`ASK_BUDGET_LIMIT_USD`, ten dollars by default) is lost. The box also needs the `cv-ask` flag on; it defaults to off, so with no flag server set `FLAG_CV_ASK=true` in `docker/.env.app.local`. Run `npm run i18n:push` before `local:up` on a branch that changes `cv.*` copy: the pull at boot merges Tolgee over the files and replaces whole arrays, so unpushed case-study pieces and decisions vanish from the running app.
 
 ## 5. Create A Read-Only Policy For `cv`
 

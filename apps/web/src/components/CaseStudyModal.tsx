@@ -11,18 +11,16 @@ import { PROJECT_DIAGRAMS } from '@/components/diagrams';
 import { ProjectTags } from '@/components/ProjectTags';
 import type { Project, ProjectPiece } from '@/content/cv';
 import { useI18n } from '@/i18n/client';
+import { CASE_STUDY_TABS, type CaseStudyTab } from '@/lib/case-study';
 import { display, mono } from '@/lib/type';
-
-type Tab = 'overview' | 'architecture' | 'pipelines';
-
-const TABS: readonly Tab[] = ['overview', 'architecture', 'pipelines'];
 
 export function CaseStudyModal({
   project,
+  initialTab = 'overview',
   onClose,
-}: Readonly<{ project: Project | null; onClose: () => void }>) {
+}: Readonly<{ project: Project | null; initialTab?: CaseStudyTab; onClose: () => void }>) {
   const { t } = useI18n();
-  const [tab, setTab] = useState<Tab>('overview');
+  const [tab, setTab] = useState<CaseStudyTab>(initialTab);
 
   // Every open starts on Overview, including reopening the same project.
   // Adjusted during render rather than in an effect, per
@@ -30,7 +28,7 @@ export function CaseStudyModal({
   const [prevProject, setPrevProject] = useState(project);
   if (project !== prevProject) {
     setPrevProject(project);
-    if (project) setTab('overview');
+    if (project) setTab(initialTab);
   }
 
   if (!project) return null;
@@ -90,9 +88,9 @@ export function CaseStudyModal({
           }}
         >
           <SegmentedControl
-            options={TABS.map((value) => ({ value, label: t(`modal.${value}`) }))}
+            options={CASE_STUDY_TABS.map((value) => ({ value, label: t(`modal.${value}`) }))}
             value={tab}
-            onChange={(value: string) => setTab(value as Tab)}
+            onChange={(value: string) => setTab(value as CaseStudyTab)}
             ariaLabel={t('modal.caseStudy')}
           />
         </div>
