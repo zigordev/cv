@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/zigordev/cv/compare/v0.8.2...v0.9.0) (2026-09-18)
+
+
+### Features
+
+* **ask:** answer questions about the CV with cited sources ([#101](https://github.com/zigordev/cv/issues/101)) ([690f9ca](https://github.com/zigordev/cv/commit/690f9caf34dfdd70cb82309dc10952616f7596cb))
+
 ## [0.8.2](https://github.com/zigordev/cv/compare/v0.8.1...v0.8.2) (2026-09-12)
 
 
