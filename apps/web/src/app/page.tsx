@@ -7,7 +7,7 @@ import { Projects } from '@/components/Projects';
 import { Rail } from '@/components/Rail';
 import { Skills } from '@/components/Skills';
 import { SiteHeader } from '@/components/SiteHeader';
-import { pdfDownloadEnabled } from '@/flags';
+import { askEnabled, pdfDownloadEnabled } from '@/flags';
 
 /**
  * The layout from the original design handoff: a single scrolling page with a
@@ -19,7 +19,7 @@ const GRAIN =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.4'/></svg>\")";
 
 export default async function Page() {
-  const pdfDownload = await pdfDownloadEnabled();
+  const [pdfDownload, ask] = await Promise.all([pdfDownloadEnabled(), askEnabled()]);
 
   return (
     <>
@@ -50,7 +50,7 @@ export default async function Page() {
           }}
         />
 
-        <SiteHeader pdfDownload={pdfDownload} />
+        <SiteHeader pdfDownload={pdfDownload} ask={ask} />
 
         <div
           className="cv-shell"

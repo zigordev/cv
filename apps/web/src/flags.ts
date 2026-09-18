@@ -1,4 +1,7 @@
+import { apiKeyPresent } from '@/lib/ask/config';
 import { connectRemoteFlags, isEnabled, registerFlags } from '@/observability';
+
+export const ASK_FLAG = 'cv-ask';
 
 registerFlags([
   {
@@ -6,6 +9,12 @@ registerFlags([
     description: 'Shows the Download CV button in the site header.',
     defaultValue: true,
     removeBy: '2026-12-31',
+  },
+  {
+    key: ASK_FLAG,
+    description: 'Shows the question box in the site header and enables POST /api/ask.',
+    defaultValue: false,
+    removeBy: '2027-03-31',
   },
 ]);
 
@@ -32,4 +41,9 @@ function connect(): Promise<boolean> {
 export async function pdfDownloadEnabled(): Promise<boolean> {
   await connect();
   return isEnabled('cv-pdf-download');
+}
+
+export async function askEnabled(): Promise<boolean> {
+  await connect();
+  return isEnabled(ASK_FLAG) && apiKeyPresent();
 }

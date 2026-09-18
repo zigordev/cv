@@ -1,20 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CaseStudyModal } from '@/components/CaseStudyModal';
 import { SectionHeader } from '@/components/SectionHeader';
 import type { Project } from '@/content/cv';
 import { useCv } from '@/content/useCv';
+import {
+  OPEN_CASE_STUDY_EVENT,
+  type CaseStudyTab,
+  type OpenCaseStudyDetail,
+} from '@/lib/case-study';
 import { Reveal } from '@/components/Reveal';
 import { ProjectTags } from '@/components/ProjectTags';
 import { display } from '@/lib/type';
 
 export function Projects() {
   const { projects, labels } = useCv();
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [opened, setOpened] = useState<{ id: string; tab: CaseStudyTab } | null>(null);
 
-  const active = projects.find((p) => p.id === openId) ?? null;
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      const detail = (event as CustomEvent<OpenCaseStudyDetail>).detail;
+      if (detail?.id) setOpened({ id: detail.id, tab: detail.tab });
+    };
+    globalThis.addEventListener(OPEN_CASE_STUDY_EVENT, onOpen);
+    return () => globalThis.removeEventListener(OPEN_CASE_STUDY_EVENT, onOpen);
+  }, []);
+
+  const active = projects.find((p) => p.id === opened?.id) ?? null;
 
   return (
     <Reveal id="projects">
@@ -23,12 +37,16 @@ export function Projects() {
 
         <div>
           {projects.map((project) => (
-            <ProjectRow key={project.id} project={project} onOpen={() => setOpenId(project.id)} />
+            <ProjectRow
+              key={project.id}
+              project={project}
+              onOpen={() => setOpened({ id: project.id, tab: 'overview' })}
+            />
           ))}
         </div>
       </div>
 
-      <CaseStudyModal project={active} onClose={() => setOpenId(null)} />
+      <CaseStudyModal project={active} initialTab={opened?.tab} onClose={() => setOpened(null)} />
     </Reveal>
   );
 }

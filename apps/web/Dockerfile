@@ -69,8 +69,8 @@ COPY scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
 # above is copied as root, so the unprivileged user the container drops to
 # cannot create it — which surfaces as an EACCES unhandledRejection on the
 # first image request rather than anything that mentions permissions.
-RUN mkdir -p /app/apps/web/.next/cache \
- && chown -R node:node /app/apps/web/.next
+RUN mkdir -p /app/apps/web/.next/cache /var/lib/cv \
+ && chown -R node:node /app/apps/web/.next /var/lib/cv
 USER node
 EXPOSE 3001
 CMD ["node", "apps/web/server.js"]

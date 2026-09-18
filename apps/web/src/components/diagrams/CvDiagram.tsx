@@ -22,6 +22,9 @@ export function CvDiagram() {
       <Node x={X[1]} y={150} w={W} h={52} label="Kafka" note={copy.notes.events} accent />
       <Node x={X[2]} y={150} w={W} h={52} label="notifications" note={copy.notes.handoff} />
       <Link x1={X[1] + W} y1={176} x2={X[2]} y2={176} accent />
+
+      <Link x1={X[1]} y1={64} x2={X[0] + W} y2={158} accent />
+      <Node x={X[0]} y={150} w={W} h={52} label="Claude API" note={copy.notes.ask} />
     </DiagramFigure>
   );
 }
