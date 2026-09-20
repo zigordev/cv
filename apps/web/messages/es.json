@@ -569,6 +569,11 @@
             "step": "03",
             "text": "Plantillas de Handlebars indexadas por aplicación de origen e identificador, resueltas por idioma, con los datos escapados al renderizar para que el contenido que controla el remitente no pueda inyectar marcado.",
             "title": "Plantillas"
+          },
+          {
+            "step": "04",
+            "text": "Cada correo lleva la traza de lo que lo pidió. El mensaje que publicó cv o gpool continúa en la reserva sobre la base de datos, el renderizado de la plantilla y la conversación SMTP, así que un envío de nueve segundos se lee como cuatro tramos en vez de deducirse de tres líneas de log. Ningún tramo lleva una dirección: el id de petición encuentra la fila, y la fila tiene al destinatario.",
+            "title": "El rastro"
           }
         ],
         "pipeline": {

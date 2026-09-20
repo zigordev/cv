@@ -569,6 +569,11 @@
             "step": "03",
             "text": "Handlebars templates keyed by source application and template id, resolved per locale, with data escaped on render so sender-controlled content cannot inject markup.",
             "title": "Templates"
+          },
+          {
+            "step": "04",
+            "text": "Every email carries the trace of whatever asked for it. The message cv or gpool published continues into the claim on the database, the template render and the SMTP conversation, so a delivery that took nine seconds reads as four spans rather than being inferred from three log lines. No span carries an address: the request id finds the row, and the row has the recipient.",
+            "title": "The trail"
           }
         ],
         "pipeline": {
