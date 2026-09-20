@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { trace } from '@opentelemetry/api';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { withRouteMetrics } from './http-metrics';
 import { registry } from './metrics.registry';
@@ -64,5 +65,48 @@ describe('withRouteMetrics', () => {
 
     const values = (await registry.getSingleMetric('http_requests_total')?.get())?.values ?? [];
     expect(values.every((value) => !String(value.labels.route).includes('secret'))).toBe(true);
+  });
+});
+
+describe('exemplars', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const inSpan = (traceFlags: number) => {
+    vi.spyOn(trace, 'getActiveSpan').mockReturnValue({
+      spanContext: () => ({ traceId: 'c'.repeat(32), spanId: 'd'.repeat(16), traceFlags }),
+    } as never);
+  };
+
+  it('attaches the trace id of a sampled request to its duration', async () => {
+    inSpan(1);
+    const handler = withRouteMetrics(
+      '/api/exemplar',
+      async (_request: Request) => new Response(null, { status: 200 })
+    );
+
+    await handler(new Request('http://cv.test/api/exemplar', { method: 'POST' }));
+
+    const exposition = await registry.metrics();
+    expect(exposition).toContain('trace_id="cccccccccccccccccccccccccccccccc"');
+  });
+
+  it('attaches nothing when the trace was not sampled: a dead link is worse', async () => {
+    inSpan(0);
+    const handler = withRouteMetrics(
+      '/api/unsampled',
+      async (_request: Request) => new Response(null, { status: 200 })
+    );
+
+    await handler(new Request('http://cv.test/api/unsampled', { method: 'POST' }));
+
+    const exposition = await registry.metrics();
+    const line = exposition
+      .split('\n')
+      .find((entry) => entry.includes('/api/unsampled') && entry.includes('_bucket'));
+
+    expect(line).toBeDefined();
+    expect(line).not.toContain('trace_id');
   });
 });

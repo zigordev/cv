@@ -15,6 +15,10 @@ const httpRequestDuration = new client.Histogram({
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'] as const,
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+  // Without this prom-client reads the exemplar form of `observe` as a plain
+  // labels object and throws `Added label "labels" is not included in initial
+  // labelset` — at request time, on the sampled requests only.
+  enableExemplars: true,
   registers: [registry],
 });
 
@@ -59,15 +63,14 @@ export function withRouteMetrics<T extends unknown[]>(
 
       httpRequestsTotal.inc(labels);
 
-      if (traceId) {
-        httpRequestDuration.observe({
-          labels,
-          value: seconds,
-          exemplarLabels: { trace_id: traceId } as never,
-        });
-      } else {
-        httpRequestDuration.observe(labels, seconds);
-      }
+      // Always the object form: once a metric has exemplars enabled,
+      // prom-client routes every observation through the exemplar path, and
+      // the two-argument form arrives there as `value: undefined`.
+      httpRequestDuration.observe({
+        labels,
+        value: seconds,
+        ...(traceId ? { exemplarLabels: { trace_id: traceId } as never } : {}),
+      });
     }
   };
 }
