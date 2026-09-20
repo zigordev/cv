@@ -149,6 +149,7 @@ class RumClient {
     }
 
     let cls = 0;
+    let reportedCls = 0;
     this.observe('layout-shift', (entries) => {
       for (const entry of entries as (PerformanceEntry & {
         value?: number;
@@ -156,6 +157,10 @@ class RumClient {
       })[]) {
         if (!entry.hadRecentInput) cls += entry.value ?? 0;
       }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'hidden' || cls === reportedCls) return;
+      reportedCls = cls;
       this.record({ type: 'performance', name: 'CLS', value: cls });
     });
 
