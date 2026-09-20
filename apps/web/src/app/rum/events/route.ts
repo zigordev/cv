@@ -8,4 +8,6 @@ export const dynamic = 'force-dynamic';
  * often during page unload — so the handler carries the same-origin check, the
  * body-size cap, the per-client rate limit and the field validation.
  */
-export const POST = createRumIngestRoute({ customInteractions: ['ask-opened', 'ask-submitted'] });
+export const POST = createRumIngestRoute({
+  customInteractions: ['ask-opened', 'ask-submitted', 'render-error'],
+});

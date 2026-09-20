@@ -1,5 +1,6 @@
 import { apiKeyPresent } from '@/lib/ask/config';
 import { connectRemoteFlags, isEnabled, registerFlags } from '@/observability';
+import { writeLogRecord } from '@/observability/json-logger';
 import { recordFlagEvaluation } from '@/observability/spans';
 
 export const ASK_FLAG = 'cv-ask';
@@ -33,6 +34,13 @@ function connect(): Promise<boolean> {
     url,
     token,
     appName: process.env.UNLEASH_APP_NAME ?? 'cv-web',
+    onEvent: (event) => {
+      if (event.kind === 'unavailable') {
+        writeLogRecord('warn', { event: 'flags.unavailable', error: event.error });
+        return;
+      }
+      writeLogRecord('info', { event: `flags.${event.kind}` });
+    },
     ...(process.env.UNLEASH_BACKUP_PATH ? { backupPath: process.env.UNLEASH_BACKUP_PATH } : {}),
   });
 

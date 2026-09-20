@@ -57,21 +57,27 @@ describe('writeLog', () => {
     expect(stdout).toHaveBeenCalledTimes(1);
     const line = String(stdout.mock.calls[0][0]);
     expect(line.endsWith('\n')).toBe(true);
-    expect(JSON.parse(line)).toMatchObject({
+    const record = JSON.parse(line);
+    expect(record).toMatchObject({
       level: 'info',
       service: 'cv-web',
-      message: 'ask.completed',
       event: 'ask.completed',
       outcome: 'answered',
     });
+    // The fields are the record, not a nested `message`: Loki flattens a
+    // nested object into `message_event`, which no query in the estate reads.
+    expect(record).not.toHaveProperty('message');
   });
 
-  it('names itself cv-web when no service name is set, and sends errors to stderr', () => {
-    delete process.env.OTEL_SERVICE_NAME;
+  it('sends errors to stderr', () => {
+    process.env.OTEL_SERVICE_NAME = 'cv-web';
     writeLog('error', 'ask.completed');
 
     expect(stdout).not.toHaveBeenCalled();
-    expect(JSON.parse(String(stderr.mock.calls[0][0]))).toMatchObject({ service: 'cv-web' });
+    expect(JSON.parse(String(stderr.mock.calls[0][0]))).toMatchObject({
+      service: 'cv-web',
+      event: 'ask.completed',
+    });
   });
 });
 

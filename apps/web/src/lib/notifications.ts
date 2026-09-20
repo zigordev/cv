@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import { Kafka, Partitioners, type Producer } from 'kafkajs';
+import { Kafka, logLevel, Partitioners, type Producer } from 'kafkajs';
+
+import { kafkaLogCreator } from '@/observability/json-logger';
 
 /**
  * Publishes to the shared notifications service, whose contract is defined in
@@ -51,6 +53,10 @@ async function getProducer(): Promise<Producer> {
   const kafka = new Kafka({
     clientId: process.env.OTEL_SERVICE_NAME || 'cv-web',
     brokers: list,
+    logLevel: logLevel.WARN,
+    // kafkajs writes its own JSON shape with no service field and no trace
+    // context, which is exactly the line you want when a broker disappears.
+    logCreator: kafkaLogCreator(),
   });
 
   const producer = kafka.producer({

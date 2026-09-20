@@ -24,8 +24,16 @@ const post = (body: unknown, ip: string) =>
     })
   );
 
+let stdout: ReturnType<typeof vi.spyOn>;
+let stderr: ReturnType<typeof vi.spyOn>;
+
+const logged = () =>
+  [...stdout.mock.calls, ...stderr.mock.calls].map(([line]) => JSON.parse(String(line)));
+
 describe('POST /api/contact', () => {
   beforeEach(() => {
+    stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
     process.env.CONTACT_RECIPIENT_EMAIL = OWNER;
     mocks.publishEmail.mockReset();
     mocks.publishEmail.mockResolvedValue(undefined);
@@ -35,7 +43,53 @@ describe('POST /api/contact', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     delete process.env.CONTACT_RECIPIENT_EMAIL;
+  });
+
+  it('writes one line for a queued message, with nothing the visitor typed in it', async () => {
+    await post(valid, freshAddress());
+
+    const records = logged().filter((record) => record.event === 'contact.queued');
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ level: 'info', locale: 'en' });
+    expect(JSON.stringify(records)).not.toContain('ada@example.com');
+    expect(JSON.stringify(records)).not.toContain('Hello there');
+    expect(JSON.stringify(records)).not.toContain('Ada');
+  });
+
+  it('names the rule a rejected message broke, and nothing else', async () => {
+    await post({ ...valid, email: 'not-an-address' }, freshAddress());
+
+    const records = logged().filter((record) => record.event === 'contact.rejected');
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ code: 'CONTACT.INVALID_EMAIL', status: 400 });
+    expect(JSON.stringify(records)).not.toContain('not-an-address');
+  });
+
+  it('writes exactly one error when the broker will not take the message', async () => {
+    mocks.publishEmail.mockRejectedValue(new Error('no brokers available'));
+
+    const response = await post(valid, freshAddress());
+    expect(response.status).toBe(502);
+
+    const errors = logged().filter((record) => record.level === 'error');
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({
+      event: 'contact.publish_failed',
+      error: { name: 'Error', message: 'no brokers available' },
+    });
+    expect(JSON.stringify(errors)).not.toContain('ada@example.com');
+  });
+
+  it('says nothing at all about a rate-limited address', async () => {
+    const ip = freshAddress();
+    for (let index = 0; index < 20; index += 1) await post(valid, ip);
+
+    const rejected = logged().filter(
+      (record) => record.code === 'CONTACT.RATE_LIMITED' || record.status === 429
+    );
+    expect(rejected).toHaveLength(0);
   });
 
   it('queues a valid submission to the owner, with the visitor only as reply-to', async () => {

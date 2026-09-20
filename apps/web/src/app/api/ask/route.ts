@@ -107,6 +107,11 @@ export async function POST(request: Request): Promise<Response> {
       citationCount: completion.sources?.length,
       budgetUsedRatio: budget.usedRatio(),
     });
+
+    // A rate-limited question is counted, not written down. Someone pointing a
+    // script at this endpoint would otherwise be writing the log.
+    if (completion.outcome === 'rate_limited') return;
+
     writeLog(
       level,
       'ask.completed',
@@ -128,7 +133,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   if (budget.exhausted()) {
-    complete({ outcome: 'budget_exhausted' });
+    complete({ outcome: 'budget_exhausted' }, 'warn');
     return problem(
       INSTANCE,
       429,
