@@ -1,8 +1,12 @@
+import { withSpan } from '@/observability/spans';
+
 import type { Locale } from './config';
 import { DEFAULT_LOCALE } from './config';
 import { loadLocalMessages } from './local';
 import { loadRemoteMessages } from './remote';
 import type { MessageValue, Messages } from './translator';
+
+import type { Span } from '@opentelemetry/api';
 
 function isMessageObject(value: MessageValue | undefined): value is Messages {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
@@ -24,15 +28,38 @@ function mergeMessages(base: Messages, override: Messages): Messages {
 }
 
 export async function loadMessages(locale: Locale) {
+  return withSpan(
+    'i18n.load_messages',
+    async (span) => {
+      const messages = await resolveMessages(locale, span);
+      return messages;
+    },
+    { 'cv.i18n.locale': locale }
+  );
+}
+
+async function resolveMessages(locale: Locale, span: Span) {
   const local = await loadLocalMessages(locale);
   const remote = await loadRemoteMessages(locale);
-  if (local && remote) return mergeMessages(local, remote);
-  if (remote) return remote;
-  if (local) return local;
+  if (local && remote) {
+    span.setAttribute('cv.i18n.source', 'merged');
+    return mergeMessages(local, remote);
+  }
+  if (remote) {
+    span.setAttribute('cv.i18n.source', 'remote');
+    return remote;
+  }
+  if (local) {
+    span.setAttribute('cv.i18n.source', 'local');
+    return local;
+  }
 
   // Fall back to the default locale when translations for the requested locale
   // are not yet available (e.g. 'en' while only 'es' files exist).
-  if (locale !== DEFAULT_LOCALE) return loadMessages(DEFAULT_LOCALE);
+  if (locale !== DEFAULT_LOCALE) {
+    span.setAttribute('cv.i18n.source', 'default_locale');
+    return resolveMessages(DEFAULT_LOCALE, span);
+  }
 
   throw new Error(
     `Translations not available for locale "${locale}". ` +
