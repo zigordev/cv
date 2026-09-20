@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/zigordev/cv/compare/v0.9.1...v0.9.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **rum:** record real visits again in production ([#105](https://github.com/zigordev/cv/issues/105)) ([30dec67](https://github.com/zigordev/cv/commit/30dec67e8c409f1a1bd180e5162e4c171590209e))
+
 ## [0.9.1](https://github.com/zigordev/cv/compare/v0.9.0...v0.9.1) (2026-09-20)
 
 
