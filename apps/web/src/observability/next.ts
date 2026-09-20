@@ -13,7 +13,7 @@ import { allowCustomInteractions } from './rum-metrics';
 export function createMetricsRoute() {
   return async function GET(): Promise<Response> {
     return new Response(await registry.metrics(), {
-      headers: { 'Content-Type': 'text/plain; version=0.0.4; charset=utf-8' },
+      headers: { 'Content-Type': registry.contentType },
     });
   };
 }
@@ -90,4 +90,5 @@ function isSameOrigin(origin: string, host: string | null, allowedOrigin?: strin
 export { initRum } from './rum-client';
 export type { RumOptions } from './rum-client';
 export { allowCustomInteractions, normalizePage } from './rum-metrics';
+export { withRouteMetrics } from './http-metrics';
 export { registry } from './metrics.registry';

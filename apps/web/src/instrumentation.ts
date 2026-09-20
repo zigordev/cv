@@ -33,6 +33,9 @@ export async function register() {
   process.once('SIGTERM', () => stopping('SIGTERM'));
   process.once('SIGINT', () => stopping('SIGINT'));
 
+  const { startBrokerProbe } = await import('@/lib/notifications');
+  startBrokerProbe();
+
   const { logAskConfiguration } = await import('@/lib/ask/startup');
   await logAskConfiguration();
 

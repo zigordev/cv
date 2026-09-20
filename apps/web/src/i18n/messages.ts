@@ -1,3 +1,4 @@
+import { recordMessageSource } from '@/observability/app-metrics';
 import { withSpan } from '@/observability/spans';
 
 import type { Locale } from './config';
@@ -43,14 +44,17 @@ async function resolveMessages(locale: Locale, span: Span) {
   const remote = await loadRemoteMessages(locale);
   if (local && remote) {
     span.setAttribute('cv.i18n.source', 'merged');
+    recordMessageSource('merged');
     return mergeMessages(local, remote);
   }
   if (remote) {
     span.setAttribute('cv.i18n.source', 'remote');
+    recordMessageSource('remote');
     return remote;
   }
   if (local) {
     span.setAttribute('cv.i18n.source', 'local');
+    recordMessageSource('local');
     return local;
   }
 
@@ -58,6 +62,7 @@ async function resolveMessages(locale: Locale, span: Span) {
   // are not yet available (e.g. 'en' while only 'es' files exist).
   if (locale !== DEFAULT_LOCALE) {
     span.setAttribute('cv.i18n.source', 'default_locale');
+    recordMessageSource('default_locale');
     return resolveMessages(DEFAULT_LOCALE, span);
   }
 

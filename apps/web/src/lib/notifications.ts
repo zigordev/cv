@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import { Kafka, logLevel, Partitioners, type Producer } from 'kafkajs';
+import { Kafka, logLevel, Partitioners, type Admin, type Producer } from 'kafkajs';
 
+import { reportComponent } from '@/observability/health';
 import { kafkaLogCreator } from '@/observability/json-logger';
 
 /**
@@ -102,7 +103,9 @@ export async function publishEmail(event: NotificationEventEnvelope): Promise<vo
         },
       ],
     });
+    reportComponent('kafka', 'up');
   } catch (error) {
+    reportComponent('kafka', 'down');
     resetProducer(producer);
     throw error;
   }
@@ -143,4 +146,57 @@ export function buildContactEvent(input: {
     metadata: { source: 'cv-contact-form' },
     requestedAt: new Date().toISOString(),
   };
+}
+
+const PROBE_INTERVAL_MS = 15_000;
+let probing = false;
+let admin: Admin | undefined;
+
+/**
+ * Ask the cluster for its metadata and record whether it answered.
+ *
+ * Retries off and short timeouts on purpose: this is a probe, not a request
+ * that matters. Without it a broker that died is discovered by the next
+ * visitor who writes a contact message, which on this site could be weeks.
+ */
+async function probeBroker(): Promise<void> {
+  if (probing) return;
+  probing = true;
+
+  try {
+    if (!admin) {
+      const list = brokers();
+      if (list.length === 0) return;
+
+      admin = new Kafka({
+        clientId: `${process.env.OTEL_SERVICE_NAME || 'cv-web'}-health`,
+        brokers: list,
+        logLevel: logLevel.NOTHING,
+        connectionTimeout: 3000,
+        requestTimeout: 3000,
+        retry: { retries: 0 },
+      }).admin();
+      await admin.connect();
+    }
+
+    await admin.describeCluster();
+    reportComponent('kafka', 'up');
+  } catch {
+    reportComponent('kafka', 'down');
+    const stale = admin;
+    admin = undefined;
+    void stale?.disconnect().catch(() => undefined);
+  } finally {
+    probing = false;
+  }
+}
+
+/** Starts the broker probe. Called once, from the instrumentation hook. */
+export function startBrokerProbe(): void {
+  if (brokers().length === 0) return;
+
+  void probeBroker();
+  const timer = setInterval(() => void probeBroker(), PROBE_INTERVAL_MS);
+  // Never hold the process open for a health probe.
+  timer.unref?.();
 }

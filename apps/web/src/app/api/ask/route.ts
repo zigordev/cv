@@ -17,6 +17,7 @@ import { askCompletedFields, writeLog, type AskLogInput, type LogLevel } from '@
 import { observeOutcome, observeSpend } from '@/lib/ask/metrics';
 import { spendOf } from '@/lib/ask/pricing';
 import { clientIp, problem } from '@/lib/http';
+import { withRouteMetrics } from '@/observability/http-metrics';
 import { annotateRequest } from '@/observability/spans';
 
 export const runtime = 'nodejs';
@@ -26,7 +27,7 @@ const INSTANCE = '/api/ask';
 
 type Completion = Omit<AskLogInput, 'requestId' | 'locale' | 'question' | 'latencyMs' | 'budget'>;
 
-export async function POST(request: Request): Promise<Response> {
+async function handlePost(request: Request): Promise<Response> {
   const started = performance.now();
   const config = askConfig();
 
@@ -181,3 +182,5 @@ export async function POST(request: Request): Promise<Response> {
     sources: result.sources,
   } satisfies AskAnswer);
 }
+
+export const POST = withRouteMetrics('/api/ask', handlePost);

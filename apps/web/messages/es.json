@@ -343,8 +343,13 @@
           },
           {
             "step": "05",
-            "text": "Cada petición es una traza. El renderizado de una página, la pregunta enviada a Claude con los tokens y el coste con los que vuelve, los flags que se leen por el camino y el mensaje entregado al broker son una sola línea temporal en el almacén de la plataforma, no cuatro conjeturas. Lo que la ahogaría — el chequeo de salud del contenedor, el scrape de métricas, las balizas del navegador, los ficheros estáticos — se descarta antes de registrarse.",
+            "text": "Cada petición es una traza. El renderizado de una página, la pregunta enviada a Claude con los tokens y el coste con los que vuelve, los flags que se leen por el camino y el mensaje entregado al broker son una sola línea temporal en el almacén de la plataforma, no cuatro conjeturas. Cada línea de log lleva la traza dentro de la que se escribió, así que un fallo encontrado en los logs abre la petición que lo causó, y una pregunta rechazada o cortada se encuentra sin leer ninguno. Lo que la ahogaría — el chequeo de salud del contenedor, el scrape de métricas, las balizas del navegador, los ficheros estáticos — se descarta antes de registrarse.",
             "title": "Qué reporta"
+          },
+          {
+            "step": "06",
+            "text": "De lo que depende, informa. Tolgee, Unleash y el broker dicen si respondieron la última vez que se les preguntó, y al broker se le pregunta cada quince segundos en vez de esperar al mensaje del siguiente visitante. Ninguno puede tumbar la página: un fallo se lee como degradado, la página se renderiza con el texto commiteado y los valores por defecto de los flags, y la alerta nombra la parte que falta. Cada petición que sirven los tres endpoints se cuenta y se mide, y una lenta lleva el id de su propia traza.",
+            "title": "Salud honesta"
           }
         ],
         "pipeline": {
@@ -578,6 +583,7 @@
         ],
         "pipeline": {
           "automation": [
+            "Cada despliegue lee la salud que el propio servicio reporta antes de darse por bueno — Postgres, el grupo de consumo y el relay — desde el host, porque este servicio no tiene ruta pública. Una versión que vuelve con un login SMTP rechazado hace fallar el workflow en vez de dead-lettear correo en silencio.",
             "Los manifiestos de compose se renderizan en la CI, así que un fichero que ya no parsea falla en el pull request y no en el host, a mitad de un despliegue.",
             "El job de integración vuelca los logs de los contenedores cuando falla. Una ejecución roja sin ellos solo te dice que lo reproduzcas en local, que es la forma más lenta posible de averiguar qué hizo el broker.",
             "Dependabot sobre npm, el Dockerfile y las Actions, semanal y agrupado; patch y minor se fusionan en verde. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",

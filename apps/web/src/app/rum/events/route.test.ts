@@ -31,16 +31,18 @@ const pageViews = async () => {
 
 describe('POST /rum/events', () => {
   it('exports the home page series at zero before any beacon arrives', async () => {
-    const frustrations = await registry.getSingleMetricAsString('rum_frustrations_total');
-    const interactions = await registry.getSingleMetricAsString('rum_interactions_total');
+    // The scrape path, not getSingleMetricAsString: only `metrics()` renders a
+    // counter the way Prometheus reads it. The single-metric helper skips the
+    // name standardisation and writes `rum_frustrations_total_total`.
+    const exposition = await registry.metrics();
 
-    expect(frustrations).toContain(
+    expect(exposition).toContain(
       'rum_frustrations_total{frustration_type="dead_click",page="/"} 0'
     );
-    expect(frustrations).toContain(
+    expect(exposition).toContain(
       'rum_frustrations_total{frustration_type="rage_click",page="/"} 0'
     );
-    expect(interactions).toContain(
+    expect(exposition).toContain(
       'rum_interactions_total{interaction_type="ask-opened",page="/"} 0'
     );
   });

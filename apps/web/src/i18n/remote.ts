@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import type { Locale } from './config';
 import type { Messages } from './translator';
+import { reportComponent } from '@/observability/health';
 import { writeLogRecord } from '@/observability/json-logger';
 
 type CacheEntry = {
@@ -113,8 +114,10 @@ export async function loadRemoteMessages(locale: Locale): Promise<Messages | nul
       updatedAt: Date.now(),
     });
 
+    reportComponent('tolgee', 'up');
     return messages;
   } catch (error) {
+    reportComponent('tolgee', 'down');
     writeLogRecord('warn', {
       event: 'i18n.fallback',
       locale,

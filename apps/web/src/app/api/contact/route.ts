@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 import { clientIp, problem } from '@/lib/http';
+import { withRouteMetrics } from '@/observability/http-metrics';
 import { buildContactEvent, publishEmail } from '@/lib/notifications';
+import { recordContactSubmission } from '@/observability/app-metrics';
 import { writeLogRecord } from '@/observability/json-logger';
 
 export const runtime = 'nodejs';
@@ -57,10 +59,11 @@ function reject(status: number, code: string, detail: string, params?: Record<st
   if (status !== 429) {
     writeLogRecord('info', { event: 'contact.rejected', code, status });
   }
+  recordContactSubmission('rejected');
   return problem(INSTANCE, status, code, detail, params);
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   if (rateLimited(clientIp(request))) {
     return reject(
       429,
@@ -113,6 +116,7 @@ export async function POST(request: Request) {
   } catch (error) {
     // The submitter gets a generic failure; the detail stays in the logs the
     // ops stack already scrapes. Nothing they typed is in it.
+    recordContactSubmission('failed');
     writeLogRecord('error', {
       event: 'contact.publish_failed',
       locale,
@@ -127,6 +131,9 @@ export async function POST(request: Request) {
     );
   }
 
+  recordContactSubmission('queued');
   writeLogRecord('info', { event: 'contact.queued', locale });
   return NextResponse.json({ ok: true }, { status: 202 });
 }
+
+export const POST = withRouteMetrics('/api/contact', handlePost);

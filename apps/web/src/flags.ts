@@ -1,5 +1,7 @@
 import { apiKeyPresent } from '@/lib/ask/config';
 import { connectRemoteFlags, isEnabled, registerFlags } from '@/observability';
+import { recordFlagState } from '@/observability/app-metrics';
+import { reportComponent } from '@/observability/health';
 import { writeLogRecord } from '@/observability/json-logger';
 import { recordFlagEvaluation } from '@/observability/spans';
 
@@ -36,14 +38,17 @@ function connect(): Promise<boolean> {
     appName: process.env.UNLEASH_APP_NAME ?? 'cv-web',
     onEvent: (event) => {
       if (event.kind === 'unavailable') {
+        reportComponent('unleash', 'down');
         writeLogRecord('warn', { event: 'flags.unavailable', error: event.error });
         return;
       }
+      reportComponent('unleash', 'up');
       writeLogRecord('info', { event: `flags.${event.kind}` });
     },
     ...(process.env.UNLEASH_BACKUP_PATH ? { backupPath: process.env.UNLEASH_BACKUP_PATH } : {}),
   });
 
+  void connection.then((ready) => reportComponent('unleash', ready ? 'up' : 'down'));
   return connection;
 }
 
@@ -59,5 +64,6 @@ export async function askEnabled(): Promise<boolean> {
 
 function evaluate(key: string, enabled: boolean): boolean {
   recordFlagEvaluation(key, enabled);
+  recordFlagState(key, enabled);
   return enabled;
 }
