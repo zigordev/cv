@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/zigordev/cv/compare/v0.9.2...v0.10.0) (2026-09-20)
+
+
+### Features
+
+* **observability:** trace requests with OpenTelemetry ([#108](https://github.com/zigordev/cv/issues/108)) ([41829dd](https://github.com/zigordev/cv/commit/41829dddc6ae3df6d9c291c198709ac7227fa816))
+
 ## [0.9.2](https://github.com/zigordev/cv/compare/v0.9.1...v0.9.2) (2026-09-20)
 
 
