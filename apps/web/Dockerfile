@@ -54,6 +54,7 @@ RUN mkdir -p public && npm run build
 FROM node:24-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=--disable-warning=TimeoutNegativeWarning
 ENV PORT=3001
 ENV HOSTNAME=0.0.0.0
 RUN apk upgrade --no-cache zlib libcrypto3 libssl3 \
@@ -79,6 +80,7 @@ FROM prod AS local
 
 FROM base AS dev
 ENV NODE_ENV=development
+ENV NODE_OPTIONS=--disable-warning=TimeoutNegativeWarning
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY package.json package-lock.json /workspace/

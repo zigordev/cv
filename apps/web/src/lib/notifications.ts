@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Kafka, type Producer } from 'kafkajs';
+import { Kafka, Partitioners, type Producer } from 'kafkajs';
 
 /**
  * Publishes to the shared notifications service, whose contract is defined in
@@ -53,7 +53,11 @@ async function getProducer(): Promise<Producer> {
     brokers: list,
   });
 
-  const producer = kafka.producer({ idempotent: true, allowAutoTopicCreation: true });
+  const producer = kafka.producer({
+    idempotent: true,
+    allowAutoTopicCreation: true,
+    createPartitioner: Partitioners.DefaultPartitioner,
+  });
 
   globalForKafka.__cvProducerConnect = producer
     .connect()
