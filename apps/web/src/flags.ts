@@ -1,5 +1,6 @@
 import { apiKeyPresent } from '@/lib/ask/config';
 import { connectRemoteFlags, isEnabled, registerFlags } from '@/observability';
+import { recordFlagEvaluation } from '@/observability/spans';
 
 export const ASK_FLAG = 'cv-ask';
 
@@ -40,10 +41,15 @@ function connect(): Promise<boolean> {
 
 export async function pdfDownloadEnabled(): Promise<boolean> {
   await connect();
-  return isEnabled('cv-pdf-download');
+  return evaluate('cv-pdf-download', isEnabled('cv-pdf-download'));
 }
 
 export async function askEnabled(): Promise<boolean> {
   await connect();
-  return isEnabled(ASK_FLAG) && apiKeyPresent();
+  return evaluate(ASK_FLAG, isEnabled(ASK_FLAG) && apiKeyPresent());
+}
+
+function evaluate(key: string, enabled: boolean): boolean {
+  recordFlagEvaluation(key, enabled);
+  return enabled;
 }
