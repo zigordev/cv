@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/zigordev/cv/compare/v0.9.0...v0.9.1) (2026-09-20)
+
+
+### Bug Fixes
+
+* **lifecycle:** stop cleanly on SIGTERM and start without warnings ([#103](https://github.com/zigordev/cv/issues/103)) ([05ed6d9](https://github.com/zigordev/cv/commit/05ed6d9cf90797c3a7d8d8f9881aa144a418cff5))
+
 ## [0.9.0](https://github.com/zigordev/cv/compare/v0.8.2...v0.9.0) (2026-09-18)
 
 
