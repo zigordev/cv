@@ -340,6 +340,11 @@
             "step": "04",
             "text": "Un route handler envía la pregunta con el CV como un único documento dividido en bloques de contenido — uno por puesto, grupo de habilidades y parte de un caso de estudio — con las citas activadas. Cada cita vuelve como un índice de bloque que apunta directamente a una sección o a una pestaña del caso de estudio, así que cada fuente es un enlace y no una cita textual. El CV va en un prefijo cacheado, de modo que las siguientes preguntas de una visita lo releen a una décima parte del precio.",
             "title": "El cuadro de preguntas"
+          },
+          {
+            "step": "05",
+            "text": "Cada petición es una traza. El renderizado de una página, la pregunta enviada a Claude con los tokens y el coste con los que vuelve, los flags que se leen por el camino y el mensaje entregado al broker son una sola línea temporal en el almacén de la plataforma, no cuatro conjeturas. Lo que la ahogaría — el chequeo de salud del contenedor, el scrape de métricas, las balizas del navegador, los ficheros estáticos — se descarta antes de registrarse.",
+            "title": "Qué reporta"
           }
         ],
         "pipeline": {

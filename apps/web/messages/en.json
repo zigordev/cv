@@ -340,6 +340,11 @@
             "step": "04",
             "text": "A route handler sends the question with the CV as one document split into content blocks — one per role, skill group and part of a case study — with citations switched on. Each citation comes back as a block index that maps straight to a section or a case-study tab, so every source is a link rather than a quote. The CV sits in a cached prefix, so the later questions of a visit reread it at a tenth of the price.",
             "title": "The answer box"
+          },
+          {
+            "step": "05",
+            "text": "Every request is a trace. A page render, the question sent to Claude with the tokens and the cost it came back with, the flags read on the way, and the message handed to the broker are one timeline in the platform’s store rather than four guesses. The traffic that would drown it — the container health check, the metrics scrape, the browser beacons, the static files — is dropped before it is ever recorded.",
+            "title": "What it reports"
           }
         ],
         "pipeline": {
