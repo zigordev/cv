@@ -17,6 +17,7 @@ import { askCompletedFields, writeLog, type AskLogInput, type LogLevel } from '@
 import { observeOutcome, observeSpend } from '@/lib/ask/metrics';
 import { spendOf } from '@/lib/ask/pricing';
 import { clientIp, problem } from '@/lib/http';
+import { annotateRequest } from '@/observability/spans';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -95,6 +96,12 @@ export async function POST(request: Request): Promise<Response> {
 
   const complete = (completion: Completion, level: LogLevel = 'info') => {
     const latencyMs = performance.now() - started;
+    annotateRequest({
+      'cv.ask.outcome': completion.outcome,
+      'cv.ask.locale': locale,
+      'cv.ask.citations': completion.sources?.length ?? 0,
+      'cv.ask.budget_used_ratio': budget.usedRatio(),
+    });
     observeOutcome(completion.outcome, {
       latencySeconds: latencyMs / 1000,
       citationCount: completion.sources?.length,

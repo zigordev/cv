@@ -1,6 +1,8 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
+import { withSpan } from '@/observability/spans';
+
 import type { AskConfig } from './config';
 import { writeLog } from './log';
 import { addUsage, EMPTY_USAGE, type TokenUsage } from './pricing';
@@ -141,14 +143,26 @@ export async function openBudget(options: BudgetOptions): Promise<Budget> {
       return persisted;
     },
     record(tokens: TokenUsage, costUsd: number) {
-      roll();
-      current = {
-        month: current.month,
-        requests: current.requests + 1,
-        costUsd: current.costUsd + costUsd,
-        tokens: addUsage(current.tokens, tokens),
-      };
-      return persist();
+      return withSpan(
+        'ask.budget.record',
+        async (span) => {
+          roll();
+          current = {
+            month: current.month,
+            requests: current.requests + 1,
+            costUsd: current.costUsd + costUsd,
+            tokens: addUsage(current.tokens, tokens),
+          };
+          await persist();
+          span.setAttributes({
+            'cv.ask.budget.month': current.month,
+            'cv.ask.budget.requests': current.requests,
+            'cv.ask.budget.cost_usd': current.costUsd,
+            'cv.ask.budget.persisted': persisted,
+          });
+        },
+        { 'cv.ask.cost_usd': costUsd }
+      );
     },
   };
 }
