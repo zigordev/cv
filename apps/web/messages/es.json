@@ -627,7 +627,7 @@
           },
           {
             "step": "04",
-            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Jaeger. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las dos últimas y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
+            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Tempo, que las conserva treinta días. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las tres y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
             "title": "Tres señales, tres caminos"
           },
           {
@@ -638,6 +638,7 @@
         ],
         "pipeline": {
           "automation": [
+            "Cada día laborable a las 10:15 el host exporta a S3 los días de logs que aún no están archivados, un fichero comprimido por día y servicio con un manifiesto que anota el número de líneas. Loki borra a los treinta días y la exportación va por delante: recupera cualquier día que se saltara, así que un fin de semana con la máquina apagada no cuesta nada. Glacier se queda los ficheros al mes y los borra al año, lo que deja un año de logs en unos céntimos.",
             "Una sonda de disponibilidad se ejecuta cada cinco minutos en la infraestructura de GitHub y comprueba los endpoints públicos de salud desde fuera. Prometheus corre en el mismo host que aquello que vigila, así que no puede avisar de su propia muerte — y el silencio se parece exactamente a que todo va bien.",
             "La sonda abre una incidencia en GitHub en lugar de enviar un correo. Una incidencia se deduplica, tiene estado y no depende del relé SMTP, que es en sí mismo una de las cosas que podrían estar rotas.",
             "Las ejecuciones programadas son de mejor esfuerzo por diseño: GitHub las retrasa cuando hay carga y las omite del todo en una cuenta ocupada, así que esto es aproximadamente cada cinco minutos y nunca un latido.",

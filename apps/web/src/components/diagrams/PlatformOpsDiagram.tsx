@@ -126,7 +126,7 @@ export function PlatformOpsDiagram() {
       <text x={599} y={214} style={svgLane}>
         {copy.groups.observability}
       </text>
-      <Entry x={599} y={ROW[0]} name="otel-collector → jaeger" note={copy.notes.traces} />
+      <Entry x={599} y={ROW[0]} name="otel-collector → tempo" note={copy.notes.traces} />
       <Entry x={599} y={ROW[1]} name="prometheus → alertmanager" note={copy.notes.metrics} />
       <Entry x={599} y={ROW[2]} name="alloy → loki" note={copy.notes.logs} />
       <Entry x={599} y={ROW[3]} name="grafana" note={copy.notes.grafana} />

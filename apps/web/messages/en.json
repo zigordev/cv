@@ -627,7 +627,7 @@
           },
           {
             "step": "04",
-            "text": "Traces are pushed by the application to an OTel collector and stored in Jaeger. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads the last two and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Tempo, which keeps them for thirty days. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads all three and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
             "title": "Three signals, three paths"
           },
           {
@@ -638,6 +638,7 @@
         ],
         "pipeline": {
           "automation": [
+            "Every weekday at 10:15 the host exports to S3 each day of logs that is not archived yet, one gzipped file per day and service with a manifest recording the line counts. Loki deletes at thirty days and the export runs ahead of it, catching up any day it missed, so a weekend with the machine switched off costs nothing. Glacier takes the files after a month and deletes them after a year, which puts a year of logs in the region of a few cents.",
             "An uptime probe runs every five minutes on GitHub's infrastructure and checks the public health endpoints from outside. Prometheus runs on the same host as the things it watches, so it cannot report its own death — and the silence looks exactly like everything being fine.",
             "The probe opens a GitHub issue rather than sending mail. An issue deduplicates, carries a state, and does not depend on the SMTP relay, which is itself one of the things that could be broken.",
             "Scheduled runs are best effort by design: GitHub delays them under load and skips them outright on a busy account, so this is roughly every five minutes and never a heartbeat.",
