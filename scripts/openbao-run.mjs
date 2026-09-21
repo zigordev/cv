@@ -4,8 +4,25 @@ import { spawn } from 'node:child_process';
 
 const FORWARDED_SIGNALS = ['SIGTERM', 'SIGINT', 'SIGHUP'];
 
-function die(message) {
-  console.error(message);
+/**
+ * The estate's log shape, by hand: this wrapper runs before the application
+ * and its dependencies exist. Without it the only line explaining why a
+ * container will not start is text Loki cannot label or query.
+ */
+function logRecord(level, fields) {
+  process.stderr.write(
+    `${JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level,
+      service: process.env.OTEL_SERVICE_NAME?.trim() || 'cv-web',
+      context: 'openbao-run',
+      ...fields,
+    })}\n`
+  );
+}
+
+function die(message, fields) {
+  logRecord('error', { event: 'secrets.unavailable', message, ...fields });
   process.exit(1);
 }
 
@@ -81,11 +98,13 @@ function enforceRequiredKeys(secrets) {
   });
 
   if (missing.length > 0) {
-    die(
-      `OpenBao secret path is missing required keys: ${missing.join(
-        ', '
-      )} (path=${process.env.OPENBAO_SECRET_PATH})`
-    );
+    // Key names only: the values are the secrets this exists to protect.
+    logRecord('error', {
+      event: 'secrets.missing',
+      path: process.env.OPENBAO_SECRET_PATH,
+      keys: missing,
+    });
+    process.exit(1);
   }
 }
 

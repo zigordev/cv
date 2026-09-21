@@ -343,8 +343,13 @@
           },
           {
             "step": "05",
-            "text": "Every request is a trace. A page render, the question sent to Claude with the tokens and the cost it came back with, the flags read on the way, and the message handed to the broker are one timeline in the platform’s store rather than four guesses. The traffic that would drown it — the container health check, the metrics scrape, the browser beacons, the static files — is dropped before it is ever recorded.",
+            "text": "Every request is a trace. A page render, the question sent to Claude with the tokens and the cost it came back with, the flags read on the way, and the message handed to the broker are one timeline in the platform's store rather than four guesses. Every line it writes carries the trace it was written inside, so a failure found in the logs opens the request that caused it, and a question refused or cut short is found without reading any of them. The traffic that would drown it — the container health check, the metrics scrape, the browser beacons, the static files — is dropped before it is ever recorded.",
             "title": "What it reports"
+          },
+          {
+            "step": "06",
+            "text": "What it depends on, it reports on. Tolgee, Unleash and the broker each say whether they answered the last time they were asked, and the broker is asked every fifteen seconds rather than waiting for the next visitor's message. None of them can take the page down: a failure reads as degraded, the page renders from the committed copy with the declared flag defaults, and the alert names the part that is missing. Every request the three endpoints serve is counted and timed, and a slow one carries the id of its own trace.",
+            "title": "Honest health"
           }
         ],
         "pipeline": {
@@ -578,6 +583,7 @@
         ],
         "pipeline": {
           "automation": [
+            "Every deploy reads the service's own health before it is called done — Postgres, the consumer group and the relay — from the host, because this service has no public route. A release that comes back with a rejected SMTP login fails the workflow instead of dead-lettering email quietly.",
             "Compose manifests are rendered in CI, so a file that no longer parses fails on the pull request rather than on the host, halfway through a deploy.",
             "The integration job dumps the container logs when it fails. A red run without them only tells you to reproduce it locally, which is the slowest possible way to learn what the broker did.",
             "Dependabot on npm, the Dockerfile and the Actions, weekly and grouped; patch and minor merge on green. Base-image majors are not proposed, so the Node runtime only moves on purpose.",

@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/config';
+import { writeLogRecord, type LogLevel } from '@/observability/json-logger';
 
 import type { BudgetState } from './budget';
 import type { AskConfig } from './config';
@@ -6,24 +7,14 @@ import type { AskSource, Refusal } from './contract';
 import type { AskOutcome } from './metrics';
 import { EMPTY_USAGE, type MessageSpend } from './pricing';
 
-export type LogLevel = 'info' | 'warn' | 'error';
+export type { LogLevel } from '@/observability/json-logger';
 
 export function writeLog(
   level: LogLevel,
   event: string,
   fields: Record<string, unknown> = {}
 ): void {
-  const record = {
-    timestamp: new Date().toISOString(),
-    level,
-    service: process.env.OTEL_SERVICE_NAME?.trim() || 'cv-web',
-    message: event,
-    event,
-    ...fields,
-  };
-  const line = `${JSON.stringify(record)}\n`;
-  if (level === 'error') process.stderr.write(line);
-  else process.stdout.write(line);
+  writeLogRecord(level, { event, ...fields });
 }
 
 export interface AskLogInput {

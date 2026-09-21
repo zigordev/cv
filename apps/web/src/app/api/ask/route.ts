@@ -17,6 +17,7 @@ import { askCompletedFields, writeLog, type AskLogInput, type LogLevel } from '@
 import { observeOutcome, observeSpend } from '@/lib/ask/metrics';
 import { spendOf } from '@/lib/ask/pricing';
 import { clientIp, problem } from '@/lib/http';
+import { withRouteMetrics } from '@/observability/http-metrics';
 import { annotateRequest } from '@/observability/spans';
 
 export const runtime = 'nodejs';
@@ -26,7 +27,7 @@ const INSTANCE = '/api/ask';
 
 type Completion = Omit<AskLogInput, 'requestId' | 'locale' | 'question' | 'latencyMs' | 'budget'>;
 
-export async function POST(request: Request): Promise<Response> {
+async function handlePost(request: Request): Promise<Response> {
   const started = performance.now();
   const config = askConfig();
 
@@ -107,6 +108,11 @@ export async function POST(request: Request): Promise<Response> {
       citationCount: completion.sources?.length,
       budgetUsedRatio: budget.usedRatio(),
     });
+
+    // A rate-limited question is counted, not written down. Someone pointing a
+    // script at this endpoint would otherwise be writing the log.
+    if (completion.outcome === 'rate_limited') return;
+
     writeLog(
       level,
       'ask.completed',
@@ -128,7 +134,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   if (budget.exhausted()) {
-    complete({ outcome: 'budget_exhausted' });
+    complete({ outcome: 'budget_exhausted' }, 'warn');
     return problem(
       INSTANCE,
       429,
@@ -176,3 +182,5 @@ export async function POST(request: Request): Promise<Response> {
     sources: result.sources,
   } satisfies AskAnswer);
 }
+
+export const POST = withRouteMetrics('/api/ask', handlePost);
