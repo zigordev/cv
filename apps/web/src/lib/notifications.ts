@@ -55,8 +55,6 @@ async function getProducer(): Promise<Producer> {
     clientId: process.env.OTEL_SERVICE_NAME || 'cv-web',
     brokers: list,
     logLevel: logLevel.WARN,
-    // kafkajs writes its own JSON shape with no service field and no trace
-    // context, which is exactly the line you want when a broker disappears.
     logCreator: kafkaLogCreator(),
   });
 
@@ -152,13 +150,6 @@ const PROBE_INTERVAL_MS = 15_000;
 let probing = false;
 let admin: Admin | undefined;
 
-/**
- * Ask the cluster for its metadata and record whether it answered.
- *
- * Retries off and short timeouts on purpose: this is a probe, not a request
- * that matters. Without it a broker that died is discovered by the next
- * visitor who writes a contact message, which on this site could be weeks.
- */
 async function probeBroker(): Promise<void> {
   if (probing) return;
   probing = true;
@@ -191,12 +182,10 @@ async function probeBroker(): Promise<void> {
   }
 }
 
-/** Starts the broker probe. Called once, from the instrumentation hook. */
 export function startBrokerProbe(): void {
   if (brokers().length === 0) return;
 
   void probeBroker();
   const timer = setInterval(() => void probeBroker(), PROBE_INTERVAL_MS);
-  // Never hold the process open for a health probe.
   timer.unref?.();
 }

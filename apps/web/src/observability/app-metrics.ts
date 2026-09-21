@@ -32,8 +32,6 @@ const buildInfo = new client.Gauge({
 
 buildInfo.set({ version: process.env.NEXT_PUBLIC_RELEASE?.trim() || 'dev' }, 1);
 
-// Zero-initialised for the same reason the RUM series are: rate() needs two
-// samples, so a counter born at the moment of the first event loses it.
 for (const outcome of ['queued', 'rejected', 'failed'] as const) {
   contactSubmissions.inc({ outcome }, 0);
 }

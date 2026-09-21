@@ -50,11 +50,6 @@ function rateLimited(ip: string): boolean {
 
 const INSTANCE = '/api/contact';
 
-/**
- * A rejection is worth one line: the code says which rule it broke, and
- * nothing the visitor typed is in it. Rate limiting writes nothing at all —
- * a bot hitting the endpoint would otherwise write the log.
- */
 function reject(status: number, code: string, detail: string, params?: Record<string, unknown>) {
   if (status !== 429) {
     writeLogRecord('info', { event: 'contact.rejected', code, status });
@@ -115,7 +110,7 @@ async function handlePost(request: Request) {
     await publishEmail(buildContactEvent({ name, email, message, locale }));
   } catch (error) {
     // The submitter gets a generic failure; the detail stays in the logs the
-    // ops stack already scrapes. Nothing they typed is in it.
+    // ops stack already scrapes.
     recordContactSubmission('failed');
     writeLogRecord('error', {
       event: 'contact.publish_failed',
