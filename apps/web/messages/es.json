@@ -354,7 +354,7 @@
           {
             "step": "07",
             "title": "Lo que ve quien visita",
-            "text": "El navegador cuenta cómo fue de verdad una visita: las Core Web Vitals una vez por página vista, con sus definiciones actuales y el elemento responsable de la que salga mal, y cada error de script con la línea de código que lo lanzó — traducida a través de los source maps de la compilación, con cualquier dato personal enmascarado en el mensaje. Cada carga de página lleva el id de la traza que la renderizó, así que una visita lenta abre su propio lado del servidor. También se cuenta el embudo — preguntas respondidas o fallidas, mensajes enviados, el PDF descargado, casos de estudio abiertos — y cada serie nombra la versión que la sirvió. La política de seguridad de contenidos sigue solo informando: cada infracción se cuenta y se registra por directiva antes de exigir nada."
+            "text": "El navegador cuenta cómo fue de verdad una visita: las Core Web Vitals una vez por página vista, con sus definiciones actuales y el elemento responsable de la que salga mal, y cada error de script con la línea de código que lo lanzó — traducida a través de los source maps de la compilación, con cualquier dato personal enmascarado en el mensaje. Cada carga de página lleva el id de la traza que la renderizó, así que una visita lenta abre su propio lado del servidor. También se cuenta el embudo — preguntas respondidas o fallidas, mensajes enviados, el PDF descargado, casos de estudio abiertos — y cada serie nombra la versión que la sirvió. La política de seguridad de contenidos sigue solo informando: cada infracción se cuenta y se registra por directiva antes de exigir nada, y cada página lleva un nonce nuevo, así que los scripts propios del sitio pasan y solo se informa de uno ajeno."
           }
         ],
         "pipeline": {
@@ -584,6 +584,11 @@
             "step": "04",
             "text": "Cada correo lleva la traza de lo que lo pidió. El mensaje que publicó cv o gpool continúa en la reserva sobre la base de datos, el renderizado de la plantilla y la conversación SMTP, así que un envío de nueve segundos se lee como cuatro tramos en vez de deducirse de tres líneas de log. Ningún tramo lleva una dirección: el id de petición encuentra la fila, y la fila tiene al destinatario.",
             "title": "El rastro"
+          },
+          {
+            "step": "05",
+            "title": "Retener el correo durante una caída",
+            "text": "El objetivo trata de correos, no de peticiones: el 99% de los correos enviados en los dos minutos siguientes a pedirse, con alertas cuando ese presupuesto se consume. El relay SMTP cuenta como una dependencia más, igual que la base de datos — cuando rechaza el login o deja de responder, la salud lo marca caído y avisa, y el consumidor se pausa y reintenta en lugar de mandar el mensaje a la cola de mensajes muertos, así que los correos esperan en el topic y salen cuando el relay vuelve. La cola de mensajes muertos es para mensajes que nunca podrán salir."
           }
         ],
         "pipeline": {
@@ -648,13 +653,18 @@
           },
           {
             "step": "04",
-            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Tempo, que las conserva treinta días. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las tres y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
+            "text": "Las trazas las envía la aplicación a un colector de OTel y se guardan en Tempo, que las conserva treinta días y convierte cada span en métricas con un exemplar adjunto — así es como el render de una página, que ninguna ruta cuenta, tiene un objetivo de latencia propio. Las métricas van al revés: Prometheus entra en cada aplicación cada cierto tiempo y encamina a Alertmanager lo que se dispara. Los logs no requieren participación alguna: Alloy los recoge del host y los lleva a Loki, así que las aplicaciones solo escriben en stdout. Grafana lee las tres y es el único sitio donde alguien mira de verdad. Cada alerta lleva el entorno que la disparó, así que producción nunca se confunde con un portátil.",
             "title": "Tres señales, tres caminos"
           },
           {
             "step": "05",
             "text": "Hooks de commit que buscan secretos, parsean cada workflow, renderizan cada fichero de compose y comprueban el formato de Terraform antes de que nada llegue a la CI.",
             "title": "Barreras de seguridad"
+          },
+          {
+            "step": "06",
+            "title": "Dashboards como código",
+            "text": "Grafana 13 provisiona doce dashboards en cinco carpetas — el conjunto, cada servicio, lo que vive quien visita, la propia plataforma, y lo que la gente hace y lo que cuesta — y ninguno se edita a mano: un generador en TypeScript los escribe, y un test falla cuando el JSON versionado no coincide con su salida o un panel consulta una métrica que nada exporta. Cada gráfica marca los despliegues a partir de la versión que cada servicio publica, contando solo una versión que no se vio en los tres días anteriores, así que un host apagado por la noche no es un despliegue cada mañana. Cada alerta nombra su dashboard, y el correo lo abre en el servicio y en las horas alrededor de la alerta, a dos clics de la traza que falla."
           }
         ],
         "pipeline": {
@@ -677,7 +687,7 @@
             },
             {
               "step": "02",
-              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, shellcheck, linting de workflows y de compose, terraform validate contra ambos stacks, el kit de observabilidad con typecheck y tests, y los helpers de fichero de entorno del script de despliegue bajo bats. Al lado, un escaneo de secretos y Semgrep.",
+              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, una comprobación de sintaxis de cada script de shell, linting de workflows y de compose, terraform validate contra ambos stacks, el kit de observabilidad y el generador de dashboards con typecheck y tests, y los helpers de fichero de entorno del script de despliegue bajo bats. Los tests del generador fallan cuando un dashboard versionado no es lo que el generador escribe, o cuando un panel consulta una métrica que nada exporta. Al lado, un escaneo de secretos y Semgrep.",
               "title": "El pull request"
             },
             {
