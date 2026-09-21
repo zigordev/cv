@@ -5,28 +5,8 @@ const path = require('path');
  *
  * Nothing in this estate set any of these — four public Next.js apps shipping
  * browser defaults. These are the cheap, unambiguous ones.
- *
- * The CSP is deliberately report-only. A strict policy that breaks the page is
- * worse than none, and Next.js needs `unsafe-inline` for its hydration styles,
- * so the honest first step is to observe violations before enforcing. Promote to
- * `Content-Security-Policy` once the reports are quiet.
  */
-const CSP = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  "img-src 'self' data:",
-  "font-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self'",
-  "connect-src 'self'",
-  'report-uri /rum/csp',
-].join('; ');
-
 const securityHeaders = [
-  { key: 'Content-Security-Policy-Report-Only', value: CSP },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
