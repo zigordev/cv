@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { health, reportComponent } from '@/observability/health';
+
 import { loadRemoteMessages } from './remote';
 
 /**
@@ -51,5 +53,71 @@ describe('loadRemoteMessages', () => {
     );
 
     await expect(loadRemoteMessages('en')).resolves.toBeNull();
+  });
+
+  describe('health', () => {
+    const configure = () => {
+      process.env.TOLGEE_API_URL = 'http://tolgee.invalid';
+      process.env.TOLGEE_API_KEY = 'test-key';
+      process.env.TOLGEE_PROJECT_ID = '1';
+    };
+
+    const logged = (stdout: { mock: { calls: unknown[][] } }) =>
+      stdout.mock.calls.map(([line]) => JSON.parse(String(line)));
+
+    beforeEach(() => {
+      reportComponent('tolgee', 'unknown');
+    });
+
+    it('reports Tolgee down when it answers with an error status, and says why', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('nope', { status: 401 }));
+
+      await loadRemoteMessages('en');
+
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: { name: 'HttpError', message: 'Tolgee answered 401' },
+        })
+      );
+    });
+
+    it('reports Tolgee down when the export comes back empty', async () => {
+      configure();
+      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('null', { status: 200, headers: { 'content-type': 'application/json' } })
+      );
+
+      await loadRemoteMessages('en');
+
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+    });
+
+    it('reports Tolgee up when it answers, including a 304 for copy it already sent', async () => {
+      configure();
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ greeting: 'hello' }), {
+            status: 200,
+            headers: { 'content-type': 'application/json', etag: '"v1"' },
+          })
+        )
+        .mockResolvedValueOnce(new Response(null, { status: 304 }));
+
+      await expect(loadRemoteMessages('en')).resolves.toEqual({ greeting: 'hello' });
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+
+      reportComponent('tolgee', 'unknown');
+      const cache = (globalThis as unknown as Record<string, Map<string, { updatedAt: number }>>)
+        .__tolgeeMessagesCache;
+      cache.get('en')!.updatedAt = 0;
+
+      await expect(loadRemoteMessages('en')).resolves.toEqual({ greeting: 'hello' });
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+    });
   });
 });
