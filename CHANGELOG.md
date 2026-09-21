@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/zigordev/cv/compare/v0.10.0...v0.11.0) (2026-09-21)
+
+
+### Features
+
+* **observability:** structured logs, route metrics and honest health ([#110](https://github.com/zigordev/cv/issues/110)) ([819ced8](https://github.com/zigordev/cv/commit/819ced8710a62bc2f7fb6a54543ebcf732db7073))
+
 ## [0.10.0](https://github.com/zigordev/cv/compare/v0.9.2...v0.10.0) (2026-09-20)
 
 
