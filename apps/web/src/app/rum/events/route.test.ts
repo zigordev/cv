@@ -31,9 +31,6 @@ const pageViews = async () => {
 
 describe('POST /rum/events', () => {
   it('exports the home page series at zero before any beacon arrives', async () => {
-    // The scrape path, not getSingleMetricAsString: only `metrics()` renders a
-    // counter the way Prometheus reads it. The single-metric helper skips the
-    // name standardisation and writes `rum_frustrations_total_total`.
     const exposition = await registry.metrics();
 
     expect(exposition).toContain(
