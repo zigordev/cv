@@ -9,6 +9,7 @@ import { Textarea } from 'design-system/components/forms/Textarea.jsx';
 import { Toast, ToastRegion } from 'design-system/components/feedback/Toast.jsx';
 
 import { useI18n } from '@/i18n/client';
+import { trackEvent } from '@/observability';
 
 type Status = 'idle' | 'sending';
 
@@ -67,12 +68,14 @@ export function ContactForm() {
         }),
       });
       if (!response.ok) throw new Error(`Contact request failed: ${response.status}`);
+      trackEvent('contact-sent');
       setStatus('idle');
       setName('');
       setEmail('');
       setMessage('');
       notify('success', t('form.success'));
     } catch {
+      trackEvent('contact-failed');
       setStatus('idle');
       notify('danger', t('form.error'));
     }

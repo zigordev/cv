@@ -22,6 +22,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self'",
   "connect-src 'self'",
+  'report-uri /rum/csp',
 ].join('; ');
 
 const securityHeaders = [
@@ -36,6 +37,10 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: true,
+  experimental: {
+    clientTraceMetadata: ['traceparent'],
+  },
   // design-system ships raw .jsx rather than a build output, so Next has to
   // transpile it like first-party source instead of skipping node_modules.
   transpilePackages: ['design-system'],

@@ -113,14 +113,17 @@ export function useAsk(): Ask {
               exchange.id === id ? { id, question: trimmed, state: 'done', answer } : exchange
             )
           );
+          trackEvent('ask-answer-shown');
           return;
         }
 
+        trackEvent('ask-failed');
         withdraw();
         const next = PROBLEM_AVAILABILITY[(await problemCode(response)) ?? ''];
         if (next) setAvailability(next);
         else setFailed(true);
       } catch {
+        trackEvent('ask-failed');
         withdraw();
         setFailed(true);
       }
