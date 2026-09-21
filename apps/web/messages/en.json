@@ -354,7 +354,7 @@
           {
             "step": "07",
             "title": "What visitors see",
-            "text": "The browser reports what a visit actually felt like: the Core Web Vitals once per page view under their current definitions, with the element behind any poor one, and every script error with the source line that threw it — mapped back through the build's source maps, with anything personal masked out of the message. A page load carries the id of the trace that rendered it, so a slow visit opens its own server side. The funnel is counted as well — questions answered or failed, messages sent, the PDF downloaded, case studies opened — and each series names the release that served it. The content security policy still only reports: every violation is counted and logged by directive before anything is enforced."
+            "text": "The browser reports what a visit actually felt like: the Core Web Vitals once per page view under their current definitions, with the element behind any poor one, and every script error with the source line that threw it — mapped back through the build's source maps, with anything personal masked out of the message. A page load carries the id of the trace that rendered it, so a slow visit opens its own server side. The funnel is counted as well — questions answered or failed, messages sent, the PDF downloaded, case studies opened — and each series names the release that served it. The content security policy still only reports: every violation is counted and logged by directive before anything is enforced, and each page carries a fresh nonce, so the site's own scripts pass and only a foreign one is reported."
           }
         ],
         "pipeline": {
@@ -584,6 +584,11 @@
             "step": "04",
             "text": "Every email carries the trace of whatever asked for it. The message cv or gpool published continues into the claim on the database, the template render and the SMTP conversation, so a delivery that took nine seconds reads as four spans rather than being inferred from three log lines. No span carries an address: the request id finds the row, and the row has the recipient.",
             "title": "The trail"
+          },
+          {
+            "step": "05",
+            "title": "Holding mail through an outage",
+            "text": "The objective is about email, not requests: 99% of emails sent within two minutes of being asked for, with alerts when that budget burns. The SMTP relay counts as a dependency like the database — when it rejects the login or stops answering, health reports it down and pages, and the consumer pauses and retries rather than dead-lettering, so the emails wait in the topic and go out when the relay is back. Dead letters are for messages that can never succeed."
           }
         ],
         "pipeline": {
@@ -648,13 +653,18 @@
           },
           {
             "step": "04",
-            "text": "Traces are pushed by the application to an OTel collector and stored in Tempo, which keeps them for thirty days. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads all three and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Tempo, which keeps them for thirty days and turns every span into metrics with an exemplar attached — which is how a page render, counted by no route, gets a latency objective of its own. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads all three and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
             "title": "Three signals, three paths"
           },
           {
             "step": "05",
             "text": "Commit hooks that scan for secrets, parse every workflow, render every compose file and check Terraform formatting before anything reaches CI.",
             "title": "Guardrails"
+          },
+          {
+            "step": "06",
+            "title": "Dashboards as code",
+            "text": "Grafana 13 provisions twelve dashboards in five folders — the estate, each service, what visitors experience, the platform itself, and what people do and what it costs — and none is edited by hand: a TypeScript generator writes them, and a test fails when the committed JSON differs from its output or a panel queries a metric nothing exports. Every graph marks deploys from the release each service reports, counting only a version not seen in the three days before, so a host switched off overnight is not a deploy every morning. Every alert names its dashboard, and the email opens it on the service and the hours around the alert, two clicks from the failing trace."
           }
         ],
         "pipeline": {
@@ -677,7 +687,7 @@
             },
             {
               "step": "02",
-              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, shellcheck, workflow and compose linting, terraform validate against both stacks, the observability kit typechecked and tested, and the deploy script's env-file helpers under bats. A secret scan and Semgrep alongside them.",
+              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, a syntax check of every shell script, workflow and compose linting, terraform validate against both stacks, the observability kit and the dashboard generator typechecked and tested, and the deploy script's env-file helpers under bats. The generator's tests fail when a committed dashboard is not what it writes, or when a panel queries a metric nothing exports. A secret scan and Semgrep alongside them.",
               "title": "The pull request"
             },
             {
