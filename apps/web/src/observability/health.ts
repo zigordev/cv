@@ -11,11 +11,17 @@ export interface HealthBody {
   readonly components: Record<ComponentName, { readonly status: ComponentStatus }>;
 }
 
-const state: Record<ComponentName, ComponentStatus> = {
+const STATE = Symbol.for('cv.observability.health');
+
+const shared = globalThis as typeof globalThis & {
+  [STATE]?: Record<ComponentName, ComponentStatus>;
+};
+
+const state = (shared[STATE] ??= {
   kafka: 'unknown',
   tolgee: 'unknown',
   unleash: 'unknown',
-};
+});
 
 /**
  * Every dependency here is optional, and that is the honest answer rather than
