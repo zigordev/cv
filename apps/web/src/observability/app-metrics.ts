@@ -2,48 +2,65 @@ import * as client from 'prom-client';
 
 import { registry } from './metrics.registry';
 
-const contactSubmissions = new client.Counter({
+type Outcome = 'failed' | 'queued' | 'rejected';
+
+interface State {
+  readonly contact: Record<Outcome, number>;
+  readonly messages: Map<string, number>;
+  readonly flags: Map<string, boolean>;
+}
+
+const STATE = Symbol.for('cv.observability.app-metrics');
+
+const shared = globalThis as typeof globalThis & { [STATE]?: State };
+
+const state = (shared[STATE] ??= {
+  contact: { queued: 0, rejected: 0, failed: 0 },
+  messages: new Map(),
+  flags: new Map(),
+});
+
+new client.Counter({
   name: 'cv_contact_submissions_total',
   help: 'Contact messages by what happened to them',
   labelNames: ['outcome'] as const,
   registers: [registry],
+  collect() {
+    this.reset();
+    for (const [outcome, count] of Object.entries(state.contact)) this.inc({ outcome }, count);
+  },
 });
 
-const i18nMessages = new client.Counter({
+new client.Counter({
   name: 'cv_i18n_messages_total',
   help: 'Message loads by where the copy came from',
   labelNames: ['source'] as const,
   registers: [registry],
+  collect() {
+    this.reset();
+    for (const [source, count] of state.messages) this.inc({ source }, count);
+  },
 });
 
-const featureFlagEnabled = new client.Gauge({
+new client.Gauge({
   name: 'cv_feature_flag_enabled',
   help: 'Whether a feature flag reads as enabled right now',
   labelNames: ['flag'] as const,
   registers: [registry],
+  collect() {
+    this.reset();
+    for (const [flag, enabled] of state.flags) this.set({ flag }, enabled ? 1 : 0);
+  },
 });
 
-const buildInfo = new client.Gauge({
-  name: 'cv_build_info',
-  help: 'The release this process is running, as a label',
-  labelNames: ['version'] as const,
-  registers: [registry],
-});
-
-buildInfo.set({ version: process.env.NEXT_PUBLIC_RELEASE?.trim() || 'dev' }, 1);
-
-for (const outcome of ['queued', 'rejected', 'failed'] as const) {
-  contactSubmissions.inc({ outcome }, 0);
-}
-
-export function recordContactSubmission(outcome: 'failed' | 'queued' | 'rejected'): void {
-  contactSubmissions.inc({ outcome });
+export function recordContactSubmission(outcome: Outcome): void {
+  state.contact[outcome] += 1;
 }
 
 export function recordMessageSource(source: string): void {
-  i18nMessages.inc({ source });
+  state.messages.set(source, (state.messages.get(source) ?? 0) + 1);
 }
 
 export function recordFlagState(flag: string, enabled: boolean): void {
-  featureFlagEnabled.set({ flag }, enabled ? 1 : 0);
+  state.flags.set(flag, enabled);
 }
