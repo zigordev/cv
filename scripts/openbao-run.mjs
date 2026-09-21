@@ -4,11 +4,6 @@ import { spawn } from 'node:child_process';
 
 const FORWARDED_SIGNALS = ['SIGTERM', 'SIGINT', 'SIGHUP'];
 
-/**
- * The estate's log shape, by hand: this wrapper runs before the application
- * and its dependencies exist. Without it the only line explaining why a
- * container will not start is text Loki cannot label or query.
- */
 function logRecord(level, fields) {
   process.stderr.write(
     `${JSON.stringify({
@@ -98,7 +93,6 @@ function enforceRequiredKeys(secrets) {
   });
 
   if (missing.length > 0) {
-    // Key names only: the values are the secrets this exists to protect.
     logRecord('error', {
       event: 'secrets.missing',
       path: process.env.OPENBAO_SECRET_PATH,

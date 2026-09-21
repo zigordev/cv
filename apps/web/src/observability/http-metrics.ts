@@ -15,9 +15,6 @@ const httpRequestDuration = new client.Histogram({
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'] as const,
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
-  // Without this prom-client reads the exemplar form of `observe` as a plain
-  // labels object and throws `Added label "labels" is not included in initial
-  // labelset` — at request time, on the sampled requests only.
   enableExemplars: true,
   registers: [registry],
 });
@@ -26,22 +23,9 @@ function sampledTraceId(): string | undefined {
   const spanContext = trace.getActiveSpan()?.spanContext();
   if (!spanContext?.traceId) return undefined;
 
-  // An exemplar pointing at a trace nobody kept is a dead link.
   return spanContext.traceFlags === 1 ? spanContext.traceId : undefined;
 }
 
-/**
- * The two metrics every SLO and alert in platform-ops is built on, around a
- * Next route handler.
- *
- * `route` is passed in rather than read from the request: a label whose value
- * is a path gives Prometheus one time series per path, and this endpoint is
- * public.
- *
- * The duration carries the trace id as an exemplar when the request was
- * sampled, which is what turns a spike on a latency graph into the request
- * that caused it.
- */
 export function withRouteMetrics<T extends unknown[]>(
   route: string,
   handler: (...args: T) => Promise<Response>
@@ -63,9 +47,6 @@ export function withRouteMetrics<T extends unknown[]>(
 
       httpRequestsTotal.inc(labels);
 
-      // Always the object form: once a metric has exemplars enabled,
-      // prom-client routes every observation through the exemplar path, and
-      // the two-argument form arrives there as `value: undefined`.
       httpRequestDuration.observe({
         labels,
         value: seconds,

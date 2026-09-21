@@ -230,8 +230,6 @@ describe('POST /api/ask', () => {
     expect(response.status).toBe(429);
     await expect(response.json()).resolves.toMatchObject({ code: 'ASK.RATE_LIMITED' });
     expect(mocks.callClaude).toHaveBeenCalledTimes(6);
-    // Counted, not written down: a script pointed at this endpoint would
-    // otherwise be the thing filling the log.
     expect(logged().filter((record) => record.outcome === 'rate_limited')).toHaveLength(0);
   });
 

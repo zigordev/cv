@@ -8,11 +8,6 @@ export async function register() {
 
   const { writeLogRecord } = await import('@/observability/json-logger');
 
-  // Next catches both of these itself, prints them and keeps the process
-  // alive. Printing is not a log line anyone can query, so the estate's shape
-  // is written here as well. An unhandled rejection is a warning: Next treats
-  // many of them as harmless, and the request that caused one reports its own
-  // failure through onRequestError.
   process.on('uncaughtException', (error: Error) => {
     writeLogRecord('error', { event: 'process.uncaught_exception' }, undefined, error.stack);
   });
@@ -46,11 +41,6 @@ export async function register() {
   });
 }
 
-/**
- * Every error Next catches while serving a request, with the route it happened
- * on. Without it a failed render is a stack trace on stdout and nothing that
- * can be counted, alerted on or joined to its trace.
- */
 export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
   const { writeLogRecord } = await import('@/observability/json-logger');
   const failure = error as Error & { digest?: string };

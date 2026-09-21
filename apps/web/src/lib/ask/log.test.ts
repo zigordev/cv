@@ -64,8 +64,6 @@ describe('writeLog', () => {
       event: 'ask.completed',
       outcome: 'answered',
     });
-    // The fields are the record, not a nested `message`: Loki flattens a
-    // nested object into `message_event`, which no query in the estate reads.
     expect(record).not.toHaveProperty('message');
   });
 

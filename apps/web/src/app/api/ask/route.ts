@@ -109,8 +109,6 @@ async function handlePost(request: Request): Promise<Response> {
       budgetUsedRatio: budget.usedRatio(),
     });
 
-    // A rate-limited question is counted, not written down. Someone pointing a
-    // script at this endpoint would otherwise be writing the log.
     if (completion.outcome === 'rate_limited') return;
 
     writeLog(
