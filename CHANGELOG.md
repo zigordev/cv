@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/zigordev/cv/compare/v0.12.0...v0.12.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* **rum:** give each page a CSP nonce so Next's own scripts stop reporting ([#120](https://github.com/zigordev/cv/issues/120)) ([729f067](https://github.com/zigordev/cv/commit/729f067bab2a621ffdbf92001f8b28d281781429))
+
 ## [0.12.0](https://github.com/zigordev/cv/compare/v0.11.2...v0.12.0) (2026-09-21)
 
 
