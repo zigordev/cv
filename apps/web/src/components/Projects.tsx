@@ -14,6 +14,7 @@ import {
 import { Reveal } from '@/components/Reveal';
 import { ProjectTags } from '@/components/ProjectTags';
 import { display } from '@/lib/type';
+import { trackEvent } from '@/observability';
 
 export function Projects() {
   const { projects, labels } = useCv();
@@ -27,6 +28,11 @@ export function Projects() {
     globalThis.addEventListener(OPEN_CASE_STUDY_EVENT, onOpen);
     return () => globalThis.removeEventListener(OPEN_CASE_STUDY_EVENT, onOpen);
   }, []);
+
+  const openedId = opened?.id;
+  useEffect(() => {
+    if (openedId) trackEvent('case-study-opened');
+  }, [openedId]);
 
   const active = projects.find((p) => p.id === opened?.id) ?? null;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 import { Button } from 'design-system/components/core/Button.jsx';
@@ -65,6 +65,10 @@ export function SiteHeader({ pdfDownload = true, ask = false }: SiteHeaderProps)
     setAskOpen(true);
     trackEvent('ask-opened');
   };
+
+  useEffect(() => {
+    if (contactOpen) trackEvent('contact-opened');
+  }, [contactOpen]);
 
   const contactFromAsk = () => {
     setAskOpen(false);
@@ -150,6 +154,7 @@ export function SiteHeader({ pdfDownload = true, ask = false }: SiteHeaderProps)
                 size="md"
                 href={`/cv-${locale}.pdf`}
                 download={`${identity.firstName}-${identity.lastName}-CV-${locale.toUpperCase()}.pdf`}
+                onClick={() => trackEvent('cv-downloaded')}
               >
                 <Icon name="arrow-down" size={15} />
                 <span className="cv-btn-label">{t('rail.pdf')}</span>
@@ -177,6 +182,7 @@ export function SiteHeader({ pdfDownload = true, ask = false }: SiteHeaderProps)
                       key={code}
                       onClick={() => {
                         close();
+                        if (code !== locale) trackEvent('locale-switched');
                         setLocale(code as Locale);
                       }}
                     >

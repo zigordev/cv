@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { trackEvent } from '@/observability';
+import { trackError, trackEvent } from '@/observability';
 
 export default function GlobalError({
   error,
@@ -13,6 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     trackEvent('render-error');
+    trackError(error);
   }, [error]);
 
   return (
