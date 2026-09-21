@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/zigordev/cv/compare/v0.11.0...v0.11.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* **observability:** share health state across Next's module graphs ([#112](https://github.com/zigordev/cv/issues/112)) ([3d3c3f8](https://github.com/zigordev/cv/commit/3d3c3f8cb7e2a7bd514124426564e2e56af29300))
+
 ## [0.11.0](https://github.com/zigordev/cv/compare/v0.10.0...v0.11.0) (2026-09-21)
 
 
