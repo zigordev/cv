@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/zigordev/cv/compare/v0.12.1...v0.12.2) (2026-09-21)
+
+
+### Bug Fixes
+
+* **observability:** let page renders reach /metrics ([#124](https://github.com/zigordev/cv/issues/124)) ([7ea59b7](https://github.com/zigordev/cv/commit/7ea59b7e04c16345c5e2efd08c7ff14099dad744))
+
 ## [0.12.1](https://github.com/zigordev/cv/compare/v0.12.0...v0.12.1) (2026-09-21)
 
 
