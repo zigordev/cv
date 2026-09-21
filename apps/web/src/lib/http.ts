@@ -1,4 +1,4 @@
-import { trace } from '@opentelemetry/api';
+import { trace, TraceFlags } from '@opentelemetry/api';
 import { NextResponse } from 'next/server';
 
 const PROBLEM_TYPE_BASE = 'https://zigordev.com/problems';
@@ -36,7 +36,11 @@ export function problem(
 }
 
 function activeTraceId(): string | undefined {
-  return trace.getActiveSpan()?.spanContext().traceId || undefined;
+  const spanContext = trace.getActiveSpan()?.spanContext();
+  if (!spanContext?.traceId) return undefined;
+  return (spanContext.traceFlags & TraceFlags.SAMPLED) === TraceFlags.SAMPLED
+    ? spanContext.traceId
+    : undefined;
 }
 
 export function clientIp(request: Request): string {
