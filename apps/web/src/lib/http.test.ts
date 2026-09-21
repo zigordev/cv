@@ -40,6 +40,18 @@ describe('problem', () => {
 
     vi.restoreAllMocks();
   });
+
+  it('omits the trace id of a request that was not sampled: no trace was stored', async () => {
+    vi.spyOn(trace, 'getActiveSpan').mockReturnValue({
+      spanContext: () => ({ traceId: 'c'.repeat(32), spanId: 'd'.repeat(16), traceFlags: 0 }),
+    } as never);
+
+    await expect(
+      body(problem('/api/ask', 503, 'ASK.DISABLED', 'Off.'))
+    ).resolves.not.toHaveProperty('traceId');
+
+    vi.restoreAllMocks();
+  });
 });
 
 describe('clientIp', () => {
