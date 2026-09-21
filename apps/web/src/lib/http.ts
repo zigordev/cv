@@ -1,3 +1,4 @@
+import { trace } from '@opentelemetry/api';
 import { NextResponse } from 'next/server';
 
 const PROBLEM_TYPE_BASE = 'https://zigordev.com/problems';
@@ -28,9 +29,16 @@ export function problem(
       instance,
       code,
       ...(params ? { params } : {}),
+      // A 5xx is the one a visitor might report. The trace id is what turns
+      // "it failed at about half past two" into the request itself.
+      ...(status >= 500 ? { traceId: activeTraceId() } : {}),
     },
     { status, headers: { 'Content-Type': PROBLEM_CONTENT_TYPE } }
   );
+}
+
+function activeTraceId(): string | undefined {
+  return trace.getActiveSpan()?.spanContext().traceId || undefined;
 }
 
 export function clientIp(request: Request): string {

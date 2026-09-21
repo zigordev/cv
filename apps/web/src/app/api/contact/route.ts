@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { clientIp, problem } from '@/lib/http';
+import { withRouteMetrics } from '@/observability/http-metrics';
 import { buildContactEvent, publishEmail } from '@/lib/notifications';
+import { recordContactSubmission } from '@/observability/app-metrics';
+import { writeLogRecord } from '@/observability/json-logger';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,10 +50,22 @@ function rateLimited(ip: string): boolean {
 
 const INSTANCE = '/api/contact';
 
-export async function POST(request: Request) {
+/**
+ * A rejection is worth one line: the code says which rule it broke, and
+ * nothing the visitor typed is in it. Rate limiting writes nothing at all —
+ * a bot hitting the endpoint would otherwise write the log.
+ */
+function reject(status: number, code: string, detail: string, params?: Record<string, unknown>) {
+  if (status !== 429) {
+    writeLogRecord('info', { event: 'contact.rejected', code, status });
+  }
+  recordContactSubmission('rejected');
+  return problem(INSTANCE, status, code, detail, params);
+}
+
+async function handlePost(request: Request) {
   if (rateLimited(clientIp(request))) {
-    return problem(
-      INSTANCE,
+    return reject(
       429,
       'CONTACT.RATE_LIMITED',
       'Too many messages from this address; try again later.'
@@ -61,16 +76,11 @@ export async function POST(request: Request) {
   try {
     payload = await request.json();
   } catch {
-    return problem(INSTANCE, 400, 'CONTACT.INVALID_JSON', 'The request body is not valid JSON.');
+    return reject(400, 'CONTACT.INVALID_JSON', 'The request body is not valid JSON.');
   }
 
   if (typeof payload !== 'object' || payload === null) {
-    return problem(
-      INSTANCE,
-      400,
-      'CONTACT.INVALID_PAYLOAD',
-      'The request body must be a JSON object.'
-    );
+    return reject(400, 'CONTACT.INVALID_PAYLOAD', 'The request body must be a JSON object.');
   }
 
   const body = payload as Record<string, unknown>;
@@ -80,8 +90,7 @@ export async function POST(request: Request) {
   const locale = typeof body.locale === 'string' ? body.locale : 'en';
 
   if (!name || name.length > MAX_NAME) {
-    return problem(
-      INSTANCE,
+    return reject(
       400,
       'CONTACT.INVALID_NAME',
       'A name is required and must be at most 120 characters.',
@@ -89,13 +98,12 @@ export async function POST(request: Request) {
     );
   }
   if (email.length > MAX_EMAIL || !EMAIL_PATTERN.test(email)) {
-    return problem(INSTANCE, 400, 'CONTACT.INVALID_EMAIL', 'A valid email address is required.', {
+    return reject(400, 'CONTACT.INVALID_EMAIL', 'A valid email address is required.', {
       maxLength: MAX_EMAIL,
     });
   }
   if (!message || message.length > MAX_MESSAGE) {
-    return problem(
-      INSTANCE,
+    return reject(
       400,
       'CONTACT.INVALID_MESSAGE',
       'A message is required and must be at most 4000 characters.',
@@ -107,8 +115,14 @@ export async function POST(request: Request) {
     await publishEmail(buildContactEvent({ name, email, message, locale }));
   } catch (error) {
     // The submitter gets a generic failure; the detail stays in the logs the
-    // ops stack already scrapes.
-    console.error('[cv] contact publish failed', error);
+    // ops stack already scrapes. Nothing they typed is in it.
+    recordContactSubmission('failed');
+    writeLogRecord('error', {
+      event: 'contact.publish_failed',
+      locale,
+      error:
+        error instanceof Error ? { name: error.name, message: error.message } : { name: 'Unknown' },
+    });
     return problem(
       INSTANCE,
       502,
@@ -117,5 +131,9 @@ export async function POST(request: Request) {
     );
   }
 
+  recordContactSubmission('queued');
+  writeLogRecord('info', { event: 'contact.queued', locale });
   return NextResponse.json({ ok: true }, { status: 202 });
 }
+
+export const POST = withRouteMetrics('/api/contact', handlePost);

@@ -160,7 +160,7 @@ describe('POST /api/ask', () => {
 
     const [record] = logged();
     expect(record).toMatchObject({
-      service: 'cv-web',
+      service: 'unknown-service',
       level: 'info',
       locale: 'en',
       question: QUESTION,
@@ -230,7 +230,9 @@ describe('POST /api/ask', () => {
     expect(response.status).toBe(429);
     await expect(response.json()).resolves.toMatchObject({ code: 'ASK.RATE_LIMITED' });
     expect(mocks.callClaude).toHaveBeenCalledTimes(6);
-    expect(logged().at(-1)).toMatchObject({ outcome: 'rate_limited' });
+    // Counted, not written down: a script pointed at this endpoint would
+    // otherwise be the thing filling the log.
+    expect(logged().filter((record) => record.outcome === 'rate_limited')).toHaveLength(0);
   });
 
   it('rests for the month once the budget is spent', async () => {
@@ -243,6 +245,7 @@ describe('POST /api/ask', () => {
     expect(response.status).toBe(429);
     await expect(response.json()).resolves.toMatchObject({ code: 'ASK.BUDGET_EXHAUSTED' });
     expect(mocks.callClaude).toHaveBeenCalledTimes(2);
+    expect(logged().at(-1)).toMatchObject({ outcome: 'budget_exhausted', level: 'warn' });
   });
 
   it('answers 502 and logs the error class when the API fails', async () => {

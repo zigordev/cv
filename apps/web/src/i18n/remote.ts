@@ -1,6 +1,8 @@
 import JSZip from 'jszip';
 import type { Locale } from './config';
 import type { Messages } from './translator';
+import { reportComponent } from '@/observability/health';
+import { writeLogRecord } from '@/observability/json-logger';
 
 type CacheEntry = {
   messages: Messages;
@@ -112,13 +114,16 @@ export async function loadRemoteMessages(locale: Locale): Promise<Messages | nul
       updatedAt: Date.now(),
     });
 
+    reportComponent('tolgee', 'up');
     return messages;
   } catch (error) {
-    console.warn(
-      // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
-      `[i18n] Tolgee fetch failed for "${locale}"; using ${cached ? 'cached' : 'local'} messages.`,
-      error instanceof Error ? error.message : error
-    );
+    reportComponent('tolgee', 'down');
+    writeLogRecord('warn', {
+      event: 'i18n.fallback',
+      locale,
+      source: cached ? 'cached' : 'local',
+      error: error instanceof Error ? { name: error.name, message: error.message } : undefined,
+    });
     return cached?.messages ?? null;
   }
 }
