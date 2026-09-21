@@ -12,6 +12,19 @@ export const dynamic = 'force-dynamic';
 export const POST = withRouteMetrics(
   '/rum/events',
   createRumIngestRoute({
-    customInteractions: ['ask-opened', 'ask-submitted', 'render-error'],
+    customInteractions: [
+      'ask-opened',
+      'ask-submitted',
+      'ask-answer-shown',
+      'ask-failed',
+      'contact-opened',
+      'contact-sent',
+      'contact-failed',
+      'cv-downloaded',
+      'case-study-opened',
+      'locale-switched',
+      'render-error',
+    ],
+    pages: ['/'],
   })
 );

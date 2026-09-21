@@ -2,6 +2,7 @@ import { trace } from '@opentelemetry/api';
 import * as client from 'prom-client';
 
 import { registry } from './metrics.registry';
+import { withServerTiming } from './server-timing';
 
 const httpRequestsTotal = new client.Counter({
   name: 'http_requests_total',
@@ -39,7 +40,7 @@ export function withRouteMetrics<T extends unknown[]>(
     try {
       const response = await handler(...args);
       status = response.status;
-      return response;
+      return withServerTiming(response);
     } finally {
       const labels = { method, route, status: String(status) };
       const seconds = (performance.now() - started) / 1000;
