@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/zigordev/cv/compare/v0.11.1...v0.11.2) (2026-09-21)
+
+
+### Bug Fixes
+
+* **i18n:** report Tolgee down when it answers with an error ([#115](https://github.com/zigordev/cv/issues/115)) ([246db2f](https://github.com/zigordev/cv/commit/246db2f4c7e5509a8a1be5ae730bdf8a2c19b612))
+
 ## [0.11.1](https://github.com/zigordev/cv/compare/v0.11.0...v0.11.1) (2026-09-21)
 
 
