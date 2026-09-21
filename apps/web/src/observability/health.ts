@@ -17,13 +17,6 @@ const state: Record<ComponentName, ComponentStatus> = {
   unleash: 'unknown',
 };
 
-/**
- * Every dependency here is optional, and that is the honest answer rather than
- * a lenient one: a page still renders with the committed copy, the declared
- * flag defaults and no way to send a contact message. So a failure is
- * `degraded`, never `error` — the container stays up and serves what it can,
- * and the alert says which part is missing.
- */
 export function reportComponent(name: ComponentName, status: ComponentStatus): void {
   state[name] = status;
 }
@@ -39,7 +32,6 @@ export function health(): HealthBody {
     ? ('degraded' as const)
     : ('ok' as const);
 
-  // The same judgement as a metric, because no rule can read the JSON body.
   recordHealth(status, components);
 
   return {
