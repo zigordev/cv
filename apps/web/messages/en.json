@@ -687,7 +687,7 @@
             },
             {
               "step": "04",
-              "text": "A published release, or a manual dispatch, packages the tracked files into a bundle, uploads it to S3 and has SSM apply it on the host. The shared stack deploys down exactly the same path as the products sitting on it, which is how that path stays trustworthy: everything exercises it. It restarts the secret store only when that store's own config changed — a mount path carrying the release name used to recreate it on every release.",
+              "text": "A published release, or a manual dispatch, packages the tracked files into a bundle, uploads it to S3 and has SSM apply it on the host. The shared stack deploys down exactly the same path as the products sitting on it, which is how that path stays trustworthy: everything exercises it. It restarts the secret store only when that store's own config changed — a mount path carrying the release name used to recreate it on every release. Containers of services a release no longer defines are removed, so retiring one is a deletion in the compose file rather than a command typed on the host.",
               "title": "The deploy"
             }
           ]
