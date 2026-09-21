@@ -687,7 +687,7 @@
             },
             {
               "step": "04",
-              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo. Solo reinicia el almacén de secretos cuando cambia su propia configuración — una ruta de montaje que llevaba el nombre de la release lo recreaba en cada una.",
+              "text": "Una release publicada, o un lanzamiento manual, empaqueta los ficheros versionados en un bundle, lo sube a S3 y hace que SSM lo aplique en el host. El stack compartido se despliega por exactamente el mismo camino que los productos que se apoyan en él, y así es como ese camino sigue siendo fiable: lo ejercita todo. Solo reinicia el almacén de secretos cuando cambia su propia configuración — una ruta de montaje que llevaba el nombre de la release lo recreaba en cada una. Los contenedores de servicios que una release ya no define se eliminan, así que retirar uno es borrarlo del fichero de compose y no una orden escrita a mano en el host.",
               "title": "El despliegue"
             }
           ]
