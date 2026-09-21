@@ -660,6 +660,7 @@
         "pipeline": {
           "automation": [
             "Every weekday at 10:15 the host exports to S3 each day of logs that is not archived yet, one gzipped file per day and service with a manifest recording the line counts. Loki deletes at thirty days and the export runs ahead of it, catching up any day it missed, so a weekend with the machine switched off costs nothing. Glacier takes the files after a month and deletes them after a year, which puts a year of logs in the region of a few cents.",
+            "Every weekday at 10:45 the host removes the Docker images that no container uses and that were built more than a week ago. Every release leaves its previous image behind, and for months nothing removed them, until the disk stood at 94% with 54 GB of images nothing ran. A week is long enough that rolling back to anything recent still needs no pull.",
             "An uptime probe runs every five minutes on GitHub's infrastructure and checks the public health endpoints from outside. Prometheus runs on the same host as the things it watches, so it cannot report its own death — and the silence looks exactly like everything being fine.",
             "The probe opens a GitHub issue rather than sending mail. An issue deduplicates, carries a state, and does not depend on the SMTP relay, which is itself one of the things that could be broken.",
             "Scheduled runs are best effort by design: GitHub delays them under load and skips them outright on a busy account, so this is roughly every five minutes and never a heartbeat.",
