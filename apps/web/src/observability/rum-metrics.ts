@@ -21,12 +21,14 @@ import { registry } from './metrics.registry';
 /** Timing metrics, in seconds. Buckets sit on the Core Web Vitals thresholds
  *  so a quantile reads against the grade: INP good at 0.2s and poor past 0.5s,
  *  TTFB good at 0.8s and poor past 1.8s, LCP good at 2.5s and poor past 4s. */
+const exemplars = (registry.contentType as string) === client.openMetricsContentType;
+
 const performanceSeconds = new client.Histogram({
   name: 'rum_performance_seconds',
   help: 'RUM timing metrics in seconds (LCP, INP, TTFB, FCP, Load)',
   labelNames: ['metric_name', 'page', 'release'] as const,
   buckets: [0.05, 0.1, 0.2, 0.5, 0.8, 1, 1.8, 2.5, 4, 6, 10],
-  enableExemplars: true,
+  enableExemplars: exemplars,
   registers: [registry],
 });
 
@@ -259,11 +261,17 @@ export function recordRumEvent(event: RumEvent): boolean {
       if (UNITLESS_METRICS.has(metricName)) {
         layoutShiftScore.observe({ page, release }, event.value);
       } else {
-        performanceSeconds.observe({
-          labels: { metric_name: metricName, page, release },
-          value: event.value / 1000,
-          ...(event.traceId ? { exemplarLabels: { trace_id: event.traceId } as never } : {}),
-        });
+        const labels = { metric_name: metricName, page, release };
+        const value = event.value / 1000;
+        if (exemplars) {
+          performanceSeconds.observe({
+            labels,
+            value,
+            ...(event.traceId ? { exemplarLabels: { trace_id: event.traceId } as never } : {}),
+          });
+        } else {
+          performanceSeconds.observe(labels, value);
+        }
       }
       return true;
     }
