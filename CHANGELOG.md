@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.12.0](https://github.com/zigordev/cv/compare/v0.11.2...v0.12.0) (2026-09-21)
+
+
+### Features
+
+* **rum:** web vitals, error details, trace links and CSP reports ([#117](https://github.com/zigordev/cv/issues/117)) ([a777f75](https://github.com/zigordev/cv/commit/a777f756b802273fb04a99d1b4a9c81f9c3db649))
+
+
+### Bug Fixes
+
+* **observability:** name a trace only when it was sampled ([#118](https://github.com/zigordev/cv/issues/118)) ([e625f05](https://github.com/zigordev/cv/commit/e625f05a8254fd470be338b49b393a14283e6150))
+
 ## [0.11.2](https://github.com/zigordev/cv/compare/v0.11.1...v0.11.2) (2026-09-21)
 
 
