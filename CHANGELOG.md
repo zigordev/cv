@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.3](https://github.com/zigordev/cv/compare/v0.12.2...v0.12.3) (2026-09-22)
+
+
+### Bug Fixes
+
+* **i18n:** tag Spanish es in Tolgee and keep Tolgee up when it has nothing to export ([#137](https://github.com/zigordev/cv/issues/137)) ([8ba16a4](https://github.com/zigordev/cv/commit/8ba16a490bf2252a67bbec2d600d5cc338a1565b))
+
 ## [0.12.2](https://github.com/zigordev/cv/compare/v0.12.1...v0.12.2) (2026-09-21)
 
 
