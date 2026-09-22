@@ -753,7 +753,7 @@
             },
             {
               "step": "02",
-              "text": "Calidad, después un smoke en Docker de la imagen, que debe responder con la página, la cabecera de su política, su salud y sus métricas; la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, una auditoría de calzada limpia, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara, axe contra WCAG A y AA, y la escena cargando dentro de su política de seguridad de contenidos con su carga llegando a RUM —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
+              "text": "Calidad, después un smoke en Docker de la imagen, que debe responder con la página, la cabecera de su política, su salud, sus métricas y la versión con la que se construyó; la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, una auditoría de calzada limpia, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara, axe contra WCAG A y AA, y la escena cargando dentro de su política de seguridad de contenidos con su carga llegando a RUM —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
               "title": "El pull request"
             },
             {

@@ -753,7 +753,7 @@
             },
             {
               "step": "02",
-              "text": "Quality, then a Docker smoke test of the image, which must answer with the page, its policy header, its health and its metrics; the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, a road-clearance audit, performance budgets, pixel samples of every camera view, axe against WCAG A and AA, and the scene loading within its content security policy with its load reaching RUM — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
+              "text": "Quality, then a Docker smoke test of the image, which must answer with the page, its policy header, its health, its metrics and the release it was built with; the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, a road-clearance audit, performance budgets, pixel samples of every camera view, axe against WCAG A and AA, and the scene loading within its content security policy with its load reaching RUM — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
               "title": "The pull request"
             },
             {
