@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import type { Locale } from './config';
 import type { Messages } from './translator';
-import { reportComponent } from '@/observability/health';
+import { reportComponent, type ComponentStatus } from '@/observability/health';
 import { writeLogRecord } from '@/observability/json-logger';
 
 type CacheEntry = {
@@ -36,6 +36,15 @@ async function parseZip(buffer: ArrayBuffer): Promise<Messages | null> {
   if (!jsonFile) return null;
   const content = await jsonFile.async('string');
   return JSON.parse(content) as Messages;
+}
+
+async function errorCode(response: Response): Promise<string | undefined> {
+  try {
+    const body = (await response.json()) as { code?: unknown };
+    return typeof body.code === 'string' ? body.code : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function tolgeeIsConfigured(): boolean {
@@ -75,8 +84,11 @@ export async function loadRemoteMessages(locale: Locale): Promise<Messages | nul
   // reason a page fails to render: a connection error, a timeout or a malformed
   // body all fall back to the cached copy, and failing that to null, which
   // `loadMessages` resolves from the committed message files instead.
-  const fallBack = (error?: { name: string; message: string }) => {
-    reportComponent('tolgee', 'down');
+  const fallBack = (
+    error?: { name: string; message: string },
+    tolgee: ComponentStatus = 'down'
+  ) => {
+    reportComponent('tolgee', tolgee);
     writeLogRecord('warn', {
       event: 'i18n.fallback',
       locale,
@@ -99,6 +111,12 @@ export async function loadRemoteMessages(locale: Locale): Promise<Messages | nul
       return cached.messages;
     }
     if (!response.ok) {
+      if (response.status === 400 && (await errorCode(response)) === 'no_exported_result') {
+        return fallBack(
+          { name: 'NoExport', message: `Tolgee has no ${locale} translations to export` },
+          'up'
+        );
+      }
       return fallBack({ name: 'HttpError', message: `Tolgee answered ${response.status}` });
     }
 
