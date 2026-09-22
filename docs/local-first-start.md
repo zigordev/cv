@@ -45,7 +45,7 @@ Log in with the bootstrap credentials from `platform-ops/docker/.env.ops.local`.
 Then:
 
 1. create a project for `cv` if it does not already exist
-2. confirm the project languages are `en` and `es` — the pull normalises region subtags, so a project tagged `es-ES` still lands as `es.json`
+2. confirm the project languages are tagged exactly `en` and `es`, not `es-ES` — the site asks Tolgee for those tags, and the push maps `messages/<tag>.json` to them
 3. note the numeric project id
 4. create an API key that the server-side runtime can use to read or export translations
 

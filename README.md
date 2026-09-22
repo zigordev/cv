@@ -235,9 +235,12 @@ reason a page fails to render. Switching language writes the cookie and
 reloads, which is a round trip; that is the cost of the server-resolved model,
 and the reason the tab title and search snippet can now follow the locale too.
 
-`i18n-pull.mjs` normalises the region subtag and drops unsupported locales, so
-a project tagged `es-ES` lands as `es.json` rather than an `es-ES.json` the app
-never imports. It warns about any supported locale Tolgee has no export for.
+The Tolgee project tags its languages exactly as the app does, `en` and `es`:
+the runtime fetch asks Tolgee for those tags, so a project tagging Spanish
+`es-ES` answers every Spanish request with nothing to export and the page falls
+back to the committed files. `i18n-pull.mjs` still normalises a region subtag
+and drops unsupported locales, and warns about any supported locale Tolgee has
+no export for.
 
 **The pull is additive.** It deep-merges the export over the committed files
 rather than replacing them, so a key that exists locally but not yet in Tolgee
@@ -287,9 +290,9 @@ The push uses `--force-mode OVERRIDE`: Tolgee's copy of every pushed key is
 replaced by what is committed. That is right for keys added in code and wrong
 if someone has been editing in the Tolgee UI, so pull first if in doubt.
 
-`tolgee.config.cjs` maps files to languages explicitly rather than by template,
-because the project tags Spanish as `es-ES` while the app's locale is `es`. Add
-a locale there whenever one is added to `src/i18n/config.ts`.
+`tolgee.config.cjs` takes each language from its file name,
+`messages/{languageTag}.json`, as gpool's does, so a file and its Tolgee
+language always share one tag.
 
 The pull runs as part of `local:up`, or on its own with the same env:
 

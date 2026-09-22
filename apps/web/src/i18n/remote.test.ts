@@ -85,6 +85,48 @@ describe('loadRemoteMessages', () => {
       );
     });
 
+    it('keeps Tolgee up when it has nothing to export for a language, and says so', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ code: 'no_exported_result', params: null }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+
+      await expect(loadRemoteMessages('es')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          locale: 'es',
+          error: { name: 'NoExport', message: 'Tolgee has no es translations to export' },
+        })
+      );
+    });
+
+    it('reports Tolgee down for any other rejected request', async () => {
+      configure();
+      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ code: 'validation_error' }), {
+            status: 400,
+            headers: { 'content-type': 'application/json' },
+          })
+        )
+        .mockResolvedValueOnce(new Response('not json', { status: 400 }));
+
+      await loadRemoteMessages('es');
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+
+      reportComponent('tolgee', 'unknown');
+      await loadRemoteMessages('es');
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+    });
+
     it('reports Tolgee down when the export comes back empty', async () => {
       configure();
       vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
