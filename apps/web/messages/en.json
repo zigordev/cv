@@ -456,12 +456,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "NestJS monolith covering auth, pools and RUM. It owns the Google OAuth exchange and issues the session itself, so the client secret lives in one service rather than two. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
+            "text": "NestJS monolith covering auth and pools. It owns the Google OAuth exchange and issues the session itself, so the client secret lives in one service rather than two. Runs database migrations on startup, exposes an OpenAPI spec, and publishes email intent as Kafka events rather than sending mail itself.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares.",
+            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares. It takes its own visitors' Core Web Vitals, script errors and content security reports, so what a visit felt like is measured where the page is served.",
             "title": "Web"
           },
           {
@@ -732,13 +732,18 @@
             "step": "04",
             "text": "Vitest covers the network builder, the lane graph and the city plan without a browser: turn connectors at a crossroads, lane assignment and adjacency, roundabout rings, ramp diverges and merges, invariants and routing. Playwright drives the built site through a debug API: graph invariants, routing between the highway and Main Street, the building-footprint audit, a road-clearance audit that fails if any terrain, tree or prop reaches the pavement, a check that no dead end is left without a destination, city counts, draw-call and triangle budgets, rendered views checked pixel by pixel and kept as screenshots, and the panel against WCAG A and AA.",
             "title": "Verification"
+          },
+          {
+            "step": "05",
+            "title": "Serving",
+            "text": "A small Fastify server serves the build, in place of the nginx image the site started in, and gives it what the rest of the estate has: a health endpoint and a metrics scrape, JSON logs with the platform's lifecycle events, and a report-only content security policy whose violations it counts. The browser reports what a visit felt like: the Core Web Vitals, and every script error with the source line that threw it, mapped back through the build's source maps. The policy started as strict as the other apps' and opened only for what the scene proved it needs: compiling its WebAssembly decoders, and reading the geometry its models embed."
           }
         ],
         "pipeline": {
           "automation": [
             "Dependabot over npm, the Docker base images and the Actions, grouped weekly with a seven-day cooldown; auto-merge on green for patch and minor, the same policy as the rest of the estate. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL on every pull request and weekly on main, dependency review, commitlint on the commits and the pull request title, and gitleaks over the full history.",
-            "The Playwright suite runs against the production build served by Vite preview, on headless Chromium with software WebGL, on a desktop and a mobile viewport, and keeps a screenshot of every camera view as test output so a change to the city can be reviewed by eye as well as by assertion."
+            "The Playwright suite runs against the production build served by the same server the image runs, on headless Chromium with software WebGL, on a desktop and a mobile viewport, and keeps a screenshot of every camera view as test output so a change to the city can be reviewed by eye as well as by assertion."
           ],
           "stages": [
             {
@@ -748,7 +753,7 @@
             },
             {
               "step": "02",
-              "text": "Quality, then a Docker smoke test of the nginx image, the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, a road-clearance audit, performance budgets, pixel samples of every camera view and axe against WCAG A and AA — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
+              "text": "Quality, then a Docker smoke test of the image, which must answer with the page, its policy header, its health and its metrics; the Playwright suite — asset pack, lane-graph invariants, routing between the ring highway and Main Street, city counts, a road-clearance audit, performance budgets, pixel samples of every camera view, axe against WCAG A and AA, and the scene loading within its content security policy with its load reaching RUM — a licence gate and npm audit on production dependencies, an SBOM and a Trivy scan of the image, and Semgrep.",
               "title": "The pull request"
             },
             {
