@@ -486,7 +486,7 @@
             },
             {
               "step": "02",
-              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build, API unit tests with coverage uploaded and the web suite — a secret scan, an integration smoke that stands the whole stack up under Compose and then opens a real browser on it — the sign-in page rendered, axe against WCAG A and AA, Core Web Vitals budgets — before a k6 load smoke, security and supply chain, and Semgrep.",
+              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build, API unit tests with coverage uploaded and the web suite — a secret scan, an integration smoke that stands the whole stack up under Compose and then opens a real browser on it — the sign-in page rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the pages, signed in and out, checked against their own content security policy — before a k6 load smoke, security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
@@ -538,7 +538,7 @@
             },
             {
               "step": "02",
-              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose from the production images and then drives the web in a real browser — the sign-in card rendered, axe against WCAG A and AA, Core Web Vitals budgets — security and supply chain, and Semgrep.",
+              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose from the production images and then drives the web in a real browser — the sign-in card rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the pages, signed in and out, checked against their own content security policy — security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
