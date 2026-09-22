@@ -486,7 +486,7 @@
             },
             {
               "step": "02",
-              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas, con y sin sesión, comprobadas contra su propia política de seguridad de contenidos — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas de acceso y de grupos comprobadas contra su propia política de seguridad de contenidos — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
