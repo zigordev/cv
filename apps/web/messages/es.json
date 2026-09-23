@@ -456,12 +456,12 @@
         "pieces": [
           {
             "step": "01",
-            "text": "Monolito en NestJS que cubre autenticación, grupos y RUM. Es él quien hace el intercambio de OAuth con Google y emite la sesión, así que el secreto de cliente vive en un único servicio y no en dos. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
+            "text": "Monolito en NestJS que cubre autenticación y grupos. Es él quien hace el intercambio de OAuth con Google y emite la sesión, así que el secreto de cliente vive en un único servicio y no en dos. Ejecuta las migraciones al arrancar, expone una especificación OpenAPI y publica la intención de enviar correo como eventos de Kafka en vez de enviarlo por su cuenta.",
             "title": "API"
           },
           {
             "step": "02",
-            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara.",
+            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara. Recibe él mismo las Core Web Vitals, los errores de script y los informes de la política de seguridad de contenidos de sus visitantes, así que la experiencia de una visita se mide donde se sirve la página.",
             "title": "Web"
           },
           {
@@ -486,7 +486,7 @@
             },
             {
               "step": "02",
-              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas de acceso y de grupos comprobadas contra su propia política de seguridad de contenidos — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -538,7 +538,7 @@
             },
             {
               "step": "02",
-              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose a partir de las imágenes de producción y después conduce la web en un navegador real — la tarjeta de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals —, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose a partir de las imágenes de producción y después conduce la web en un navegador real — la tarjeta de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas, con y sin sesión, comprobadas contra su propia política de seguridad de contenidos —, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -732,13 +732,18 @@
             "step": "04",
             "text": "Vitest cubre el constructor de red, el grafo de carriles y el plan de la ciudad sin navegador: conectores de giro en un cruce, asignación y adyacencia de carriles, anillos de rotonda, salidas e incorporaciones de ramales, invariantes y enrutado. Playwright conduce la build a través de una API de depuración: invariantes del grafo, enrutado entre la autopista y Main Street, la auditoría de huellas de edificios, una auditoría de calzada que falla si el terreno, un árbol o cualquier elemento alcanza el pavimento, una comprobación de que ningún fondo de saco queda sin destino, recuentos de la ciudad, presupuestos de draw calls y triángulos, vistas renderizadas comprobadas píxel a píxel y guardadas como capturas, y el panel contra WCAG A y AA.",
             "title": "Verificación"
+          },
+          {
+            "step": "05",
+            "title": "Servicio",
+            "text": "Un servidor Fastify pequeño sirve la build, en lugar de la imagen de nginx con la que empezó el sitio, y le da lo que ya tiene el resto del conjunto: un endpoint de salud y un scrape de métricas, logs JSON con los eventos de ciclo de vida de la plataforma y una política de seguridad de contenidos en modo informe cuyas violaciones cuenta. El navegador informa de cómo fue la visita: las Core Web Vitals y cada error de script con la línea que lo lanzó, trazada a través de los source maps de la build. La política empezó tan estricta como la de las demás aplicaciones y solo se abrió para lo que la escena demostró necesitar: compilar sus decodificadores de WebAssembly y leer la geometría que llevan incrustada sus modelos."
           }
         ],
         "pipeline": {
           "automation": [
             "Dependabot sobre npm, las imágenes base de Docker y las Actions, agrupado semanalmente con siete días de espera; auto-merge en verde para patch y minor, la misma política que el resto del parque. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL en cada pull request y semanalmente en main, revisión de dependencias, commitlint sobre los commits y el título del pull request, y gitleaks sobre todo el historial.",
-            "La suite de Playwright se ejecuta contra la build de producción servida por Vite preview, en Chromium sin cabeza con WebGL por software, en un viewport de escritorio y otro móvil, y conserva una captura de cada vista de cámara como salida de la prueba, para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
+            "La suite de Playwright se ejecuta contra la build de producción servida por el mismo servidor que se ejecuta en la imagen, en Chromium sin cabeza con WebGL por software, en un viewport de escritorio y otro móvil, y conserva una captura de cada vista de cámara como salida de la prueba, para que un cambio en la ciudad pueda revisarse a ojo además de por aserción."
           ],
           "stages": [
             {
@@ -748,7 +753,7 @@
             },
             {
               "step": "02",
-              "text": "Calidad, después un smoke en Docker de la imagen de nginx, la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, una auditoría de calzada limpia, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara y axe contra WCAG A y AA —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
+              "text": "Calidad, después un smoke en Docker de la imagen, que debe responder con la página, la cabecera de su política, su salud, sus métricas y la versión con la que se construyó; la suite de Playwright — pack de assets, invariantes del grafo de carriles, enrutado entre la autopista de circunvalación y Main Street, recuentos de la ciudad, una auditoría de calzada limpia, presupuestos de rendimiento, muestras de píxeles de cada vista de cámara, axe contra WCAG A y AA, y la escena cargando dentro de su política de seguridad de contenidos con su carga llegando a RUM —, una puerta de licencias y npm audit sobre las dependencias de producción, un SBOM y un escaneo con Trivy de la imagen, y Semgrep.",
               "title": "El pull request"
             },
             {
