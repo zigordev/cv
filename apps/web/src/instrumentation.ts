@@ -12,6 +12,10 @@ export async function register() {
     process.once('SIGTERM', () => logServiceStopping('SIGTERM'));
     process.once('SIGINT', () => logServiceStopping('SIGINT'));
 
+    const { registerRumVocabulary } = await import('@/observability/rum-metrics');
+    const { RUM_VOCABULARY } = await import('@/observability/rum-events');
+    registerRumVocabulary(RUM_VOCABULARY);
+
     const { startBrokerProbe } = await import('@/lib/notifications');
     startBrokerProbe();
 

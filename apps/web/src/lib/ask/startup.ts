@@ -4,6 +4,7 @@ import { allFlags } from '@/observability';
 import { sharedBudget } from './budget';
 import { apiKeyPresent, askConfig } from './config';
 import { roundUsd, writeLog } from './log';
+import { observeBudgetUsed } from './metrics';
 
 export async function logAskConfiguration(): Promise<void> {
   const config = askConfig();
@@ -12,6 +13,8 @@ export async function logAskConfiguration(): Promise<void> {
   const budget = await sharedBudget(config);
   const state = budget.state();
   const keyPresent = apiKeyPresent();
+
+  observeBudgetUsed(budget.usedRatio());
 
   writeLog('info', 'ask.configured', {
     enabled,
