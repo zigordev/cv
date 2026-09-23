@@ -13,3 +13,7 @@ export function contentSecurityPolicy(nonce: string): string {
     'report-uri /rum/csp',
   ].join('; ');
 }
+
+export function nonceFrom(policy: string | null | undefined): string | undefined {
+  return policy?.match(/'nonce-([^']+)'/)?.[1];
+}
