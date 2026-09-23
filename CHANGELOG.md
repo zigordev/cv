@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/zigordev/cv/compare/v0.12.4...v0.12.5) (2026-09-23)
+
+
+### Bug Fixes
+
+* **observability:** create the answer box and RUM series before the first request ([#142](https://github.com/zigordev/cv/issues/142)) ([02cd998](https://github.com/zigordev/cv/commit/02cd998f20266179d1509649e38a4ec80e80e9e6))
+
 ## [0.12.4](https://github.com/zigordev/cv/compare/v0.12.3...v0.12.4) (2026-09-23)
 
 
