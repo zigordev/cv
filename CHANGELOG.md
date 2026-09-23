@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.6](https://github.com/zigordev/cv/compare/v0.12.5...v0.12.6) (2026-09-23)
+
+
+### Bug Fixes
+
+* **csp:** stamp the structured-data script with the page nonce ([#144](https://github.com/zigordev/cv/issues/144)) ([b929870](https://github.com/zigordev/cv/commit/b9298705ed221618e63517069f99e371607304cf))
+
 ## [0.12.5](https://github.com/zigordev/cv/compare/v0.12.4...v0.12.5) (2026-09-23)
 
 
