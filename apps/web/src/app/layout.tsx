@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+import { headers } from 'next/headers';
 
 import { I18nProvider } from '@/i18n/client';
 import { getLocale, getMessages } from '@/i18n/server';
+import { nonceFrom } from '@/lib/csp';
 import { resolveCv } from '@/content/cv';
 
 import './globals.css';
@@ -56,6 +58,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const locale = await getLocale();
   const messages = await getMessages(locale);
   const { identity, languages } = resolveCv(messages);
+  const nonce = nonceFrom((await headers()).get('content-security-policy-report-only'));
 
   /**
    * schema.org Person, so the CV is machine-readable to search engines and to
@@ -79,6 +82,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <RumProvider />
         <script
           type="application/ld+json"
+          nonce={nonce}
           // Serialised from a literal defined above — no user input reaches this.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
