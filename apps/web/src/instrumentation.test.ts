@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/observability/tracing', () => ({ startTracing: vi.fn() }));
+vi.mock('@/observability/tracing', () => ({ shutdownTelemetry: vi.fn() }));
 vi.mock('@/observability/standard-events', () => ({
   logServiceStarted: vi.fn(),
   logServiceStopping: vi.fn(),

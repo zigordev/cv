@@ -2,8 +2,7 @@ import type { Instrumentation } from 'next';
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { startTracing } = await import('@/observability/tracing');
-    startTracing();
+    await import('@/observability/tracing');
 
     const { logServiceStarted, logServiceStopping, observeProcessFailures } =
       await import('@/observability/standard-events');
