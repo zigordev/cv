@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isUnsampledPath, pathOfSpan } from './tracing';
+import { isUnsampledPath, pathOfSpan } from './probe-paths';
 
 describe('isUnsampledPath', () => {
   it('drops the paths that would otherwise be most of the traces', () => {

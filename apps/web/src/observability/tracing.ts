@@ -1,113 +1,99 @@
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import {
-  AlwaysOnSampler,
-  ParentBasedSampler,
-  SamplingDecision,
-  type Sampler,
-  type SamplingResult,
-} from '@opentelemetry/sdk-trace-base';
-import {
-  ATTR_HTTP_ROUTE,
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-  ATTR_URL_FULL,
-  ATTR_URL_PATH,
-} from '@opentelemetry/semantic-conventions';
-import { ATTR_DEPLOYMENT_ENVIRONMENT_NAME } from '@opentelemetry/semantic-conventions/incubating';
+import { NodeSDK, tracing } from '@opentelemetry/sdk-node';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
-import type { Attributes } from '@opentelemetry/api';
+import { currentRelease } from './json-logger';
+import { isUnsampledPath, pathOfSpan } from './probe-paths';
+import { RouteNameProcessor } from './route-names';
 
-const UNSAMPLED_PATHS = [/^\/health$/, /^\/metrics$/, /^\/rum(\/|$)/, /^\/_next\/static(\/|$)/];
+/**
+ * The OpenTelemetry bootstrap.
+ *
+ * This module must be imported **before anything else** — instrumentation works
+ * by patching modules as they load, so anything required ahead of it goes
+ * untraced. In practice that means `import './observability/tracing';` on the
+ * first line of `main.ts`, above every other import.
+ *
+ * Auto-instrumentation rather than a hand-picked list: it covers http, express,
+ * nest, pg and kafkajs without each service having to remember to add the one
+ * it just started using. `fs` is off because it produces a span per file read
+ * and drowns everything else.
+ */
+class ProbeSampler implements tracing.Sampler {
+  constructor(private readonly delegate: tracing.Sampler) {}
 
-export function isUnsampledPath(path: string | undefined): boolean {
-  if (!path) return false;
-  const withoutQuery = path.split('?')[0];
-  return UNSAMPLED_PATHS.some((pattern) => pattern.test(withoutQuery));
-}
-
-export function pathOfSpan(attributes: Attributes): string | undefined {
-  const candidates = [
-    attributes[ATTR_URL_PATH],
-    attributes[ATTR_HTTP_ROUTE],
-    attributes['http.target'],
-  ];
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string' && candidate.length > 0) {
-      return candidate;
+  shouldSample(...args: Parameters<tracing.Sampler['shouldSample']>): tracing.SamplingResult {
+    if (isUnsampledPath(pathOfSpan(args[4]))) {
+      return { decision: tracing.SamplingDecision.NOT_RECORD };
     }
-  }
-
-  const full = attributes[ATTR_URL_FULL] ?? attributes['http.url'];
-  if (typeof full === 'string') {
-    try {
-      return new URL(full).pathname;
-    } catch {
-      return undefined;
-    }
-  }
-
-  return undefined;
-}
-
-class PathSampler implements Sampler {
-  constructor(private readonly delegate: Sampler) {}
-
-  shouldSample(
-    ...args: Parameters<Sampler['shouldSample']>
-  ): SamplingResult | ReturnType<Sampler['shouldSample']> {
-    const attributes = args[4];
-
-    if (isUnsampledPath(pathOfSpan(attributes))) {
-      return { decision: SamplingDecision.NOT_RECORD };
-    }
-
     return this.delegate.shouldSample(...args);
   }
 
   toString(): string {
-    return `PathSampler(${this.delegate.toString()})`;
+    return `ProbeSampler(${this.delegate.toString()})`;
   }
 }
 
 const tracesEnabled = (process.env.OTEL_TRACES_ENABLED || 'true').toLowerCase() !== 'false';
 
-let telemetrySdk: NodeSDK | undefined;
+const telemetrySdk = tracesEnabled ? start() : null;
+
 let shutdownPromise: Promise<void> | undefined;
 
-export function startTracing(): void {
-  if (!tracesEnabled || telemetrySdk) return;
+/**
+ * Flush buffered spans and stop the SDK. Safe to call repeatedly and from more
+ * than one place — the signal handlers below and a framework shutdown hook will
+ * both call it, and OTel's own `shutdown()` rejects on a second call.
+ */
+export function shutdownTelemetry(): Promise<void> {
+  shutdownPromise ??= telemetrySdk?.shutdown().catch(() => undefined) ?? Promise.resolve();
+  return shutdownPromise;
+}
 
+function start(): NodeSDK {
+  const serviceName = process.env.OTEL_SERVICE_NAME?.trim() || 'unknown-service';
+
+  // The OTel spec defines this as the BASE endpoint, with each signal appending
+  // its own path. Trimming a trailing slash keeps `http://collector:4318/` and
+  // `http://collector:4318` from producing different URLs.
   const endpoint = (
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.trim() || 'http://otel-collector:4318'
   ).replace(/\/+$/, '');
 
-  telemetrySdk = new NodeSDK({
+  const sdk = new NodeSDK({
     resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME?.trim() || 'cv-web',
-      [ATTR_SERVICE_VERSION]: process.env.NEXT_PUBLIC_RELEASE?.trim() || 'dev',
-      [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.NODE_ENV || 'development',
+      [ATTR_SERVICE_NAME]: serviceName,
+      [ATTR_SERVICE_VERSION]: currentRelease() ?? 'dev',
     }),
-    traceExporter: new OTLPTraceExporter({ url: `${endpoint}/v1/traces` }),
-    sampler: new PathSampler(new ParentBasedSampler({ root: new AlwaysOnSampler() })),
+    sampler: new ProbeSampler(
+      new tracing.ParentBasedSampler({ root: new tracing.AlwaysOnSampler() })
+    ),
+    spanProcessors: [
+      new RouteNameProcessor(),
+      new tracing.BatchSpanProcessor(new OTLPTraceExporter({ url: `${endpoint}/v1/traces` })),
+    ],
     instrumentations: [
       getNodeAutoInstrumentations({
+        // A span per file read drowns everything else.
         '@opentelemetry/instrumentation-fs': { enabled: false },
+        // Pino services get their trace context from the kit's own log
+        // config, under the estate's `traceId` name. Leaving this enabled
+        // stamps a second copy as `trace_id`/`span_id`/`trace_flags` on every
+        // line — same values, different names, and only one of them is what
+        // Loki's derived field looks for.
         '@opentelemetry/instrumentation-pino': { enabled: false },
       }),
     ],
   });
 
-  telemetrySdk.start();
+  sdk.start();
 
-  process.once('SIGTERM', () => void shutdownTracing());
-  process.once('SIGINT', () => void shutdownTracing());
-}
+  // Flush buffered spans on the way out. Without this the last spans before a
+  // deploy — often the interesting ones — are lost.
+  process.once('SIGTERM', () => void shutdownTelemetry());
+  process.once('SIGINT', () => void shutdownTelemetry());
 
-export function shutdownTracing(): Promise<void> {
-  shutdownPromise ??= telemetrySdk?.shutdown().catch(() => undefined) ?? Promise.resolve();
-  return shutdownPromise;
+  return sdk;
 }
