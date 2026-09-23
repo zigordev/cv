@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.8](https://github.com/zigordev/cv/compare/v0.12.7...v0.12.8) (2026-09-23)
+
+
+### Bug Fixes
+
+* **observability:** take the kit as it is, byte for byte ([#148](https://github.com/zigordev/cv/issues/148)) ([4605f48](https://github.com/zigordev/cv/commit/4605f486e28eb2b9ccaef1e813527aa5bbf13fbe))
+
 ## [0.12.7](https://github.com/zigordev/cv/compare/v0.12.6...v0.12.7) (2026-09-23)
 
 
