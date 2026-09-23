@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.7](https://github.com/zigordev/cv/compare/v0.12.6...v0.12.7) (2026-09-23)
+
+
+### Bug Fixes
+
+* **i18n:** push the repository copy to the local Tolgee before pulling it back ([#146](https://github.com/zigordev/cv/issues/146)) ([19ae548](https://github.com/zigordev/cv/commit/19ae5485f5a23d0843212d7fbbe131539ce07daf))
+
 ## [0.12.6](https://github.com/zigordev/cv/compare/v0.12.5...v0.12.6) (2026-09-23)
 
 
