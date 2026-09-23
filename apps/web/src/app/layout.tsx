@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import { headers } from 'next/headers';
 
 import { I18nProvider } from '@/i18n/client';
@@ -14,23 +14,29 @@ import { RumProvider } from '@/observability/RumProvider';
 // 650 / 800; requesting static 400/500/600/800 meant 550 and 650 were never
 // actually loaded and the browser snapped or synthesised them. The variable
 // face covers the whole range and drops the 800 cut nothing on screen used.
-const inter = Inter({
-  subsets: ['latin'],
+const inter = localFont({
+  src: './fonts/inter-latin.woff2',
+  weight: '100 900',
+  style: 'normal',
   variable: '--font-inter',
   display: 'swap',
 });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  style: ['normal', 'italic'],
+const instrumentSerif = localFont({
+  src: [
+    { path: './fonts/instrument-serif-latin.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/instrument-serif-latin-italic.woff2', weight: '400', style: 'italic' },
+  ],
   variable: '--font-instrument-serif',
   display: 'swap',
+  adjustFontFallback: 'Times New Roman',
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const jetbrainsMono = localFont({
+  src: [
+    { path: './fonts/jetbrains-mono-latin.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/jetbrains-mono-latin.woff2', weight: '500', style: 'normal' },
+  ],
   variable: '--font-jetbrains-mono',
   display: 'swap',
 });
