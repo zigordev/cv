@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.4](https://github.com/zigordev/cv/compare/v0.12.3...v0.12.4) (2026-09-23)
+
+
+### Bug Fixes
+
+* **observability:** start cv-web the way the other web apps now do ([#139](https://github.com/zigordev/cv/issues/139)) ([3d209b6](https://github.com/zigordev/cv/commit/3d209b6b56b3a77807a1c56dbe7e0c6fc8cc2dde))
+
 ## [0.12.3](https://github.com/zigordev/cv/compare/v0.12.2...v0.12.3) (2026-09-22)
 
 
