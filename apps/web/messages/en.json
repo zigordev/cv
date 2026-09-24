@@ -653,7 +653,7 @@
           },
           {
             "step": "04",
-            "text": "Traces are pushed by the application to an OTel collector and stored in Tempo, which keeps them for thirty days and turns every span into metrics with an exemplar attached — which is how a page render, counted by no route, gets a latency objective of its own. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads all three and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop.",
+            "text": "Traces are pushed by the application to an OTel collector and stored in Tempo, which keeps them for thirty days and turns every span into metrics with an exemplar attached — which is how a page render, counted by no route, gets a latency objective of its own. Metrics are scraped the other way round — Prometheus reaches into each application on a schedule, and routes whatever fires to Alertmanager. Logs need no participation at all: Alloy tails them off the host into Loki, so applications only ever write to stdout. Grafana reads all three and is the one place anyone actually looks. Every alert carries the environment that raised it, so production is never mistaken for a laptop. A fix in review changes what a page render looks like along that first path: the kit emits one server span per Next request instead of three, because the incoming HTTP span duplicated Next's own and the middleware pass added a second with no route in its name, and anything aggregating by span kind was counting a page view three times. The route-less pass is held rather than dropped until the request it hands on ends, so a 404, which has no other span, still keeps the one that explains it.",
             "title": "Three signals, three paths"
           },
           {
@@ -676,6 +676,7 @@
             "Scheduled runs are best effort by design: GitHub delays them under load and skips them outright on a busy account, so this is roughly every five minutes and never a heartbeat.",
             "One prettier configuration and one ignore body across the eight repositories, with a format gate that covers application source rather than workflows and documentation alone. Everything generated is named in that shared ignore — build output, the Next-written next-env.d.ts, the OpenAPI client CI diffs against the running API, the design-system manifest compared byte for byte — because prettier reads that file and not .gitignore.",
             "Every unit suite in the estate carries a coverage floor set at what it reaches today, so a change that deletes a tested path fails the job instead of quietly lowering the number. The figures differ widely by repository — the low twenties in the gpool API, the mid nineties in the sity lane graph — because they are measurements rather than targets. The Rust workspace has one too, through cargo llvm-cov rather than vitest, and it is the only lane that does not drift: three separate runs reported the same 3176 of 11424 lines to the fourth decimal.",
+            "The observability kit is vendored into every product rather than published, because a private registry would put a token in every CI run and a build secret in every image for a dozen files. What that costs is drift, so the copies are checked instead of trusted. A manifest carries a hash per file and a digest over all of them: an edited or missing copy fails offline and blocks the pull request that made it, and a deviation has to be declared with a reason, so one that has stopped being needed fails too. Being behind the kit is the other half and cannot be seen without the network, and a network failure must never redden an unrelated pull request, so it is reported by default and only fails in the strict mode a weekly run would use. The kit is held to its own manifest here today; the products adopt the check, and that weekly run with it, next.",
             "Dependabot on npm and the Actions, weekly and grouped, with patch and minor merging on green.",
             "A Power workflow stops and starts the single production host on demand, and two EventBridge Scheduler rules do the same on a fixed daily window. Off means a stopped machine, not a torn-down one: every database, the secret store and the certificates stay on its volume, and the uptime probe reads the host's state first, so a deliberate stop is a silence it expects."
           ],
@@ -763,8 +764,8 @@
             },
             {
               "step": "04",
-              "text": "The image is built and smoke-tested but not shipped: the scene has no users beyond its author until vehicles and traffic devices exist, so there is no host and no deploy workflow yet.",
-              "title": "No deploy, yet"
+              "text": "On main the image is still built, smoke-tested and left there: nothing ships the scene. The path out of CI is written and in review rather than missing. In this repository a published release builds the web image to ECR, uploads a bundle of the repository to S3 and has SSM bring up a single container on the shared host, by the same path as every other product; in platform-ops, the ingress route, the ECR repository and a deploy role trusted for this repository alone. One container, no database and no secret: the scene is generated in the browser and the server only serves files, a health endpoint, a metrics scrape and the reports the browser sends back, which is why it fits on a host already running twenty-three containers. What is left is not code — the infrastructure has to be applied, the deploy variables set on the repository, and a DNS record pointed at the host — and until something answers behind that name Prometheus is deliberately not told to scrape it, because a job aimed at a container that does not exist would report it down forever.",
+              "title": "The deploy, written and not yet run"
             }
           ]
         },
@@ -820,8 +821,8 @@
             },
             {
               "step": "04",
-              "text": "There is no deploy workflow. The bot runs from Compose on a machine somebody is watching, and automating the path to production before a strategy has earned trust would only make it faster to ship something that should not be running.",
-              "title": "No deploy, deliberately"
+              "text": "There is no deploy workflow on main here either, and the one in review is built so that it cannot start on its own: no release trigger and no push trigger, only a manual dispatch that makes whoever presses it confirm the target host has the memory. The reason is arithmetic rather than caution. Production is one t3.large — two cores and 8 GiB — already running twenty-three containers, and this stack's seven containers measure about 10.6 GiB, of which ClickHouse alone is 5.57 GiB. Sharing that host would mean a t3.2xlarge, roughly four times the compute rate of the one machine the whole estate runs on; a host of its own would still mean a t3.xlarge, with little room left for a large backtest. That is a billing decision rather than a deployment one, so the path is built and left inert, with no production scrape job and no uptime probe behind it: a check pointed at something nobody has started only teaches people to ignore it.",
+              "title": "A deploy that cannot fire by itself"
             }
           ]
         },
