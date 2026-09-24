@@ -353,8 +353,8 @@
           },
           {
             "step": "07",
-            "title": "Lo que ve quien visita",
-            "text": "El navegador cuenta cómo fue de verdad una visita: las Core Web Vitals una vez por página vista, con sus definiciones actuales y el elemento responsable de la que salga mal, y cada error de script con la línea de código que lo lanzó — traducida a través de los source maps de la compilación, con cualquier dato personal enmascarado en el mensaje. Cada carga de página lleva el id de la traza que la renderizó, así que una visita lenta abre su propio lado del servidor. También se cuenta el embudo — preguntas respondidas o fallidas, mensajes enviados, el PDF descargado, casos de estudio abiertos — y cada serie nombra la versión que la sirvió. La política de seguridad de contenidos sigue solo informando: cada infracción se cuenta y se registra por directiva antes de exigir nada, y cada página lleva un nonce nuevo, así que los scripts propios del sitio pasan y solo se informa de uno ajeno."
+            "text": "El navegador cuenta cómo fue de verdad una visita: las Core Web Vitals una vez por página vista, con sus definiciones actuales y el elemento responsable de la que salga mal, y cada error de script con la línea de código que lo lanzó — traducida a través de los source maps de la compilación, con cualquier dato personal enmascarado en el mensaje. Cada carga de página lleva el id de la traza que la renderizó, así que una visita lenta abre su propio lado del servidor. También se cuenta el embudo — preguntas respondidas o fallidas, mensajes enviados, el PDF descargado, casos de estudio abiertos — y cada serie nombra la versión que la sirvió. La política de seguridad de contenidos sigue solo informando: cada infracción se cuenta y se registra por directiva antes de exigir nada, y cada página lleva un nonce nuevo, así que los scripts propios del sitio pasan y solo se informa de uno ajeno.",
+            "title": "Lo que ve quien visita"
           }
         ],
         "pipeline": {
@@ -587,8 +587,8 @@
           },
           {
             "step": "05",
-            "title": "Retener el correo durante una caída",
-            "text": "El objetivo trata de correos, no de peticiones: el 99% de los correos enviados en los dos minutos siguientes a pedirse, con alertas cuando ese presupuesto se consume. El relay SMTP cuenta como una dependencia más, igual que la base de datos — cuando rechaza el login o deja de responder, la salud lo marca caído y avisa, y el consumidor se pausa y reintenta en lugar de mandar el mensaje a la cola de mensajes muertos, así que los correos esperan en el topic y salen cuando el relay vuelve. La cola de mensajes muertos es para mensajes que nunca podrán salir."
+            "text": "El objetivo trata de correos, no de peticiones: el 99% de los correos enviados en los dos minutos siguientes a pedirse, con alertas cuando ese presupuesto se consume. El relay SMTP cuenta como una dependencia más, igual que la base de datos — cuando rechaza el login o deja de responder, la salud lo marca caído y avisa, y el consumidor se pausa y reintenta en lugar de mandar el mensaje a la cola de mensajes muertos, así que los correos esperan en el topic y salen cuando el relay vuelve. La cola de mensajes muertos es para mensajes que nunca podrán salir.",
+            "title": "Retener el correo durante una caída"
           }
         ],
         "pipeline": {
@@ -663,8 +663,8 @@
           },
           {
             "step": "06",
-            "title": "Dashboards como código",
-            "text": "Grafana 13 provisiona doce dashboards en cinco carpetas — el conjunto, cada servicio, lo que vive quien visita, la propia plataforma, y lo que la gente hace y lo que cuesta — y ninguno se edita a mano: un generador en TypeScript los escribe, y un test falla cuando el JSON versionado no coincide con su salida o un panel consulta una métrica que nada exporta. Cada gráfica marca los despliegues a partir de la versión que cada servicio publica, contando solo una versión que no se vio en los tres días anteriores, así que un host apagado por la noche no es un despliegue cada mañana. Cada alerta nombra su dashboard, y el correo lo abre en el servicio y en las horas alrededor de la alerta, a dos clics de la traza que falla."
+            "text": "Grafana 13 provisiona doce dashboards en cinco carpetas — el conjunto, cada servicio, lo que vive quien visita, la propia plataforma, y lo que la gente hace y lo que cuesta — y ninguno se edita a mano: un generador en TypeScript los escribe, y un test falla cuando el JSON versionado no coincide con su salida o un panel consulta una métrica que nada exporta. Cada gráfica marca los despliegues a partir de la versión que cada servicio publica, contando solo una versión que no se vio en los tres días anteriores, así que un host apagado por la noche no es un despliegue cada mañana. Cada alerta nombra su dashboard, y el correo lo abre en el servicio y en las horas alrededor de la alerta, a dos clics de la traza que falla.",
+            "title": "Dashboards como código"
           }
         ],
         "pipeline": {
@@ -736,8 +736,8 @@
           },
           {
             "step": "05",
-            "title": "Servicio",
-            "text": "Un servidor Fastify pequeño sirve la build, en lugar de la imagen de nginx con la que empezó el sitio, y le da lo que ya tiene el resto del conjunto: un endpoint de salud y un scrape de métricas, logs JSON con los eventos de ciclo de vida de la plataforma y una política de seguridad de contenidos en modo informe cuyas violaciones cuenta. El navegador informa de cómo fue la visita: las Core Web Vitals y cada error de script con la línea que lo lanzó, trazada a través de los source maps de la build. La política empezó tan estricta como la de las demás aplicaciones y solo se abrió para lo que la escena demostró necesitar: compilar sus decodificadores de WebAssembly y leer la geometría que llevan incrustada sus modelos."
+            "text": "Un servidor Fastify pequeño sirve la build, en lugar de la imagen de nginx con la que empezó el sitio, y le da lo que ya tiene el resto del conjunto: un endpoint de salud y un scrape de métricas, logs JSON con los eventos de ciclo de vida de la plataforma y una política de seguridad de contenidos en modo informe cuyas violaciones cuenta. El navegador informa de cómo fue la visita: las Core Web Vitals y cada error de script con la línea que lo lanzó, trazada a través de los source maps de la build. La política empezó tan estricta como la de las demás aplicaciones y solo se abrió para lo que la escena demostró necesitar: compilar sus decodificadores de WebAssembly y leer la geometría que llevan incrustada sus modelos.",
+            "title": "Servicio"
           }
         ],
         "pipeline": {

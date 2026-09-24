@@ -353,8 +353,8 @@
           },
           {
             "step": "07",
-            "title": "What visitors see",
-            "text": "The browser reports what a visit actually felt like: the Core Web Vitals once per page view under their current definitions, with the element behind any poor one, and every script error with the source line that threw it — mapped back through the build's source maps, with anything personal masked out of the message. A page load carries the id of the trace that rendered it, so a slow visit opens its own server side. The funnel is counted as well — questions answered or failed, messages sent, the PDF downloaded, case studies opened — and each series names the release that served it. The content security policy still only reports: every violation is counted and logged by directive before anything is enforced, and each page carries a fresh nonce, so the site's own scripts pass and only a foreign one is reported."
+            "text": "The browser reports what a visit actually felt like: the Core Web Vitals once per page view under their current definitions, with the element behind any poor one, and every script error with the source line that threw it — mapped back through the build's source maps, with anything personal masked out of the message. A page load carries the id of the trace that rendered it, so a slow visit opens its own server side. The funnel is counted as well — questions answered or failed, messages sent, the PDF downloaded, case studies opened — and each series names the release that served it. The content security policy still only reports: every violation is counted and logged by directive before anything is enforced, and each page carries a fresh nonce, so the site's own scripts pass and only a foreign one is reported.",
+            "title": "What visitors see"
           }
         ],
         "pipeline": {
@@ -587,8 +587,8 @@
           },
           {
             "step": "05",
-            "title": "Holding mail through an outage",
-            "text": "The objective is about email, not requests: 99% of emails sent within two minutes of being asked for, with alerts when that budget burns. The SMTP relay counts as a dependency like the database — when it rejects the login or stops answering, health reports it down and pages, and the consumer pauses and retries rather than dead-lettering, so the emails wait in the topic and go out when the relay is back. Dead letters are for messages that can never succeed."
+            "text": "The objective is about email, not requests: 99% of emails sent within two minutes of being asked for, with alerts when that budget burns. The SMTP relay counts as a dependency like the database — when it rejects the login or stops answering, health reports it down and pages, and the consumer pauses and retries rather than dead-lettering, so the emails wait in the topic and go out when the relay is back. Dead letters are for messages that can never succeed.",
+            "title": "Holding mail through an outage"
           }
         ],
         "pipeline": {
@@ -663,8 +663,8 @@
           },
           {
             "step": "06",
-            "title": "Dashboards as code",
-            "text": "Grafana 13 provisions twelve dashboards in five folders — the estate, each service, what visitors experience, the platform itself, and what people do and what it costs — and none is edited by hand: a TypeScript generator writes them, and a test fails when the committed JSON differs from its output or a panel queries a metric nothing exports. Every graph marks deploys from the release each service reports, counting only a version not seen in the three days before, so a host switched off overnight is not a deploy every morning. Every alert names its dashboard, and the email opens it on the service and the hours around the alert, two clicks from the failing trace."
+            "text": "Grafana 13 provisions twelve dashboards in five folders — the estate, each service, what visitors experience, the platform itself, and what people do and what it costs — and none is edited by hand: a TypeScript generator writes them, and a test fails when the committed JSON differs from its output or a panel queries a metric nothing exports. Every graph marks deploys from the release each service reports, counting only a version not seen in the three days before, so a host switched off overnight is not a deploy every morning. Every alert names its dashboard, and the email opens it on the service and the hours around the alert, two clicks from the failing trace.",
+            "title": "Dashboards as code"
           }
         ],
         "pipeline": {
@@ -736,8 +736,8 @@
           },
           {
             "step": "05",
-            "title": "Serving",
-            "text": "A small Fastify server serves the build, in place of the nginx image the site started in, and gives it what the rest of the estate has: a health endpoint and a metrics scrape, JSON logs with the platform's lifecycle events, and a report-only content security policy whose violations it counts. The browser reports what a visit felt like: the Core Web Vitals, and every script error with the source line that threw it, mapped back through the build's source maps. The policy started as strict as the other apps' and opened only for what the scene proved it needs: compiling its WebAssembly decoders, and reading the geometry its models embed."
+            "text": "A small Fastify server serves the build, in place of the nginx image the site started in, and gives it what the rest of the estate has: a health endpoint and a metrics scrape, JSON logs with the platform's lifecycle events, and a report-only content security policy whose violations it counts. The browser reports what a visit felt like: the Core Web Vitals, and every script error with the source line that threw it, mapped back through the build's source maps. The policy started as strict as the other apps' and opened only for what the scene proved it needs: compiling its WebAssembly decoders, and reading the geometry its models embed.",
+            "title": "Serving"
           }
         ],
         "pipeline": {
