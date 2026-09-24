@@ -91,6 +91,20 @@ no integration-e2e stage — with no API and no database there is no stack to
 bring up; CI covers the runtime path with a Docker smoke test that asserts the
 CV is present in the server-rendered HTML.
 
+## Release + deploy model
+
+- `Release Please` manages versioning/changelog + release PR.
+- On release publish, `Deploy AWS App (EC2 Compose)` builds and pushes the web
+  image to ECR, signs and attests it by digest, uploads the release bundle to S3
+  and deploys remotely over AWS SSM.
+- Runtime env comes from the SSM prefix in `AWS_SSM_APP_PREFIX` (conventionally
+  `/cv/prod/app`) rendered into `docker/.env.app.prod` on the host, with
+  `OPENBAO_TOKEN` read from that same prefix.
+- The production host is powered on only inside its weekday window, so a deploy
+  outside it has nothing to reach. `docs/cloud-first-deploy.md` is the runbook.
+- Platform infra/ops services are owned by `platform-ops`; this repo only ships
+  app stack compose + app config under `docker/`.
+
 ## Vendored observability kit
 
 `apps/web/src/observability` is a hand-copied subset of
@@ -123,20 +137,6 @@ the OpenMetrics registry the app actually vendored, which the `next` profile
 declares as a local file. `probe-paths.test.ts` and `server-timing.test.ts` are
 cv's own suites under names the kit also uses — they cover cv's routes and cv's
 `withRouteMetrics` wrapper — and are declared as exemptions with their reason.
-
-## Release + deploy model
-
-- `Release Please` manages versioning/changelog + release PR.
-- On release publish, `Deploy AWS App (EC2 Compose)` builds and pushes the web
-  image to ECR, signs and attests it by digest, uploads the release bundle to S3
-  and deploys remotely over AWS SSM.
-- Runtime env comes from the SSM prefix in `AWS_SSM_APP_PREFIX` (conventionally
-  `/cv/prod/app`) rendered into `docker/.env.app.prod` on the host, with
-  `OPENBAO_TOKEN` read from that same prefix.
-- The production host is powered on only inside its weekday window, so a deploy
-  outside it has nothing to reach. `docs/cloud-first-deploy.md` is the runbook.
-- Platform infra/ops services are owned by `platform-ops`; this repo only ships
-  app stack compose + app config under `docker/`.
 
 ## Required OpenBao keys
 
