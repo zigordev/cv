@@ -1,6 +1,6 @@
 {
   "name": "cv",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "private": true,
   "description": "Personal CV web app (editorial single-page)",
   "engines": {

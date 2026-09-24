@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.3](https://github.com/zigordev/cv/compare/v0.13.2...v0.13.3) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** serve the structured tolgee export the reader expects ([#167](https://github.com/zigordev/cv/issues/167)) ([5a16dfc](https://github.com/zigordev/cv/commit/5a16dfc79136696bedb6e45a9186e4d904bb0cb9))
+
 ## [0.13.2](https://github.com/zigordev/cv/compare/v0.13.1...v0.13.2) (2026-09-24)
 
 
