@@ -4,9 +4,12 @@ import { registry } from './metrics.registry';
 
 type Outcome = 'failed' | 'queued' | 'rejected';
 
+export const MESSAGE_SOURCES = ['merged', 'remote', 'local', 'default_locale'] as const;
+export type MessageSource = (typeof MESSAGE_SOURCES)[number];
+
 interface State {
   readonly contact: Record<Outcome, number>;
-  readonly messages: Map<string, number>;
+  readonly messages: Map<MessageSource, number>;
   readonly flags: Map<string, boolean>;
 }
 
@@ -16,7 +19,7 @@ const shared = globalThis as typeof globalThis & { [STATE]?: State };
 
 const state = (shared[STATE] ??= {
   contact: { queued: 0, rejected: 0, failed: 0 },
-  messages: new Map(),
+  messages: new Map(MESSAGE_SOURCES.map((source) => [source, 0])),
   flags: new Map(),
 });
 
@@ -57,7 +60,7 @@ export function recordContactSubmission(outcome: Outcome): void {
   state.contact[outcome] += 1;
 }
 
-export function recordMessageSource(source: string): void {
+export function recordMessageSource(source: MessageSource): void {
   state.messages.set(source, (state.messages.get(source) ?? 0) + 1);
 }
 

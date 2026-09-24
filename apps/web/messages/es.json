@@ -452,7 +452,8 @@
           "Los secretos se obtienen al arrancar mediante un proceso envoltorio, nunca se hornean en la imagen ni se suben en un fichero de entorno: un token filtrado expone una sola ruta del kv, no todo el almacén.",
           "El correo es un evento, no una llamada. La API publica en un topic y un servicio compartido se encarga de la entrega, la idempotencia y los mensajes muertos.",
           "La CI regenera el contrato de la API desde la API en ejecución y falla ante cualquier desviación, para que cliente y servidor no puedan discrepar en silencio.",
-          "Los errores son problem details de la RFC 9457 con un code traducible, y cada ruta declara su código de estado — así salió a la luz que Nest respondía 201 a POSTs que el cliente generado documentaba como 200."
+          "Los errores son problem details de la RFC 9457 con un code traducible, y cada ruta declara su código de estado — así salió a la luz que Nest respondía 201 a POSTs que el cliente generado documentaba como 200.",
+          "Qué copia sirvió cada render se cuenta, no se supone. Una página que recae en las traducciones versionadas sigue renderizando, así que un health check la da por sana; así es como un idioma llegó a quedarse obsoleto durante meses detrás de una señal en verde."
         ],
         "pieces": [
           {
@@ -478,7 +479,8 @@
             "platform-ops sondea los endpoints públicos cada cinco minutos desde fuera del estado y abre una incidencia cuando alguno deja de responder.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request; Trivy y el SBOM otra vez en el despliegue, contra la imagen que realmente se publica y no contra la que la CI construyó en su momento.",
             "Las dos aplicaciones llevan el código de observabilidad copiado desde el repositorio de plataforma, y un fichero junto a ellas guarda el digest del kit del que salieron esas copias. Una edición sobre una copia tumba el pull request sin salir a la red; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada, porque todos los productos van por detrás durante los días entre un cambio del kit y la ronda de actualizaciones. Las copias de los tests del kit en la API llevan el nombre que espera el runner que las recoge, y el fichero declara ese renombrado en vez de dejar seis ficheros fuera de la comparación.",
-            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar.",
+            "La descarga de traducciones fusiona en lugar de reemplazar. Arrancar el stack local sincroniza con Tolgee, y un Tolgee vacío o desactualizado borraba la copia versionada que no conocía; ahora el texto que aún no se ha subido sobrevive a la sincronización."
           ],
           "stages": [
             {
@@ -531,7 +533,8 @@
             "Dependabot sobre npm, ambos Dockerfiles y las Actions, agrupado semanalmente, con patch y minor fusionándose en verde. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
             "El código de observabilidad de las dos aplicaciones se copia desde el repositorio de plataforma, y un fichero junto a él guarda el digest del kit del que salió. Una edición sobre una copia tumba el pull request sin salir a la red, de modo que esa comprobación no puede ser inestable; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada, porque todos los productos van por detrás durante los días entre un cambio del kit y la ronda de actualizaciones.",
-            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar.",
+            "La descarga de traducciones fusiona la exportación con los ficheros de mensajes versionados en lugar de reemplazarlos, de modo que una sincronización local contra un Tolgee vacío no puede borrar texto que nadie ha subido todavía; es la misma protección que usan cv y gpool."
           ],
           "stages": [
             {
@@ -565,7 +568,8 @@
         "decisions": [
           "Los payloads inválidos fallan como no reintentables y acaban en un registro duradero de mensajes muertos, porque reintentar eternamente un mensaje malformado es peor que perderlo haciendo ruido.",
           "El nombre del topic va versionado, de modo que un cambio de contrato es un topic nuevo y no una rotura silenciosa para cada productor.",
-          "Los errores son problem details de la RFC 9457 como en el resto, aunque este servicio solo sirva health y metrics — los 404 y 500 que sí emite son justo aquellos para los que nadie escribe un cliente."
+          "Los errores son problem details de la RFC 9457 como en el resto, aunque este servicio solo sirva health y metrics — los 404 y 500 que sí emite son justo aquellos para los que nadie escribe un cliente.",
+          "Cuando lo que falla es la escritura al dead-letter, el registro se conserva en vez de descartarse: el offset no se confirma y esa partición se detiene, porque un email perdido en silencio es peor que una cola que espera a la vista. El consumidor identifica el registro en el que se ha atascado y cuántas veces ha fallado."
         ],
         "pieces": [
           {
@@ -691,7 +695,7 @@
             },
             {
               "step": "02",
-              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, una comprobación de sintaxis de cada script de shell, linting de workflows y de compose, terraform validate contra ambos stacks, el kit de observabilidad y el generador de dashboards con typecheck y tests, y los helpers de fichero de entorno del script de despliegue bajo bats. Los tests del generador fallan cuando un dashboard versionado no es lo que el generador escribe, o cuando un panel consulta una métrica que nada exporta. Al lado, un escaneo de secretos y Semgrep.",
+              "text": "La infraestructura compartida casi nunca es código de aplicación, así que las comprobaciones tampoco lo son: formato, una comprobación de sintaxis de cada script de shell, linting de workflows y de compose, terraform validate contra ambos stacks, el kit de observabilidad y el generador de dashboards con typecheck y tests, y los helpers de fichero de entorno del script de despliegue bajo bats. Los tests del generador fallan cuando un dashboard versionado no es lo que el generador escribe, o cuando un panel consulta una métrica que nada exporta. Una segunda comprobación lee el cableado de las alertas en lugar de los dashboards: que cada alerta tenga su fila de runbook, que una regla de inhibición compare solo etiquetas que la alerta lleva de verdad, y que un contenedor con límite de memoria se lo haya dicho a su runtime. De cada una solo se sale declarando la excepción con su motivo, así que una excepción que ha dejado de hacer falta también falla. Al lado, un escaneo de secretos y Semgrep.",
               "title": "El pull request"
             },
             {

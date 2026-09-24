@@ -90,7 +90,7 @@ jobs:
       - name: Run container
         run: |
           docker run -d --name cv-web -p 3001:3001 cv-web:ci node apps/web/server.js
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl -sf http://localhost:3001/health > /dev/null; then
               echo "web is up"; exit 0
             fi
