@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.10](https://github.com/zigordev/cv/compare/v0.12.9...v0.12.10) (2026-09-24)
+
+
+### Bug Fixes
+
+* **ci:** read each cv smoke probe once and match without a pipe ([#151](https://github.com/zigordev/cv/issues/151)) ([ca7051c](https://github.com/zigordev/cv/commit/ca7051ce7c783f496355c2100a70d064a36a0408))
+
 ## [0.12.9](https://github.com/zigordev/cv/compare/v0.12.8...v0.12.9) (2026-09-24)
 
 
