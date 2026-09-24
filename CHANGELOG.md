@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.11](https://github.com/zigordev/cv/compare/v0.12.10...v0.12.11) (2026-09-24)
+
+
+### Bug Fixes
+
+* **observability:** vendor the kit's next span processors ([#153](https://github.com/zigordev/cv/issues/153)) ([010e02d](https://github.com/zigordev/cv/commit/010e02d05626a0dbc7ce0c7227b1fb93bc48d988))
+
 ## [0.12.10](https://github.com/zigordev/cv/compare/v0.12.9...v0.12.10) (2026-09-24)
 
 
