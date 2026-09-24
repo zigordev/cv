@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.9](https://github.com/zigordev/cv/compare/v0.12.8...v0.12.9) (2026-09-24)
+
+
+### Bug Fixes
+
+* **fonts:** self-host the web fonts so the build stops fetching them ([#152](https://github.com/zigordev/cv/issues/152)) ([df4f03f](https://github.com/zigordev/cv/commit/df4f03f9e9672839261cc0781fbe123fbbd88c15))
+
 ## [0.12.8](https://github.com/zigordev/cv/compare/v0.12.7...v0.12.8) (2026-09-23)
 
 
