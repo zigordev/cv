@@ -452,7 +452,8 @@
           "Secrets are fetched at boot by a wrapper process, never baked into an image or committed to an env file, so a leaked app token exposes one kv path rather than the whole store.",
           "Email is an event, not a call. The API publishes to a topic and a shared service owns delivery, idempotency and dead-lettering.",
           "CI regenerates the web API contract from the running API and fails on drift, so client and server cannot disagree silently.",
-          "Errors are RFC 9457 problem details with a translatable code, and every route declares its status code — which is how it came out that Nest was answering 201 to POSTs the generated client documented as 200."
+          "Errors are RFC 9457 problem details with a translatable code, and every route declares its status code — which is how it came out that Nest was answering 201 to POSTs the generated client documented as 200.",
+          "Which copy a render served is counted, not assumed. A page that falls back to the committed translations still renders, so a health check reads it as up — which is how a language once stayed stale for months behind a green signal."
         ],
         "pieces": [
           {
@@ -478,7 +479,8 @@
             "The public endpoints are probed every five minutes from outside the estate by platform-ops, which opens an issue when one stops answering.",
             "CodeQL, dependency review and Semgrep on every pull request; Trivy and the SBOM again at deploy, against the image that is actually shipping rather than the one CI happened to build.",
             "Both applications carry the observability code copied in from the platform repository, and a pin beside them records the digest of the kit those copies came from. An edit to a copy fails the pull request without going to the network; the kit having moved on is only reported there and fails a weekly scheduled run instead, because every product is behind for the days between a kit change and someone doing the rounds. The API's copies of the kit's tests are renamed for the test runner that collects them, and the pin declares that renaming rather than leaving six files outside the comparison.",
-            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
+            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in.",
+            "The translation pull merges rather than replaces. Starting the local stack syncs with Tolgee, and a Tolgee that is empty or behind used to delete committed copy it did not know about; wording that has not been pushed yet now survives the sync."
           ],
           "stages": [
             {
@@ -531,7 +533,8 @@
             "Dependabot across npm, both Dockerfiles and the Actions, grouped weekly, with patch and minor merging on green. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL, dependency review and Semgrep on every pull request.",
             "The observability code in both applications is copied in from the platform repository, and a pin beside it records the digest of the kit it came from. An edit to a copy fails the pull request without going to the network, so that check cannot be flaky; the kit having moved on is only reported there and fails a weekly scheduled run instead, because every product is behind for the days between a kit change and someone doing the rounds.",
-            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
+            "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in.",
+            "The translation pull merges the export into the committed message files instead of replacing them, so a local sync against an empty Tolgee cannot delete wording nobody has pushed yet — the same guard cv and gpool run."
           ],
           "stages": [
             {
@@ -565,7 +568,8 @@
         "decisions": [
           "Invalid payloads fail as non-retryable and go to a durable dead-letter record, because retrying a malformed message forever is a worse outcome than losing it loudly.",
           "A versioned topic name, so a contract change is a new topic rather than a silent break for every producer.",
-          "Errors are RFC 9457 problem details like every other service, even though this one serves nothing but health and metrics — the 404s and 500s it does emit are the ones nobody writes a client for."
+          "Errors are RFC 9457 problem details like every other service, even though this one serves nothing but health and metrics — the 404s and 500s it does emit are the ones nobody writes a client for.",
+          "When the dead-letter write itself fails, the record is held rather than dropped: the offset stays uncommitted and that partition stops, because an email lost in silence is worse than a queue that visibly waits. The consumer names the record it is stuck on and how many times it has failed."
         ],
         "pieces": [
           {
@@ -691,7 +695,7 @@
             },
             {
               "step": "02",
-              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, a syntax check of every shell script, workflow and compose linting, terraform validate against both stacks, the observability kit and the dashboard generator typechecked and tested, and the deploy script's env-file helpers under bats. The generator's tests fail when a committed dashboard is not what it writes, or when a panel queries a metric nothing exports. A secret scan and Semgrep alongside them.",
+              "text": "Shared infrastructure is mostly not application code, so the checks are not application checks: formatting, a syntax check of every shell script, workflow and compose linting, terraform validate against both stacks, the observability kit and the dashboard generator typechecked and tested, and the deploy script's env-file helpers under bats. The generator's tests fail when a committed dashboard is not what it writes, or when a panel queries a metric nothing exports. A second check reads the alert wiring rather than the dashboards: that every alert has a runbook row, that an inhibit rule compares only labels the alert actually carries, and that a container given a memory limit has told its runtime about it. Each is escapable only by declaring the exception with its reason, so an exception that has stopped being needed fails too. A secret scan and Semgrep alongside them.",
               "title": "The pull request"
             },
             {
