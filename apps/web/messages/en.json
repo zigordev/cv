@@ -365,6 +365,7 @@
             "The observability code is copied in from the platform repository rather than installed from a registry, so a pin beside it records the digest of the kit it was copied from. An edit to a copy fails the pull request without going to the network, so that check cannot be flaky; the kit having moved on is only reported there, because every product is behind for the days between a kit change and someone doing the rounds, and a weekly scheduled run is what eventually fails for it. A deliberate fork is declared in the pin with its reason, and a declaration that stops matching what is on disk fails as well.",
             "The PDF is rendered by headless Chromium inside the Docker build, which fails if the file cannot be produced. A deploy cannot ship a page and a stale PDF that disagree with each other.",
             "The deploy bundle is the repository at the released commit, so the host runs the deploy script belonging to the release it is deploying. Rolling back to an older tag restores that release's deploy logic with it, rather than running today's script against last month's compose file.",
+            "A push to main touching the message files, the Tolgee config or the production environment promotes the committed copy into the production Tolgee project, so wording ships without a release. The push is retried, and a promotion that still fails opens one labelled issue and comments on it rather than leaving a red mark nobody reads. Nothing the running site measures can catch it: a failed promotion leaves Tolgee answering with yesterday's wording, so every render still counts as translated.",
             "Local development has two modes over one set of containers. `local:up` runs the production image, so what is being checked is what ships; `local:dev` builds a dev stage instead and runs `next dev` under `docker compose watch`, which copies changed files into the running container rather than rebuilding it. The rebuild it skips includes the Chromium PDF render, the slowest step in the image."
           ],
           "stages": [
@@ -474,7 +475,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Translations promote themselves. A push to main touching the message files, the Tolgee config or the production env promotes the copy to the production Tolgee project, so wording ships without a release.",
+            "Translations promote themselves. A push to main touching the message files, the Tolgee config or the production env promotes the copy to the production Tolgee project, so wording ships without a release. The push is retried, and a promotion that still fails opens one labelled issue and comments on it, so stale wording is visible as a task rather than a red mark nobody reads.",
             "Dependabot watches four ecosystems — npm, both Dockerfiles and the Actions themselves — grouped weekly, with patch and minor merging on green and majors left for a person. Base-image majors are not proposed at all, so the Node runtime only moves on purpose.",
             "The public endpoints are probed every five minutes from outside the estate by platform-ops, which opens an issue when one stops answering.",
             "CodeQL, dependency review and Semgrep on every pull request; Trivy and the SBOM again at deploy, against the image that is actually shipping rather than the one CI happened to build.",
@@ -534,7 +535,8 @@
             "CodeQL, dependency review and Semgrep on every pull request.",
             "The observability code in both applications is copied in from the platform repository, and a pin beside it records the digest of the kit it came from. An edit to a copy fails the pull request without going to the network, so that check cannot be flaky; the kit having moved on is only reported there and fails a weekly scheduled run instead, because every product is behind for the days between a kit change and someone doing the rounds.",
             "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in.",
-            "The translation pull merges the export into the committed message files instead of replacing them, so a local sync against an empty Tolgee cannot delete wording nobody has pushed yet — the same guard cv and gpool run."
+            "The translation pull merges the export into the committed message files instead of replacing them, so a local sync against an empty Tolgee cannot delete wording nobody has pushed yet — the same guard cv and gpool run.",
+            "Translations promote themselves here too. A push to main touching the message files promotes the committed copy into the production Tolgee project, and a promotion that fails after its retries opens one labelled issue instead of going unnoticed — a failed promotion leaves Tolgee answering with yesterday's wording, so nothing the running site measures can catch it."
           ],
           "stages": [
             {
