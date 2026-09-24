@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/zigordev/cv/compare/v0.12.12...v0.13.0) (2026-09-24)
+
+
+### Features
+
+* **observability:** check the vendored kit against a pinned digest ([#160](https://github.com/zigordev/cv/issues/160)) ([2ffa97c](https://github.com/zigordev/cv/commit/2ffa97cef74a177e4398a1e74abcb2f1f13b8fc0))
+
 ## [0.12.12](https://github.com/zigordev/cv/compare/v0.12.11...v0.12.12) (2026-09-24)
 
 
