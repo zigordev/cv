@@ -477,17 +477,18 @@
             "Dependabot watches four ecosystems — npm, both Dockerfiles and the Actions themselves — grouped weekly, with patch and minor merging on green and majors left for a person. Base-image majors are not proposed at all, so the Node runtime only moves on purpose.",
             "The public endpoints are probed every five minutes from outside the estate by platform-ops, which opens an issue when one stops answering.",
             "CodeQL, dependency review and Semgrep on every pull request; Trivy and the SBOM again at deploy, against the image that is actually shipping rather than the one CI happened to build.",
+            "Both applications carry the observability code copied in from the platform repository, and a pin beside them records the digest of the kit those copies came from. An edit to a copy fails the pull request without going to the network; the kit having moved on is only reported there and fails a weekly scheduled run instead, because every product is behind for the days between a kit change and someone doing the rounds. The API's copies of the kit's tests are renamed for the test runner that collects them, and the pin declares that renaming rather than leaving six files outside the comparison.",
             "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "The same three hooks every repository here carries: gitleaks over the staged diff followed by lint, typecheck, build and both unit suites; commitlint on the message; and a pre-push hook that refuses main. CI sets HUSKY=0 so the hooks never run a second time on a runner that is already running them as jobs.",
+              "text": "The same three hooks every repository here carries: gitleaks over the staged diff followed by the vendored observability code against the kit digest this repository pinned, then lint, typecheck, build and both unit suites; commitlint on the message; and a pre-push hook that refuses main. CI sets HUSKY=0 so the hooks never run a second time on a runner that is already running them as jobs.",
               "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "Five jobs: quality — compose manifests rendered, lint, typecheck, build, API unit tests with coverage uploaded and the web suite — a secret scan, an integration smoke that stands the whole stack up under Compose and then opens a real browser on it — the sign-in page rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the sign-in and pools pages checked against their own content security policy — before a k6 load smoke, security and supply chain, and Semgrep.",
+              "text": "Five jobs: quality — compose manifests rendered, the vendored kit against its pin, lint, typecheck, build, API unit tests with coverage uploaded and the web suite — a secret scan, an integration smoke that stands the whole stack up under Compose and then opens a real browser on it — the sign-in page rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the sign-in and pools pages checked against their own content security policy — before a k6 load smoke, security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
@@ -529,17 +530,18 @@
             "A proof of concept runs the same pipeline as production. The point of owning the template is that a new idea starts with signed images, a smoke test and a changelog rather than earning them later, when retrofitting is exactly what nobody has time for.",
             "Dependabot across npm, both Dockerfiles and the Actions, grouped weekly, with patch and minor merging on green. Base-image majors are not proposed, so the Node runtime only moves on purpose.",
             "CodeQL, dependency review and Semgrep on every pull request.",
+            "The observability code in both applications is copied in from the platform repository, and a pin beside it records the digest of the kit it came from. An edit to a copy fails the pull request without going to the network, so that check cannot be flaky; the kit having moved on is only reported there and fails a weekly scheduled run instead, because every product is behind for the days between a kit change and someone doing the rounds.",
             "Local development has two modes over one set of containers. `local:up` runs the production images; `local:dev` builds a dev stage of each and runs `nest start --watch` and `next dev` under `docker compose watch`, so an edit reaches the running container as a file sync instead of an image rebuild. Dependency manifests still trigger a rebuild, because a lockfile change cannot be copied in."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "gitleaks over the staged diff, then lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main.",
+              "text": "gitleaks over the staged diff, then the vendored observability code against the kit digest this repository pinned, then lint, typecheck and build; commitlint on the message; and a pre-push hook that refuses main.",
               "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "Quality, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose from the production images and then drives the web in a real browser — the sign-in card rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the pages, signed in and out, checked against their own content security policy — security and supply chain, and Semgrep.",
+              "text": "Quality, which starts by comparing the vendored observability code against its pin, a secret scan, an integration smoke that stands the API, the web app and Postgres up under Compose from the production images and then drives the web in a real browser — the sign-in card rendered, axe against WCAG A and AA, Core Web Vitals budgets, and the pages, signed in and out, checked against their own content security policy — security and supply chain, and Semgrep.",
               "title": "The pull request"
             },
             {
@@ -802,17 +804,18 @@
             "Dependabot covers npm, Cargo and all five Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly. Base-image majors are not proposed, so a runtime major only lands on purpose.",
             "Auto-merge on green for patch and minor; majors wait for a person, in both ecosystems.",
             "CodeQL, dependency review and Semgrep on every pull request — the same gate the production repositories use, because the code will need it before it deploys, not after.",
+            "The control plane and the operator console both carry the observability code copied in from the platform repository, and a pin beside them records the digest of the kit those copies came from. An edit to a copy fails the pull request without going to the network; the kit having moved on is only reported there and fails a weekly scheduled run instead. The control plane compiles as NodeNext, so its copies carry the file extension on their relative imports, and that difference is declared in the pin with its reason instead of being quietly tolerated.",
             "Local development has two modes over one set of containers, across both languages. `local:dev` runs the control plane under `tsx watch`, the console under `next dev` and the three Rust services under `cargo watch`, all fed by `docker compose watch`. The Rust services share one named volume for the cargo target directory, so the dependency artefacts they have in common are compiled once rather than three times: the first build is long, an incremental one is a few seconds."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "gitleaks over the staged diff and then the workspace checks, commitlint on the message, and a pre-push hook that refuses main. The same three hooks as the rest of the estate, so moving between repositories does not mean learning a different set of local rules.",
+              "text": "gitleaks over the staged diff and then the workspace checks, among them the vendored observability code against the kit digest this repository pinned, commitlint on the message, and a pre-push hook that refuses main. The same three hooks as the rest of the estate, so moving between repositories does not mean learning a different set of local rules.",
               "title": "Before the commit"
             },
             {
               "step": "02",
-              "text": "Two language lanes running side by side. Rust: cargo fmt --check, a lock check that refuses a Cargo.lock disagreeing with the manifests, clippy with warnings denied, and the workspace test suite. TypeScript: format, lint, typecheck, build and tests with coverage for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
+              "text": "Two language lanes running side by side. Rust: cargo fmt --check, a lock check that refuses a Cargo.lock disagreeing with the manifests, clippy with warnings denied, and the workspace test suite. TypeScript: format, the vendored kit against its pin, lint, typecheck, build and tests with coverage for the control plane and the operator console. A third lane stands a real PostgreSQL up under Compose and runs the control plane's trade projection against it. Around them, a secret scan, compose manifests rendered against a placeholder env, supply chain and Semgrep.",
               "title": "The pull request"
             },
             {

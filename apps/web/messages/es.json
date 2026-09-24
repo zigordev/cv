@@ -477,17 +477,18 @@
             "Dependabot vigila cuatro ecosistemas — npm, ambos Dockerfiles y las propias Actions — agrupados semanalmente, con patch y minor fusionándose en verde y los majors reservados a una persona. Los majors de la imagen base ni siquiera se proponen, así que el runtime de Node solo cambia a propósito.",
             "platform-ops sondea los endpoints públicos cada cinco minutos desde fuera del estado y abre una incidencia cuando alguno deja de responder.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request; Trivy y el SBOM otra vez en el despliegue, contra la imagen que realmente se publica y no contra la que la CI construyó en su momento.",
+            "Las dos aplicaciones llevan el código de observabilidad copiado desde el repositorio de plataforma, y un fichero junto a ellas guarda el digest del kit del que salieron esas copias. Una edición sobre una copia tumba el pull request sin salir a la red; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada, porque todos los productos van por detrás durante los días entre un cambio del kit y la ronda de actualizaciones. Las copias de los tests del kit en la API llevan el nombre que espera el runner que las recoge, y el fichero declara ese renombrado en vez de dejar seis ficheros fuera de la comparación.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "Los mismos tres hooks que lleva cada repositorio de aquí: gitleaks sobre el diff en stage seguido de lint, typecheck, build y las dos baterías de tests unitarios; commitlint en el mensaje; y un hook de pre-push que rechaza main. La CI pone HUSKY=0 para que los hooks no se ejecuten por segunda vez en un runner que ya los está ejecutando como jobs.",
+              "text": "Los mismos tres hooks que lleva cada repositorio de aquí: gitleaks sobre el diff en stage seguido del código de observabilidad copiado contra el digest del kit que este repositorio fijó, y después lint, typecheck, build y las dos baterías de tests unitarios; commitlint en el mensaje; y un hook de pre-push que rechaza main. La CI pone HUSKY=0 para que los hooks no se ejecuten por segunda vez en un runner que ya los está ejecutando como jobs.",
               "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas de acceso y de grupos comprobadas contra su propia política de seguridad de contenidos — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Cinco jobs: calidad — manifiestos de compose renderizados, el kit copiado contra su digest fijado, lint, typecheck, build, tests unitarios de la API con la cobertura subida y la batería de la web —, un escaneo de secretos, un smoke de integración que levanta el stack completo con Compose y después abre un navegador real sobre él — la página de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas de acceso y de grupos comprobadas contra su propia política de seguridad de contenidos — antes de un smoke de carga con k6, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -529,17 +530,18 @@
             "Una prueba de concepto usa el mismo pipeline que producción. La ventaja de tener la plantilla propia es que una idea nueva empieza con imágenes firmadas, un smoke y un changelog en lugar de ganárselos más tarde, cuando adaptarlo todo es justo lo que nadie tiene tiempo de hacer.",
             "Dependabot sobre npm, ambos Dockerfiles y las Actions, agrupado semanalmente, con patch y minor fusionándose en verde. Los majors de la imagen base no se proponen, así que el runtime de Node solo cambia a propósito.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
+            "El código de observabilidad de las dos aplicaciones se copia desde el repositorio de plataforma, y un fichero junto a él guarda el digest del kit del que salió. Una edición sobre una copia tumba el pull request sin salir a la red, de modo que esa comprobación no puede ser inestable; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada, porque todos los productos van por detrás durante los días entre un cambio del kit y la ronda de actualizaciones.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "gitleaks sobre el diff en stage y después lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main.",
+              "text": "gitleaks sobre el diff en stage, después el código de observabilidad copiado contra el digest del kit que este repositorio fijó, y luego lint, typecheck y build; commitlint en el mensaje; y un hook de pre-push que rechaza main.",
               "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "Calidad, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose a partir de las imágenes de producción y después conduce la web en un navegador real — la tarjeta de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas, con y sin sesión, comprobadas contra su propia política de seguridad de contenidos —, seguridad y cadena de suministro, y Semgrep.",
+              "text": "Calidad, que empieza comparando el código de observabilidad copiado contra su digest fijado, un escaneo de secretos, un smoke de integración que levanta la API, la aplicación web y Postgres con Compose a partir de las imágenes de producción y después conduce la web en un navegador real — la tarjeta de acceso renderizada, axe contra WCAG A y AA, presupuestos de Core Web Vitals y las páginas, con y sin sesión, comprobadas contra su propia política de seguridad de contenidos —, seguridad y cadena de suministro, y Semgrep.",
               "title": "El pull request"
             },
             {
@@ -802,17 +804,18 @@
             "Dependabot cubre npm, Cargo y los cinco Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio. Los majors de la imagen base no se proponen, así que un major de runtime solo llega a propósito.",
             "Auto-merge en verde para patch y minor; los majors esperan a una persona, en los dos ecosistemas.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request — la misma barrera que usan los repositorios en producción, porque el código la va a necesitar antes de desplegarse y no después.",
+            "El plano de control y la consola de operación llevan el código de observabilidad copiado desde el repositorio de plataforma, y un fichero junto a ellos guarda el digest del kit del que salieron esas copias. Una edición sobre una copia tumba el pull request sin salir a la red; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada. El plano de control compila como NodeNext, así que sus copias llevan la extensión en los imports relativos, y esa diferencia se declara junto al digest con su motivo en lugar de tolerarse en silencio.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores, en los dos lenguajes. `local:dev` ejecuta el plano de control con `tsx watch`, la consola con `next dev` y los tres servicios Rust con `cargo watch`, todos alimentados por `docker compose watch`. Los servicios Rust comparten un único volumen para el directorio target de cargo, así que los artefactos de las dependencias que tienen en común se compilan una vez y no tres: la primera construcción es larga y una incremental son unos segundos."
           ],
           "stages": [
             {
               "step": "01",
-              "text": "gitleaks sobre el diff en stage y después las comprobaciones del workspace, commitlint en el mensaje y un hook de pre-push que rechaza main. Los mismos tres hooks que en el resto del estado, para que cambiar de repositorio no signifique aprender otro juego de reglas locales.",
+              "text": "gitleaks sobre el diff en stage y después las comprobaciones del workspace, entre ellas el código de observabilidad copiado contra el digest del kit que este repositorio fijó, commitlint en el mensaje y un hook de pre-push que rechaza main. Los mismos tres hooks que en el resto del estado, para que cambiar de repositorio no signifique aprender otro juego de reglas locales.",
               "title": "Antes del commit"
             },
             {
               "step": "02",
-              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, una comprobación que rechaza un Cargo.lock que no concuerde con los manifiestos, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, lint, typecheck, build y tests con cobertura del plano de control y de la consola de operación. Un tercer carril levanta un PostgreSQL real con Compose y ejecuta contra él la proyección de operaciones del plano de control. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
+              "text": "Dos carriles de lenguaje en paralelo. Rust: cargo fmt --check, una comprobación que rechaza un Cargo.lock que no concuerde con los manifiestos, clippy con los avisos como errores y la batería de tests del workspace. TypeScript: formato, el kit copiado contra su digest fijado, lint, typecheck, build y tests con cobertura del plano de control y de la consola de operación. Un tercer carril levanta un PostgreSQL real con Compose y ejecuta contra él la proyección de operaciones del plano de control. Alrededor, un escaneo de secretos, los manifiestos de compose renderizados contra un entorno de ejemplo, cadena de suministro y Semgrep.",
               "title": "El pull request"
             },
             {
