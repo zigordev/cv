@@ -35,6 +35,24 @@ describe('loadRemoteMessages', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('asks Tolgee for the nested export the app reads, with lists reassembled', async () => {
+    process.env.TOLGEE_API_URL = 'http://tolgee.invalid';
+    process.env.TOLGEE_API_KEY = 'test-key';
+    process.env.TOLGEE_PROJECT_ID = '1';
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ cv: { identity: { title: 'Engineer' } } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await loadRemoteMessages('en');
+
+    const url = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(url.searchParams.get('structureDelimiter')).toBe('.');
+    expect(url.searchParams.get('supportArrays')).toBe('true');
+  });
+
   it('falls back rather than throwing when the fetch rejects', async () => {
     process.env.TOLGEE_API_URL = 'http://tolgee.invalid';
     process.env.TOLGEE_API_KEY = 'test-key';
@@ -157,6 +175,30 @@ describe('loadRemoteMessages', () => {
       reportComponent('tolgee', 'unknown');
       await loadRemoteMessages('es');
       expect(health().components.tolgee).toEqual({ status: 'down' });
+    });
+
+    it('falls back rather than serving an export whose keys were never nested', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ 'cv.identity.title': 'Engineer', 'nav.home': 'Home' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+
+      await expect(loadRemoteMessages('en')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: {
+            name: 'FlatExport',
+            message: 'Tolgee returned dotted keys; the app reads a nested export',
+          },
+        })
+      );
     });
 
     it('reports Tolgee down when the export comes back empty', async () => {

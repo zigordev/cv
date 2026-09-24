@@ -73,12 +73,22 @@ function normalizeLocale(tag) {
  * The trade-off is deliberate: a key deliberately deleted in Tolgee will linger
  * locally until it is removed here too. Stale keys are cheap; lost copy is not.
  */
-function mergeMessages(local, remote) {
+const keptLists = [];
+
+function mergeMessages(local, remote, path = '') {
+  if (Array.isArray(local) && Array.isArray(remote)) {
+    if (local.length !== remote.length) {
+      keptLists.push(`${path} (${local.length} committed, ${remote.length} exported)`);
+      return local;
+    }
+    return local.map((item, index) => mergeMessages(item, remote[index], `${path}.${index}`));
+  }
   if (Array.isArray(remote) || typeof remote !== 'object' || remote === null) return remote;
   if (Array.isArray(local) || typeof local !== 'object' || local === null) return remote;
   const merged = { ...local };
   for (const [key, value] of Object.entries(remote)) {
-    merged[key] = key in local ? mergeMessages(local[key], value) : value;
+    const at = path ? `${path}.${key}` : key;
+    merged[key] = key in local ? mergeMessages(local[key], value, at) : value;
   }
   return merged;
 }
@@ -153,6 +163,12 @@ await Promise.all(
   )
 );
 console.log(`Updated translations in ${outDir}`);
+if (keptLists.length) {
+  console.warn(
+    `Kept the committed list for: ${keptLists.join(', ')} — the export has a different number ` +
+      'of entries, which is a partial translation rather than an edit. Push, then pull again.'
+  );
+}
 if (skipped.length) {
   console.warn(`Skipped unsupported locales from Tolgee: ${skipped.join(', ')}`);
 }

@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,4 +73,89 @@ jobs:
           TOLGEE_API_URL: ${{ vars.TOLGEE_SYNC_API_URL }}
           TOLGEE_API_KEY: ${{ secrets.TOLGEE_SYNC_API_KEY }}
           TOLGEE_PROJECT_ID: ${{ env.TOLGEE_PROJECT_ID }}
-        run: npm run i18n:push -w @cv/web
+        run: |
+          set -uo pipefail
+
+          for attempt in 1 2 3; do
+            if npm run i18n:push -w @cv/web; then
+              exit 0
+            fi
+            echo "Promotion attempt $attempt failed" >&2
+            sleep $((attempt * 20))
+          done
+
+          echo 'Every promotion attempt failed; prod Tolgee still holds the previous copy.' >&2
+          exit 1
+
+      - name: Open or update an issue when the promotion fails
+        if: failure()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const title = 'Translations: promotion to prod Tolgee failing';
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              'The committed message files were not promoted to the production Tolgee project.',
+              '',
+              'Production keeps serving the copy Tolgee already held, so every render still',
+              'counts `source="merged"` and `CopyServedFromRepository` will not fire for this.',
+              'The wording in `apps/web/messages` is live only once this succeeds.',
+              '',
+              `[Failed run](${run}) · [Runbook](https://github.com/zigordev/platform-ops/blob/main/docs/runbooks/i18n-fallback.md)`,
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              ...context.repo,
+              state: 'all',
+              labels: 'translations',
+              per_page: 20,
+            });
+            const issue = existing.data.find((candidate) => candidate.title === title);
+
+            if (!issue) {
+              await github.rest.issues.create({
+                ...context.repo,
+                title,
+                body,
+                labels: ['translations'],
+              });
+              return;
+            }
+
+            if (issue.state === 'closed') {
+              await github.rest.issues.update({
+                ...context.repo,
+                issue_number: issue.number,
+                state: 'open',
+              });
+            }
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: issue.number,
+              body,
+            });
+
+      - name: Close the issue once the promotion succeeds
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const title = 'Translations: promotion to prod Tolgee failing';
+            const open = await github.rest.issues.listForRepo({
+              ...context.repo,
+              state: 'open',
+              labels: 'translations',
+              per_page: 20,
+            });
+            const issue = open.data.find((candidate) => candidate.title === title);
+            if (!issue) return;
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: issue.number,
+              body: 'The copy reached prod Tolgee again. Closing.',
+            });
+            await github.rest.issues.update({
+              ...context.repo,
+              issue_number: issue.number,
+              state: 'closed',
+            });
