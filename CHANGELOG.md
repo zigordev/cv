@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.12](https://github.com/zigordev/cv/compare/v0.12.11...v0.12.12) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** commit the messages in the order the pull writes them ([#158](https://github.com/zigordev/cv/issues/158)) ([91da064](https://github.com/zigordev/cv/commit/91da0647489a79be5c74a72234d714c0692818dd))
+
 ## [0.12.11](https://github.com/zigordev/cv/compare/v0.12.10...v0.12.11) (2026-09-24)
 
 
