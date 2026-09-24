@@ -39,6 +39,14 @@ describe('app metrics', () => {
     }
   });
 
+  it('reports every message source from the first scrape, so increase() sees the first load', async () => {
+    const text = await (await graph()).registry.metrics();
+
+    for (const source of ['merged', 'remote', 'local', 'default_locale']) {
+      expect(text).toContain(`cv_i18n_messages_total{source="${source}"} 0`);
+    }
+  });
+
   it('counts repeated loads and follows a flag that turns off', async () => {
     const metrics = await graph();
     metrics.recordMessageSource('remote');
