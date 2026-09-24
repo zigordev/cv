@@ -7,10 +7,8 @@ const requestHeaders = new Headers();
 
 vi.mock('./globals.css', () => ({}));
 
-vi.mock('next/font/google', () => ({
-  Inter: () => ({ variable: '--font-inter' }),
-  Instrument_Serif: () => ({ variable: '--font-instrument-serif' }),
-  JetBrains_Mono: () => ({ variable: '--font-jetbrains-mono' }),
+vi.mock('next/font/local', () => ({
+  default: ({ variable }: { variable: string }) => ({ variable }),
 }));
 
 vi.mock('next/headers', () => ({
