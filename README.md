@@ -19,15 +19,16 @@ NestJS service alongside would be one endpoint's worth of ceremony. Delivery
 state, idempotency and dead-letter auditing all live in the notifications
 service already.
 
-| Concern       | Where                                                                     |
-| ------------- | ------------------------------------------------------------------------- |
-| UI            | `apps/web/src/components` — sections composed from the design system      |
-| CV content    | Tolgee → `cv.*`; skeleton in `apps/web/src/content/cv.ts`                 |
-| UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                                 |
-| Secrets       | OpenBao, kv mount, path `cv`                                              |
-| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`             |
-| Questions     | `POST /api/ask` → Claude API, answers cite the CV; `apps/web/src/lib/ask` |
-| Design system | `design-system`, pinned to a tag from the shared repository               |
+| Concern       | Where                                                                            |
+| ------------- | -------------------------------------------------------------------------------- |
+| UI            | `apps/web/src/components` — sections composed from the design system             |
+| CV content    | Tolgee → `cv.*`; skeleton in `apps/web/src/content/cv.ts`                        |
+| UI copy       | Tolgee → `apps/web/messages/{en,es}.json`                                        |
+| Secrets       | OpenBao, kv mount, path `cv`                                                     |
+| Contact email | `POST /api/contact` → Kafka `notification.email.requested.v1`                    |
+| Questions     | `POST /api/ask` → Claude API, answers cite the CV; `apps/web/src/lib/ask`        |
+| Design system | `design-system`, pinned to a tag from the shared repository                      |
+| Observability | vendored kit in `apps/web/src/observability`, pinned by `observability.kit.json` |
 
 ## Quick start
 
@@ -85,10 +86,43 @@ npm run dev -w @cv/web
 npm run precommit:checks
 ```
 
-Gitleaks, lint, typecheck and build. There is no integration-e2e stage — with
-no API and no database there is no stack to bring up; CI covers the runtime
-path with a Docker smoke test that asserts the CV is present in the
-server-rendered HTML.
+Gitleaks, the vendored kit against its pin, lint, typecheck and build. There is
+no integration-e2e stage — with no API and no database there is no stack to
+bring up; CI covers the runtime path with a Docker smoke test that asserts the
+CV is present in the server-rendered HTML.
+
+## Vendored observability kit
+
+`apps/web/src/observability` is a hand-copied subset of
+`platform-ops/packages/observability`. It is vendored rather than installed
+because the Dockerfile's dependency stage copies only manifests, and a private
+registry would mean a token in every CI run for a dozen files.
+
+`observability.kit.json` names the directories that are copies, the profile each
+one follows, and the kit digest they were taken from.
+`scripts/check-kit-parity.mjs` is the kit's own script, copied in verbatim.
+
+```bash
+npm run check:kit -- --offline
+npm run check:kit
+```
+
+The first compares the copies against the pin and fails on a local edit; it
+needs no network, so it can block a pull request. The second also reads the kit
+as it is now and reports being behind without failing — every product is behind
+for the days between a kit change and someone doing the rounds. `Kit Parity`
+runs weekly with `--strict-remote`, and that is the run that fails for it.
+
+Re-vendoring is: copy the changed files in, run
+`node scripts/check-kit-parity.mjs --repin`, commit both. The pin is generated,
+never hand-edited: the checker rehashes it and rejects one that does not
+describe its own contents.
+
+Two things deliberately differ. `metrics.registry.ts` is a one-line re-export of
+the OpenMetrics registry the app actually vendored, which the `next` profile
+declares as a local file. `probe-paths.test.ts` and `server-timing.test.ts` are
+cv's own suites under names the kit also uses — they cover cv's routes and cv's
+`withRouteMetrics` wrapper — and are declared as exemptions with their reason.
 
 ## Release + deploy model
 
