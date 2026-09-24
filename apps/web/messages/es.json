@@ -663,7 +663,7 @@
           },
           {
             "step": "06",
-            "text": "Grafana 13 provisiona doce dashboards en cinco carpetas — el conjunto, cada servicio, lo que vive quien visita, la propia plataforma, y lo que la gente hace y lo que cuesta — y ninguno se edita a mano: un generador en TypeScript los escribe, y un test falla cuando el JSON versionado no coincide con su salida o un panel consulta una métrica que nada exporta. Cada gráfica marca los despliegues a partir de la versión que cada servicio publica, contando solo una versión que no se vio en los tres días anteriores, así que un host apagado por la noche no es un despliegue cada mañana. Cada alerta nombra su dashboard, y el correo lo abre en el servicio y en las horas alrededor de la alerta, a dos clics de la traza que falla.",
+            "text": "Grafana 13 provisiona todos los dashboards en cinco carpetas — el conjunto, cada servicio, lo que vive quien visita, la propia plataforma, y lo que la gente hace y lo que cuesta — y ninguno se edita a mano: un generador en TypeScript los escribe, y un test falla cuando el JSON versionado no coincide con su salida o un panel consulta una métrica que nada exporta. Cada gráfica marca los despliegues a partir de la versión que cada servicio publica, contando solo una versión que no se vio en los tres días anteriores, así que un host apagado por la noche no es un despliegue cada mañana. Cada alerta nombra su dashboard, y el correo lo abre en el servicio y en las horas alrededor de la alerta, a dos clics de la traza que falla.",
             "title": "Dashboards como código"
           }
         ],

@@ -663,7 +663,7 @@
           },
           {
             "step": "06",
-            "text": "Grafana 13 provisions twelve dashboards in five folders — the estate, each service, what visitors experience, the platform itself, and what people do and what it costs — and none is edited by hand: a TypeScript generator writes them, and a test fails when the committed JSON differs from its output or a panel queries a metric nothing exports. Every graph marks deploys from the release each service reports, counting only a version not seen in the three days before, so a host switched off overnight is not a deploy every morning. Every alert names its dashboard, and the email opens it on the service and the hours around the alert, two clicks from the failing trace.",
+            "text": "Grafana 13 provisions every dashboard in five folders — the estate, each service, what visitors experience, the platform itself, and what people do and what it costs — and none is edited by hand: a TypeScript generator writes them, and a test fails when the committed JSON differs from its output or a panel queries a metric nothing exports. Every graph marks deploys from the release each service reports, counting only a version not seen in the three days before, so a host switched off overnight is not a deploy every morning. Every alert names its dashboard, and the email opens it on the service and the hours around the alert, two clicks from the failing trace.",
             "title": "Dashboards as code"
           }
         ],
