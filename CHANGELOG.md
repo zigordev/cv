@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/zigordev/cv/compare/v0.13.1...v0.13.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* **checks:** make the licence gate fail on zero and restore the README spine ([#165](https://github.com/zigordev/cv/issues/165)) ([09999ec](https://github.com/zigordev/cv/commit/09999ec8cc36b1a69bca5776079df45ed82eb9c8))
+
 ## [0.13.1](https://github.com/zigordev/cv/compare/v0.13.0...v0.13.1) (2026-09-24)
 
 
