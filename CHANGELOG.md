@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/zigordev/cv/compare/v0.13.0...v0.13.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** name the tolgee error code and record the estate guards ([#163](https://github.com/zigordev/cv/issues/163)) ([3aff619](https://github.com/zigordev/cv/commit/3aff619e4a2aabc7f99634c605a127527dbf1a8e))
+
 ## [0.13.0](https://github.com/zigordev/cv/compare/v0.12.12...v0.13.0) (2026-09-24)
 
 
