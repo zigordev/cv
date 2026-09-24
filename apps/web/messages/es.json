@@ -475,7 +475,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Las traducciones se promocionan solas. Un push a main que toque los ficheros de mensajes, la configuración de Tolgee o el entorno de producción promociona el texto al proyecto de Tolgee de producción, así que el copy se publica sin una release.",
+            "Las traducciones se promocionan solas. Un push a main que toque los ficheros de mensajes, la configuración de Tolgee o el entorno de producción promociona el texto al proyecto de Tolgee de producción, así que el copy se publica sin una release. El push se reintenta, y una promoción que aun así falla abre una única incidencia etiquetada y comenta en ella, de modo que el texto desactualizado se ve como una tarea y no como una marca roja que nadie mira.",
             "Dependabot vigila cuatro ecosistemas — npm, ambos Dockerfiles y las propias Actions — agrupados semanalmente, con patch y minor fusionándose en verde y los majors reservados a una persona. Los majors de la imagen base ni siquiera se proponen, así que el runtime de Node solo cambia a propósito.",
             "platform-ops sondea los endpoints públicos cada cinco minutos desde fuera del estado y abre una incidencia cuando alguno deja de responder.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request; Trivy y el SBOM otra vez en el despliegue, contra la imagen que realmente se publica y no contra la que la CI construyó en su momento.",
@@ -535,7 +535,8 @@
             "CodeQL, revisión de dependencias y Semgrep en cada pull request.",
             "El código de observabilidad de las dos aplicaciones se copia desde el repositorio de plataforma, y un fichero junto a él guarda el digest del kit del que salió. Una edición sobre una copia tumba el pull request sin salir a la red, de modo que esa comprobación no puede ser inestable; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada, porque todos los productos van por detrás durante los días entre un cambio del kit y la ronda de actualizaciones.",
             "El desarrollo local tiene dos modos sobre un mismo juego de contenedores. `local:up` ejecuta las imágenes de producción; `local:dev` construye una etapa de desarrollo de cada una y ejecuta `nest start --watch` y `next dev` bajo `docker compose watch`, de modo que una edición llega al contenedor en marcha como una copia de archivos y no como una reconstrucción de la imagen. Los manifiestos de dependencias sí fuerzan una reconstrucción, porque un cambio de lockfile no se puede copiar.",
-            "La descarga de traducciones fusiona la exportación con los ficheros de mensajes versionados en lugar de reemplazarlos, de modo que una sincronización local contra un Tolgee vacío no puede borrar texto que nadie ha subido todavía; es la misma protección que usan cv y gpool."
+            "La descarga de traducciones fusiona la exportación con los ficheros de mensajes versionados en lugar de reemplazarlos, de modo que una sincronización local contra un Tolgee vacío no puede borrar texto que nadie ha subido todavía; es la misma protección que usan cv y gpool.",
+            "Aquí las traducciones también se promocionan solas. Un push a main que toque los ficheros de mensajes promociona la copia versionada al proyecto Tolgee de producción, y una promoción que falla tras sus reintentos abre una única incidencia etiquetada en lugar de pasar desapercibida: una promoción fallida deja a Tolgee respondiendo con el texto de ayer, así que nada de lo que mide el sitio en marcha puede detectarlo."
           ],
           "stages": [
             {
