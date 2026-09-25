@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.6](https://github.com/zigordev/cv/compare/v0.13.5...v0.13.6) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** report tolgee up when the export comes back empty ([#174](https://github.com/zigordev/cv/issues/174)) ([ecadf33](https://github.com/zigordev/cv/commit/ecadf33b2a4d32bcb4cc5dcad88269fcc4b90f1e))
+
 ## [0.13.5](https://github.com/zigordev/cv/compare/v0.13.4...v0.13.5) (2026-09-25)
 
 
