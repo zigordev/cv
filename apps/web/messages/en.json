@@ -464,7 +464,7 @@
           },
           {
             "step": "02",
-            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are pulled from Tolgee at boot; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares. It takes its own visitors' Core Web Vitals, script errors and content security reports, so what a visit felt like is measured where the page is served.",
+            "text": "Next.js App Router in standalone output, talking to the API directly with a session cookie rather than proxying every call to sign its own headers. Translations are fetched from Tolgee per request behind a sixty-second cache and merged over the copy committed in the repository, so wording ships without a release and an unreachable Tolgee falls back to the committed words; the container starts under a wrapper that fetches its secrets from OpenBao and refuses to boot without the keys it declares. It takes its own visitors' Core Web Vitals, script errors and content security reports, so what a visit felt like is measured where the page is served.",
             "title": "Web"
           },
           {

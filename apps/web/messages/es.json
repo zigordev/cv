@@ -464,7 +464,7 @@
           },
           {
             "step": "02",
-            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se descargan de Tolgee al arrancar; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara. Recibe él mismo las Core Web Vitals, los errores de script y los informes de la política de seguridad de contenidos de sus visitantes, así que la experiencia de una visita se mide donde se sirve la página.",
+            "text": "Next.js App Router con salida standalone, que habla con la API directamente mediante una cookie de sesión en vez de retransmitir cada llamada firmando sus propias cabeceras. Las traducciones se piden a Tolgee en cada petición tras una caché de sesenta segundos y se mezclan sobre la copia versionada en el repositorio, así que el texto se publica sin una release y un Tolgee inalcanzable recae en la copia versionada; el contenedor se inicia bajo un wrapper que obtiene sus secretos de OpenBao y se niega a arrancar sin las claves que declara. Recibe él mismo las Core Web Vitals, los errores de script y los informes de la política de seguridad de contenidos de sus visitantes, así que la experiencia de una visita se mide donde se sirve la página.",
             "title": "Web"
           },
           {
