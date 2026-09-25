@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.5](https://github.com/zigordev/cv/compare/v0.13.4...v0.13.5) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** report tolgee up when the export comes back in the wrong shape ([#172](https://github.com/zigordev/cv/issues/172)) ([ae18c84](https://github.com/zigordev/cv/commit/ae18c840288ea0d208b66c9ef889cbc01714f48b))
+
 ## [0.13.4](https://github.com/zigordev/cv/compare/v0.13.3...v0.13.4) (2026-09-25)
 
 
