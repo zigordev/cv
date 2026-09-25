@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.4](https://github.com/zigordev/cv/compare/v0.13.3...v0.13.4) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** guard the pull against a flat export and validate the deploy role ([#170](https://github.com/zigordev/cv/issues/170)) ([90c418d](https://github.com/zigordev/cv/commit/90c418dc6dde531b61a3b7273d459c10b3ab5ba8))
+
 ## [0.13.3](https://github.com/zigordev/cv/compare/v0.13.2...v0.13.3) (2026-09-24)
 
 
