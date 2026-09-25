@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.7](https://github.com/zigordev/cv/compare/v0.13.6...v0.13.7) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** treat an export with no keys as an empty export ([#176](https://github.com/zigordev/cv/issues/176)) ([4e59d33](https://github.com/zigordev/cv/commit/4e59d3347f895229ff261cc56c989198e172d789))
+
 ## [0.13.6](https://github.com/zigordev/cv/compare/v0.13.5...v0.13.6) (2026-09-25)
 
 
