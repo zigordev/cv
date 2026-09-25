@@ -177,7 +177,7 @@ describe('loadRemoteMessages', () => {
       expect(health().components.tolgee).toEqual({ status: 'down' });
     });
 
-    it('falls back rather than serving an export whose keys were never nested', async () => {
+    it('keeps Tolgee up when the export comes back in the wrong shape, and says which project', async () => {
       configure();
       const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -189,14 +189,51 @@ describe('loadRemoteMessages', () => {
 
       await expect(loadRemoteMessages('en')).resolves.toBeNull();
 
-      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(health().components.tolgee).toEqual({ status: 'up' });
       expect(logged(stdout)).toContainEqual(
         expect.objectContaining({
           event: 'i18n.fallback',
+          locale: 'en',
+          projectId: '1',
+          source: 'local',
           error: {
             name: 'FlatExport',
             message: 'Tolgee returned dotted keys; the app reads a nested export',
           },
+        })
+      );
+    });
+
+    it('leaves a wrong-shape export invisible to the counters when a cached one is held', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ greeting: 'hello' }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          })
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ 'cv.identity.title': 'Engineer' }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          })
+        );
+
+      await loadRemoteMessages('en');
+      const cache = (globalThis as unknown as Record<string, Map<string, { updatedAt: number }>>)
+        .__tolgeeMessagesCache;
+      cache.get('en')!.updatedAt = 0;
+
+      await expect(loadRemoteMessages('en')).resolves.toEqual({ greeting: 'hello' });
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          source: 'cached',
+          error: expect.objectContaining({ name: 'FlatExport' }),
         })
       );
     });
