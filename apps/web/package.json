@@ -41,7 +41,7 @@
     "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.63.0",
     "@tolgee/cli": "2.20.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitest/coverage-v8": "^5.0.0",
