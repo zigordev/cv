@@ -804,7 +804,7 @@
           },
           {
             "step": "03",
-            "text": "Una interfaz de supervisión en Next.js sobre Tailwind y Radix, que comparte el design system con el resto de productos.",
+            "text": "Una interfaz de supervisión en Next.js sobre Tailwind y Radix, que comparte el design system con el resto de productos. El texto se pide a Tolgee en cada petición, tras una caché corta y mezclado sobre lo que está en el repositorio, así que una herramienta interna se traduce en los mismos términos que las públicas, y un render que cayó al texto del repositorio se cuenta en vez de suponerse.",
             "title": "Consola de operador"
           }
         ],
@@ -814,7 +814,8 @@
             "Auto-merge en verde para patch y minor; los majors esperan a una persona, en los dos ecosistemas.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request — la misma barrera que usan los repositorios en producción, porque el código la va a necesitar antes de desplegarse y no después.",
             "El plano de control y la consola de operación llevan el código de observabilidad copiado desde el repositorio de plataforma, y un fichero junto a ellos guarda el digest del kit del que salieron esas copias. Una edición sobre una copia tumba el pull request sin salir a la red; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada. El plano de control compila como NodeNext, así que sus copias llevan la extensión en los imports relativos, y esa diferencia se declara junto al digest con su motivo en lugar de tolerarse en silencio.",
-            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores, en los dos lenguajes. `local:dev` ejecuta el plano de control con `tsx watch`, la consola con `next dev` y los tres servicios Rust con `cargo watch`, todos alimentados por `docker compose watch`. Los servicios Rust comparten un único volumen para el directorio target de cargo, así que los artefactos de las dependencias que tienen en común se compilan una vez y no tres: la primera construcción es larga y una incremental son unos segundos."
+            "El desarrollo local tiene dos modos sobre un mismo juego de contenedores, en los dos lenguajes. `local:dev` ejecuta el plano de control con `tsx watch`, la consola con `next dev` y los tres servicios Rust con `cargo watch`, todos alimentados por `docker compose watch`. Los servicios Rust comparten un único volumen para el directorio target de cargo, así que los artefactos de las dependencias que tienen en común se compilan una vez y no tres: la primera construcción es larga y una incremental son unos segundos.",
+            "El texto de la consola de operador se promociona solo, igual que el de los otros tres productos: un push a main que toque sus ficheros de mensajes o su configuración de Tolgee empuja el texto confirmado al proyecto de producción. Una promoción rechazada por credenciales inválidas deja de reintentar y abre una única incidencia etiquetada, en vez de dejar producción respondiendo con el texto de ayer tras un deploy en verde."
           ],
           "stages": [
             {

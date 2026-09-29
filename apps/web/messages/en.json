@@ -804,7 +804,7 @@
           },
           {
             "step": "03",
-            "text": "A Next.js supervision UI built on Tailwind and Radix, sharing the design system with the other products.",
+            "text": "A Next.js supervision UI built on Tailwind and Radix, sharing the design system with the other products. Its copy is fetched from Tolgee per request behind a short cache and merged over what is committed, so an internal tool is translated on the same terms as the public ones, and a render that fell back to the repository copy is counted rather than assumed.",
             "title": "Operator console"
           }
         ],
@@ -814,7 +814,8 @@
             "Auto-merge on green for patch and minor; majors wait for a person, in both ecosystems.",
             "CodeQL, dependency review and Semgrep on every pull request — the same gate the production repositories use, because the code will need it before it deploys, not after.",
             "The control plane and the operator console both carry the observability code copied in from the platform repository, and a pin beside them records the digest of the kit those copies came from. An edit to a copy fails the pull request without going to the network; the kit having moved on is only reported there and fails a weekly scheduled run instead. The control plane compiles as NodeNext, so its copies carry the file extension on their relative imports, and that difference is declared in the pin with its reason instead of being quietly tolerated.",
-            "Local development has two modes over one set of containers, across both languages. `local:dev` runs the control plane under `tsx watch`, the console under `next dev` and the three Rust services under `cargo watch`, all fed by `docker compose watch`. The Rust services share one named volume for the cargo target directory, so the dependency artefacts they have in common are compiled once rather than three times: the first build is long, an incremental one is a few seconds."
+            "Local development has two modes over one set of containers, across both languages. `local:dev` runs the control plane under `tsx watch`, the console under `next dev` and the three Rust services under `cargo watch`, all fed by `docker compose watch`. The Rust services share one named volume for the cargo target directory, so the dependency artefacts they have in common are compiled once rather than three times: the first build is long, an incremental one is a few seconds.",
+            "The operator console's copy promotes itself the way the other three products' does: a push to main touching its message files or its Tolgee config pushes the committed copy into the production project. A promotion rejected for bad credentials stops retrying and opens one labelled issue, rather than leaving production answering with yesterday's wording behind a green deploy."
           ],
           "stages": [
             {
