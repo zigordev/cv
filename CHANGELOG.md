@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.8](https://github.com/zigordev/cv/compare/v0.13.7...v0.13.8) (2026-10-05)
+
+
+### Bug Fixes
+
+* **cv:** clear the high and critical prod audit blockers ([#187](https://github.com/zigordev/cv/issues/187)) ([3a91b1f](https://github.com/zigordev/cv/commit/3a91b1f60d4151ae557ce54d79b1ba8cda6fd740))
+
 ## [0.13.7](https://github.com/zigordev/cv/compare/v0.13.6...v0.13.7) (2026-09-25)
 
 
