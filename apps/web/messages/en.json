@@ -810,7 +810,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot covers npm, Cargo and all five Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly. Base-image majors are not proposed, so a runtime major only lands on purpose.",
+            "Dependabot covers npm, Cargo and all five Dockerfiles, so the Rust dependencies get the same weekly attention as the TypeScript ones rather than ageing quietly. Base-image majors are not proposed, so a runtime major only lands on purpose. The OpenTelemetry crates travel as one group, because they are version-locked to one another: proposed separately, each bump fails to compile against the other two.",
             "Auto-merge on green for patch and minor; majors wait for a person, in both ecosystems.",
             "CodeQL, dependency review and Semgrep on every pull request — the same gate the production repositories use, because the code will need it before it deploys, not after.",
             "The control plane and the operator console both carry the observability code copied in from the platform repository, and a pin beside them records the digest of the kit those copies came from. An edit to a copy fails the pull request without going to the network; the kit having moved on is only reported there and fails a weekly scheduled run instead. The control plane compiles as NodeNext, so its copies carry the file extension on their relative imports, and that difference is declared in the pin with its reason instead of being quietly tolerated.",
