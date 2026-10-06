@@ -34,7 +34,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "source-map-js": "^1.2.1",
-    "unleash-client": "^6.12.1",
+    "unleash-client": "^6.12.2",
     "web-vitals": "^6.2.2"
   },
   "devDependencies": {
