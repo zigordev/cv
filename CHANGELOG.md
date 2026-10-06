@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.9](https://github.com/zigordev/cv/compare/v0.13.8...v0.13.9) (2026-10-06)
+
+
+### Bug Fixes
+
+* **cv:** take the patched source-map-js ([#196](https://github.com/zigordev/cv/issues/196)) ([0a9b404](https://github.com/zigordev/cv/commit/0a9b4045d5b9a7c2daad93bb076ca448fea9724a))
+
 ## [0.13.8](https://github.com/zigordev/cv/compare/v0.13.7...v0.13.8) (2026-10-05)
 
 
