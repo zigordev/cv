@@ -810,7 +810,7 @@
         ],
         "pipeline": {
           "automation": [
-            "Dependabot cubre npm, Cargo y los cinco Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio. Los majors de la imagen base no se proponen, así que un major de runtime solo llega a propósito.",
+            "Dependabot cubre npm, Cargo y los cinco Dockerfiles, así que las dependencias de Rust reciben la misma atención semanal que las de TypeScript en vez de envejecer en silencio. Los majors de la imagen base no se proponen, así que un major de runtime solo llega a propósito. Las crates de OpenTelemetry viajan como un grupo, porque están bloqueadas entre sí por versión: propuestas por separado, cada bump no compila contra las otras dos.",
             "Auto-merge en verde para patch y minor; los majors esperan a una persona, en los dos ecosistemas.",
             "CodeQL, revisión de dependencias y Semgrep en cada pull request — la misma barrera que usan los repositorios en producción, porque el código la va a necesitar antes de desplegarse y no después.",
             "El plano de control y la consola de operación llevan el código de observabilidad copiado desde el repositorio de plataforma, y un fichero junto a ellos guarda el digest del kit del que salieron esas copias. Una edición sobre una copia tumba el pull request sin salir a la red; que el kit haya avanzado solo se informa ahí y hace fallar en su lugar una ejecución semanal programada. El plano de control compila como NodeNext, así que sus copias llevan la extensión en los imports relativos, y esa diferencia se declara junto al digest con su motivo en lugar de tolerarse en silencio.",
